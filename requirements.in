@@ -1,0 +1,9 @@
+click
+attrs
+
+html-text
+lxml
+parsel
+pymongo[srv, snappy]
+pyyaml
+requests
