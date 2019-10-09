@@ -15,7 +15,8 @@ from pymongo import MongoClient
 
 MONGO_URI = 'mongodb://localhost:27017/'
 
-LINKS = 'http://cirtec.ranepa.ru/cgi/spadist4bundle.cgi?code=linked_papers&c=Sergey-Sinelnikov-Murylev'
+# LINKS = 'http://cirtec.ranepa.ru/cgi/spadist4bundle.cgi?code=linked_papers&c=Sergey-Sinelnikov-Murylev'
+LINKS = 'http://cirtec.repec.org/cgi/spadist4bundle.cgi?code=linked_papers&c=Sergey-Sinelnikov-Murylev'
 
 re_start_stop = re.compile(
   r'start:\s* (?P<start>\d+)\s*;\s* end:\s* (?P<stop>\d+)', re.I | re.X

@@ -1,0 +1,5386 @@
+{
+ "Oates": {
+  "Fjeldstad": [
+   "repec:gai:ppaper:2@161941"
+  ],
+  "Tiebout": [
+   "repec:gai:ppaper:47@135469",
+   "repec:gai:ppaper:47@229904"
+  ],
+  "Musgrave": [
+   "repec:gai:ppaper:47@165112",
+   "repec:gai:ppaper:47@229904"
+  ]
+ },
+ "Fjeldstad": {
+  "Oates": [
+   "repec:gai:ppaper:2@161941"
+  ],
+  "Boadway": [
+   "repec:gai:ppaper:2@170650"
+  ],
+  "Ma": [
+   "repec:gai:ppaper:2@170650"
+  ]
+ },
+ "Kubler": {
+  "Dafflon": [
+   "repec:gai:ppaper:2@288389"
+  ]
+ },
+ "Dafflon": {
+  "Kubler": [
+   "repec:gai:ppaper:2@288389"
+  ]
+ },
+ "Boadway": {
+  "Fjeldstad": [
+   "repec:gai:ppaper:2@170650"
+  ],
+  "Ma": [
+   "repec:gai:ppaper:2@170650"
+  ]
+ },
+ "Ma": {
+  "Fjeldstad": [
+   "repec:gai:ppaper:2@170650"
+  ],
+  "Boadway": [
+   "repec:gai:ppaper:2@170650"
+  ]
+ },
+ "Bird": {
+  "Slack": [
+   "repec:gai:ppaper:47@214070"
+  ],
+  "Chen": [
+   "repec:gai:ppaper:47@214070"
+  ]
+ },
+ "Slack": {
+  "Bird": [
+   "repec:gai:ppaper:47@214070"
+  ],
+  "Chen": [
+   "repec:gai:ppaper:47@214070"
+  ]
+ },
+ "Chen": {
+  "Bird": [
+   "repec:gai:ppaper:47@214070"
+  ],
+  "Slack": [
+   "repec:gai:ppaper:47@214070"
+  ]
+ },
+ "Tiebout": {
+  "Oates": [
+   "repec:gai:ppaper:47@135469",
+   "repec:gai:ppaper:47@229904"
+  ],
+  "Musgrave": [
+   "repec:gai:ppaper:47@229904"
+  ]
+ },
+ "Musgrave": {
+  "Tiebout": [
+   "repec:gai:ppaper:47@229904"
+  ],
+  "Oates": [
+   "repec:gai:ppaper:47@165112",
+   "repec:gai:ppaper:47@229904"
+  ]
+ },
+ "Rodden": {
+  "Ames": [
+   "repec:gai:ppaper:47@247841"
+  ],
+  "Oliviera": [
+   "repec:gai:ppaper:47@247841"
+  ]
+ },
+ "Ames": {
+  "Rodden": [
+   "repec:gai:ppaper:47@247841"
+  ],
+  "Oliviera": [
+   "repec:gai:ppaper:47@247841"
+  ]
+ },
+ "Oliviera": {
+  "Rodden": [
+   "repec:gai:ppaper:47@247841"
+  ],
+  "Ames": [
+   "repec:gai:ppaper:47@247841"
+  ]
+ },
+ "Stewart": {
+  "Arnold": [
+   "repec:gai:ppaper:47@180628"
+  ],
+  "Inman": [
+   "repec:gai:ppaper:47@180628"
+  ],
+  "Fitts": [
+   "repec:gai:ppaper:47@180628"
+  ]
+ },
+ "Arnold": {
+  "Stewart": [
+   "repec:gai:ppaper:47@180628"
+  ],
+  "Inman": [
+   "repec:gai:ppaper:47@180628"
+  ],
+  "Fitts": [
+   "repec:gai:ppaper:47@180628"
+  ]
+ },
+ "Inman": {
+  "Stewart": [
+   "repec:gai:ppaper:47@180628"
+  ],
+  "Arnold": [
+   "repec:gai:ppaper:47@180628"
+  ]
+ },
+ "Fitts": {
+  "Stewart": [
+   "repec:gai:ppaper:47@180628"
+  ],
+  "Arnold": [
+   "repec:gai:ppaper:47@180628"
+  ]
+ },
+ "Kolstad": {
+  "Ladd": [
+   "repec:gai:ppaper:47@178369"
+  ]
+ },
+ "Ladd": {
+  "Kolstad": [
+   "repec:gai:ppaper:47@178369"
+  ],
+  "Wolak": [
+   "repec:gai:ppaper:47@178369"
+  ],
+  "Wildasin": [
+   "repec:gai:ppaper:47@178414"
+  ]
+ },
+ "Wolak": {
+  "Ladd": [
+   "repec:gai:ppaper:47@178369"
+  ]
+ },
+ "Wildasin": {
+  "Ladd": [
+   "repec:gai:ppaper:47@178414"
+  ]
+ },
+ "Auerbach": {
+  "Gokhale": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Kotlikoff": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Gale": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:rpaper:125@52170",
+   "repec:gai:rpaper:125@38354",
+   "repec:gai:wpaper:0113@25437",
+   "repec:gai:wpaper:0113@42629",
+   "repec:gai:wpaper:0113@57100"
+  ],
+  "Orszag": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:rpaper:125@52170",
+   "repec:gai:rpaper:125@38354",
+   "repec:gai:wpaper:0113@25437",
+   "repec:gai:wpaper:0113@42629",
+   "repec:gai:wpaper:0113@57100"
+  ],
+  "Evans": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Phillips": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Raffelhuschen": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Smetters": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Green": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Burns": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Sutherland": [
+   "repec:gai:rpaper:125@38354",
+   "repec:gai:wpaper:0113@42629"
+  ],
+  "Hoeller": [
+   "repec:gai:rpaper:125@38354",
+   "repec:gai:wpaper:0113@42629"
+  ],
+  "Merola": [
+   "repec:gai:rpaper:125@38354",
+   "repec:gai:wpaper:0113@42629"
+  ]
+ },
+ "Gokhale": {
+  "Auerbach": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Gale": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Orszag": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Evans": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Kotlikoff": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Phillips": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Raffelhuschen": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Smetters": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Green": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Burns": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ]
+ },
+ "Kotlikoff": {
+  "Auerbach": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Gale": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Orszag": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Evans": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Gokhale": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Phillips": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Raffelhuschen": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Smetters": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Green": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Burns": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ]
+ },
+ "Gale": {
+  "Auerbach": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:rpaper:125@52170",
+   "repec:gai:rpaper:125@38354",
+   "repec:gai:wpaper:0113@25437",
+   "repec:gai:wpaper:0113@42629",
+   "repec:gai:wpaper:0113@57100"
+  ],
+  "Gokhale": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Kotlikoff": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Orszag": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Evans": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Phillips": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Raffelhuschen": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Smetters": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Green": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Burns": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Sutherland": [
+   "repec:gai:rpaper:125@38354",
+   "repec:gai:wpaper:0113@42629"
+  ],
+  "Hoeller": [
+   "repec:gai:rpaper:125@38354",
+   "repec:gai:wpaper:0113@42629"
+  ],
+  "Merola": [
+   "repec:gai:rpaper:125@38354",
+   "repec:gai:wpaper:0113@42629"
+  ]
+ },
+ "Orszag": {
+  "Auerbach": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:rpaper:125@52170",
+   "repec:gai:rpaper:125@38354",
+   "repec:gai:wpaper:0113@25437",
+   "repec:gai:wpaper:0113@42629",
+   "repec:gai:wpaper:0113@57100"
+  ],
+  "Gokhale": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Kotlikoff": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Gale": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Evans": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Phillips": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Raffelhuschen": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Smetters": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Green": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Burns": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Sutherland": [
+   "repec:gai:rpaper:125@38354",
+   "repec:gai:wpaper:0113@42629"
+  ],
+  "Hoeller": [
+   "repec:gai:rpaper:125@38354",
+   "repec:gai:wpaper:0113@42629"
+  ],
+  "Merola": [
+   "repec:gai:rpaper:125@38354",
+   "repec:gai:wpaper:0113@42629"
+  ]
+ },
+ "Evans": {
+  "Auerbach": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Gale": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Orszag": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Gokhale": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Kotlikoff": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Raffelhuschen": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Smetters": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Green": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Burns": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ]
+ },
+ "Phillips": {
+  "Auerbach": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Gale": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Orszag": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Gokhale": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Kotlikoff": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Raffelhuschen": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Smetters": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Green": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Burns": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ]
+ },
+ "Raffelhuschen": {
+  "Auerbach": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Gale": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Orszag": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Evans": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Kotlikoff": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Phillips": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Gokhale": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Smetters": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Green": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Burns": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ]
+ },
+ "Smetters": {
+  "Auerbach": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Gale": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Orszag": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Evans": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Kotlikoff": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Phillips": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Gokhale": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Raffelhuschen": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Green": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Burns": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ]
+ },
+ "Green": {
+  "Auerbach": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Gale": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Orszag": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Evans": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Kotlikoff": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Phillips": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Gokhale": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Raffelhuschen": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Smetters": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Burns": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ]
+ },
+ "Burns": {
+  "Auerbach": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Gale": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Orszag": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Evans": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Kotlikoff": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Phillips": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Gokhale": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Raffelhuschen": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Green": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ],
+  "Smetters": [
+   "repec:gai:rpaper:125@21816",
+   "repec:gai:wpaper:0113@25437"
+  ]
+ },
+ "Horne": {
+  "Blanchard": [
+   "repec:gai:rpaper:125@23539",
+   "repec:gai:wpaper:0113@25832"
+  ]
+ },
+ "Blanchard": {
+  "Horne": [
+   "repec:gai:rpaper:125@23539",
+   "repec:gai:wpaper:0113@25832"
+  ],
+  "Monacelli": [
+   "repec:gai:wpaper:0076@40056",
+   "repec:gai:wpaper:0096@16344"
+  ],
+  "Perotti": [
+   "repec:gai:wpaper:0076@40056",
+   "repec:gai:wpaper:0096@16344"
+  ]
+ },
+ "IEA": {
+  "OPEC": [
+   "repec:gai:rpaper:125@70584",
+   "repec:gai:wpaper:0113@78116"
+  ]
+ },
+ "OPEC": {
+  "IEA": [
+   "repec:gai:rpaper:125@70584",
+   "repec:gai:wpaper:0113@78116"
+  ]
+ },
+ "Sutherland": {
+  "Auerbach": [
+   "repec:gai:rpaper:125@38354",
+   "repec:gai:wpaper:0113@42629"
+  ],
+  "Gale": [
+   "repec:gai:rpaper:125@38354",
+   "repec:gai:wpaper:0113@42629"
+  ],
+  "Orszag": [
+   "repec:gai:rpaper:125@38354",
+   "repec:gai:wpaper:0113@42629"
+  ]
+ },
+ "Hoeller": {
+  "Auerbach": [
+   "repec:gai:rpaper:125@38354",
+   "repec:gai:wpaper:0113@42629"
+  ],
+  "Gale": [
+   "repec:gai:rpaper:125@38354",
+   "repec:gai:wpaper:0113@42629"
+  ],
+  "Orszag": [
+   "repec:gai:rpaper:125@38354",
+   "repec:gai:wpaper:0113@42629"
+  ]
+ },
+ "Merola": {
+  "Auerbach": [
+   "repec:gai:rpaper:125@38354",
+   "repec:gai:wpaper:0113@42629"
+  ],
+  "Gale": [
+   "repec:gai:rpaper:125@38354",
+   "repec:gai:wpaper:0113@42629"
+  ],
+  "Orszag": [
+   "repec:gai:rpaper:125@38354",
+   "repec:gai:wpaper:0113@42629"
+  ]
+ },
+ "Baum": {
+  "Cecchetti": [
+   "repec:gai:rpaper:125@6354",
+   "repec:gai:wpaper:0113@6952"
+  ],
+  "Mohanty": [
+   "repec:gai:rpaper:125@6354",
+   "repec:gai:wpaper:0113@6952"
+  ],
+  "Zampolli": [
+   "repec:gai:rpaper:125@6354",
+   "repec:gai:wpaper:0113@6952"
+  ]
+ },
+ "Cecchetti": {
+  "Baum": [
+   "repec:gai:rpaper:125@6354",
+   "repec:gai:wpaper:0113@6952"
+  ],
+  "Checherita-Westphal": [
+   "repec:gai:rpaper:125@6354",
+   "repec:gai:wpaper:0113@6952"
+  ],
+  "Rother": [
+   "repec:gai:rpaper:125@6354",
+   "repec:gai:wpaper:0113@6952"
+  ]
+ },
+ "Mohanty": {
+  "Baum": [
+   "repec:gai:rpaper:125@6354",
+   "repec:gai:wpaper:0113@6952"
+  ],
+  "Checherita-Westphal": [
+   "repec:gai:rpaper:125@6354",
+   "repec:gai:wpaper:0113@6952"
+  ],
+  "Rother": [
+   "repec:gai:rpaper:125@6354",
+   "repec:gai:wpaper:0113@6952"
+  ]
+ },
+ "Zampolli": {
+  "Baum": [
+   "repec:gai:rpaper:125@6354",
+   "repec:gai:wpaper:0113@6952"
+  ],
+  "Checherita-Westphal": [
+   "repec:gai:rpaper:125@6354",
+   "repec:gai:wpaper:0113@6952"
+  ],
+  "Rother": [
+   "repec:gai:rpaper:125@6354",
+   "repec:gai:wpaper:0113@6952"
+  ]
+ },
+ "Checherita-Westphal": {
+  "Cecchetti": [
+   "repec:gai:rpaper:125@6354",
+   "repec:gai:wpaper:0113@6952"
+  ],
+  "Mohanty": [
+   "repec:gai:rpaper:125@6354",
+   "repec:gai:wpaper:0113@6952"
+  ],
+  "Zampolli": [
+   "repec:gai:rpaper:125@6354",
+   "repec:gai:wpaper:0113@6952"
+  ]
+ },
+ "Rother": {
+  "Cecchetti": [
+   "repec:gai:rpaper:125@6354",
+   "repec:gai:wpaper:0113@6952"
+  ],
+  "Mohanty": [
+   "repec:gai:rpaper:125@6354",
+   "repec:gai:wpaper:0113@6952"
+  ],
+  "Zampolli": [
+   "repec:gai:rpaper:125@6354",
+   "repec:gai:wpaper:0113@6952"
+  ],
+  "Burnside": [
+   "repec:gai:rpaper:125@23607",
+   "repec:gai:wpaper:0113@25895"
+  ],
+  "Chalk": [
+   "repec:gai:rpaper:125@23607",
+   "repec:gai:wpaper:0113@25895"
+  ],
+  "Hemming": [
+   "repec:gai:rpaper:125@23607",
+   "repec:gai:wpaper:0113@25895"
+  ]
+ },
+ "Волчкова": {
+  "Ross": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Mehlum": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Moene": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Torvik": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Robinson": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Verdier": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Кнобель": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Гуриев": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Егоров": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Сонин": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Полтерович": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Попов": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Тонис": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Идрисов": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Казакова": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Полбин": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ]
+ },
+ "Ross": {
+  "Волчкова": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Суслова": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Идрисов": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Казакова": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Полбин": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Гуриев": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Егоров": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Сонин": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Полтерович": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Попов": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Тонис": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Robinson": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Torvik": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Verdier": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Mehlum": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Moene": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Кнобель": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ]
+ },
+ "Суслова": {
+  "Ross": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Mehlum": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Moene": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Torvik": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Robinson": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Verdier": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Кнобель": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Гуриев": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Егоров": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Сонин": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Полтерович": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Попов": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Тонис": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Идрисов": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Казакова": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Полбин": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ]
+ },
+ "Mehlum": {
+  "Волчкова": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Суслова": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Идрисов": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Казакова": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Полбин": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Гуриев": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Егоров": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Сонин": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Полтерович": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Попов": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Тонис": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Robinson": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Torvik": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Verdier": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Ross": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Кнобель": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Treisman": [
+   "repec:gai:wpaper:0096@12184"
+  ],
+  "Gylfason": [
+   "repec:gai:wpaper:0096@12184"
+  ]
+ },
+ "Moene": {
+  "Волчкова": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Суслова": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Идрисов": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Казакова": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Полбин": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Гуриев": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Егоров": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Сонин": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Полтерович": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Попов": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Тонис": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Robinson": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Torvik": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Verdier": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Ross": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Кнобель": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Treisman": [
+   "repec:gai:wpaper:0096@12184"
+  ],
+  "Gylfason": [
+   "repec:gai:wpaper:0096@12184"
+  ]
+ },
+ "Torvik": {
+  "Волчкова": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Суслова": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Идрисов": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Казакова": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Полбин": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Гуриев": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Егоров": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Сонин": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Полтерович": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Попов": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Тонис": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Ross": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Robinson": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Mehlum": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Moene": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Verdier": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Кнобель": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Treisman": [
+   "repec:gai:wpaper:0096@12184"
+  ],
+  "Gylfason": [
+   "repec:gai:wpaper:0096@12184"
+  ]
+ },
+ "Robinson": {
+  "Волчкова": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Суслова": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Идрисов": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Казакова": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Полбин": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Гуриев": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Егоров": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Сонин": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Полтерович": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Попов": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Тонис": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Ross": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Mehlum": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Moene": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Torvik": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Кнобель": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Mauro": [
+   "repec:rnp:ecopol:1532@8428"
+  ]
+ },
+ "Verdier": {
+  "Волчкова": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Суслова": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Идрисов": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Казакова": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Полбин": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Гуриев": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Егоров": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Сонин": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Полтерович": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Попов": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Тонис": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Ross": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Mehlum": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Moene": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Torvik": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Кнобель": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ]
+ },
+ "Кнобель": {
+  "Волчкова": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Суслова": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Идрисов": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Казакова": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Полбин": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Гуриев": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Егоров": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Сонин": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Полтерович": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Попов": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Тонис": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Robinson": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Torvik": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Verdier": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Ross": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Mehlum": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Moene": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ]
+ },
+ "Гуриев": {
+  "Волчкова": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Суслова": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Идрисов": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Казакова": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Полбин": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Ross": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Mehlum": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Moene": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Torvik": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Robinson": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Verdier": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Кнобель": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Полтерович": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Попов": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Тонис": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ]
+ },
+ "Егоров": {
+  "Волчкова": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Суслова": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Идрисов": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Казакова": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Полбин": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Ross": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Mehlum": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Moene": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Torvik": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Robinson": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Verdier": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Кнобель": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Полтерович": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Попов": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Тонис": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ]
+ },
+ "Сонин": {
+  "Волчкова": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Суслова": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Идрисов": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Казакова": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Полбин": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Ross": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Mehlum": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Moene": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Torvik": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Robinson": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Verdier": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Кнобель": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Полтерович": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Попов": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Тонис": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ]
+ },
+ "Полтерович": {
+  "Волчкова": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Суслова": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Идрисов": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Казакова": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Полбин": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Гуриев": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Егоров": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Сонин": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Ross": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Mehlum": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Moene": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Torvik": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Robinson": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Verdier": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Кнобель": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ]
+ },
+ "Попов": {
+  "Волчкова": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Суслова": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Идрисов": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Казакова": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Полбин": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Гуриев": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Егоров": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Сонин": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Ross": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Mehlum": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Moene": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Torvik": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Robinson": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Verdier": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Кнобель": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ]
+ },
+ "Тонис": {
+  "Волчкова": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Суслова": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Идрисов": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Казакова": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Полбин": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Гуриев": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Егоров": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Сонин": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Ross": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Mehlum": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Moene": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Torvik": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Robinson": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Verdier": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Кнобель": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ]
+ },
+ "Идрисов": {
+  "Волчкова": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Суслова": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Ross": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Mehlum": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Moene": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Torvik": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Robinson": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Verdier": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Кнобель": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Гуриев": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Егоров": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Сонин": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Полтерович": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Попов": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Тонис": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Синельников-Мурылев": [
+   "repec:gai:rpaper:125@9287",
+   "repec:gai:wpaper:0113@9793"
+  ],
+  "Knetter": [
+   "repec:rnp:ecopol:1532@51485"
+  ],
+  "Трунин": [
+   "repec:rnp:ecopol:1532@53961"
+  ]
+ },
+ "Казакова": {
+  "Волчкова": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Суслова": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Ross": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Mehlum": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Moene": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Torvik": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Robinson": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Verdier": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Кнобель": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Гуриев": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Егоров": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Сонин": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Полтерович": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Попов": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Тонис": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ]
+ },
+ "Полбин": {
+  "Волчкова": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Суслова": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Ross": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Mehlum": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Moene": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Torvik": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Robinson": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Verdier": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Кнобель": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Гуриев": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Егоров": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Сонин": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Полтерович": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Попов": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ],
+  "Тонис": [
+   "repec:gai:rpaper:125@72367",
+   "repec:gai:wpaper:0113@78270"
+  ]
+ },
+ "Clements": {
+  "Maisonneuve": [
+   "repec:gai:rpaper:125@11638",
+   "repec:gai:wpaper:0113@11783"
+  ],
+  "Martins": [
+   "repec:gai:rpaper:125@11638",
+   "repec:gai:wpaper:0113@11783"
+  ],
+  "IMF": [
+   "repec:gai:rpaper:125@11638",
+   "repec:gai:wpaper:0113@11783"
+  ]
+ },
+ "Maisonneuve": {
+  "Clements": [
+   "repec:gai:rpaper:125@11638",
+   "repec:gai:wpaper:0113@11783"
+  ],
+  "Coady": [
+   "repec:gai:rpaper:125@11638",
+   "repec:gai:wpaper:0113@11783"
+  ],
+  "Gupta": [
+   "repec:gai:rpaper:125@11638",
+   "repec:gai:wpaper:0113@11783"
+  ],
+  "IMF": [
+   "repec:gai:rpaper:125@11638",
+   "repec:gai:wpaper:0113@11783"
+  ]
+ },
+ "Martins": {
+  "Clements": [
+   "repec:gai:rpaper:125@11638",
+   "repec:gai:wpaper:0113@11783"
+  ],
+  "Coady": [
+   "repec:gai:rpaper:125@11638",
+   "repec:gai:wpaper:0113@11783"
+  ],
+  "Gupta": [
+   "repec:gai:rpaper:125@11638",
+   "repec:gai:wpaper:0113@11783"
+  ],
+  "IMF": [
+   "repec:gai:rpaper:125@11638",
+   "repec:gai:wpaper:0113@11783"
+  ]
+ },
+ "Coady": {
+  "Maisonneuve": [
+   "repec:gai:rpaper:125@11638",
+   "repec:gai:wpaper:0113@11783"
+  ],
+  "Martins": [
+   "repec:gai:rpaper:125@11638",
+   "repec:gai:wpaper:0113@11783"
+  ],
+  "IMF": [
+   "repec:gai:rpaper:125@11638",
+   "repec:gai:wpaper:0113@11783"
+  ]
+ },
+ "Gupta": {
+  "Maisonneuve": [
+   "repec:gai:rpaper:125@11638",
+   "repec:gai:wpaper:0113@11783"
+  ],
+  "Martins": [
+   "repec:gai:rpaper:125@11638",
+   "repec:gai:wpaper:0113@11783"
+  ],
+  "IMF": [
+   "repec:gai:rpaper:125@11638",
+   "repec:gai:wpaper:0113@11783"
+  ]
+ },
+ "IMF": {
+  "Clements": [
+   "repec:gai:rpaper:125@11638",
+   "repec:gai:wpaper:0113@11783"
+  ],
+  "Coady": [
+   "repec:gai:rpaper:125@11638",
+   "repec:gai:wpaper:0113@11783"
+  ],
+  "Gupta": [
+   "repec:gai:rpaper:125@11638",
+   "repec:gai:wpaper:0113@11783"
+  ],
+  "Brixi": [
+   "repec:gai:rpaper:125@20693",
+   "repec:gai:wpaper:0113@23195"
+  ],
+  "Schick": [
+   "repec:gai:rpaper:125@20693",
+   "repec:gai:wpaper:0113@23195"
+  ],
+  "OECD": [
+   "repec:gai:rpaper:125@11484",
+   "repec:gai:wpaper:0113@11617"
+  ],
+  "Maisonneuve": [
+   "repec:gai:rpaper:125@11638",
+   "repec:gai:wpaper:0113@11783"
+  ],
+  "Martins": [
+   "repec:gai:rpaper:125@11638",
+   "repec:gai:wpaper:0113@11783"
+  ],
+  "World": [
+   "repec:gai:wpaper:0076@30005",
+   "repec:gai:wpaper:0076@13236",
+   "repec:gai:wpaper:0096@18951"
+  ],
+  "Bank": [
+   "repec:gai:wpaper:0076@30005",
+   "repec:gai:wpaper:0076@13236",
+   "repec:gai:wpaper:0096@18951"
+  ],
+  "Islam": [
+   "repec:gai:wpaper:0076@25622"
+  ],
+  "Young": [
+   "repec:gai:wpaper:0076@25622"
+  ],
+  "Mankiw": [
+   "repec:gai:wpaper:0076@25622"
+  ],
+  "Romer": [
+   "repec:gai:wpaper:0076@25622"
+  ],
+  "Weil": [
+   "repec:gai:wpaper:0076@25622"
+  ],
+  "Tanzi": [
+   "repec:gai:wpaper:0076@30005",
+   "repec:gai:wpaper:0096@18951"
+  ],
+  "Zee": [
+   "repec:gai:wpaper:0076@30005",
+   "repec:gai:wpaper:0096@18951"
+  ],
+  "Blankenau": [
+   "repec:gai:wpaper:0096@3726"
+  ],
+  "Simpson": [
+   "repec:gai:wpaper:0096@3726"
+  ],
+  "European": [
+   "repec:gai:wpaper:0096@3726"
+  ],
+  "Commission": [
+   "repec:gai:wpaper:0096@3726"
+  ]
+ },
+ "Reinhart": {
+  "Kumar": [
+   "repec:gai:rpaper:125@6260",
+   "repec:gai:wpaper:0113@6859"
+  ],
+  "Woo": [
+   "repec:gai:rpaper:125@6260",
+   "repec:gai:wpaper:0113@6859"
+  ],
+  "Chamon": [
+   "repec:rnp:ecopol:ep1711@35492"
+  ],
+  "Garcia": [
+   "repec:rnp:ecopol:ep1711@35492"
+  ],
+  "Calvo": [
+   "repec:rnp:ecopol:ep1711@33901"
+  ],
+  "Izquierdo": [
+   "repec:rnp:ecopol:ep1711@33901"
+  ],
+  "Mejia": [
+   "repec:rnp:ecopol:ep1711@33901"
+  ]
+ },
+ "Kumar": {
+  "Reinhart": [
+   "repec:gai:rpaper:125@6260",
+   "repec:gai:wpaper:0113@6859"
+  ],
+  "Rogoff": [
+   "repec:gai:rpaper:125@6260",
+   "repec:gai:wpaper:0113@6859"
+  ]
+ },
+ "Woo": {
+  "Reinhart": [
+   "repec:gai:rpaper:125@6260",
+   "repec:gai:wpaper:0113@6859"
+  ],
+  "Rogoff": [
+   "repec:gai:rpaper:125@6260",
+   "repec:gai:wpaper:0113@6859"
+  ]
+ },
+ "Rogoff": {
+  "Kumar": [
+   "repec:gai:rpaper:125@6260",
+   "repec:gai:wpaper:0113@6859"
+  ],
+  "Woo": [
+   "repec:gai:rpaper:125@6260",
+   "repec:gai:wpaper:0113@6859"
+  ],
+  "Tornell": [
+   "repec:rnp:ecopol:ep1711@12024"
+  ],
+  "Velasco": [
+   "repec:rnp:ecopol:ep1711@12024"
+  ],
+  "Alfaro": [
+   "repec:rnp:ecopol:ep1711@12024"
+  ],
+  "Kalemli-Ozcan": [
+   "repec:rnp:ecopol:ep1711@12024"
+  ],
+  "Volosovych": [
+   "repec:rnp:ecopol:ep1711@12024"
+  ]
+ },
+ "Синельников-Мурылев": {
+  "Идрисов": [
+   "repec:gai:rpaper:125@9287",
+   "repec:gai:wpaper:0113@9793"
+  ]
+ },
+ "Celasun": {
+  "Tanner": [
+   "repec:gai:rpaper:125@20353",
+   "repec:gai:wpaper:0113@22838"
+  ],
+  "Samake": [
+   "repec:gai:rpaper:125@20353",
+   "repec:gai:wpaper:0113@22838"
+  ],
+  "Burnside": [
+   "repec:gai:rpaper:125@20353",
+   "repec:gai:wpaper:0113@22838"
+  ]
+ },
+ "Tanner": {
+  "Celasun": [
+   "repec:gai:rpaper:125@20353",
+   "repec:gai:wpaper:0113@22838"
+  ],
+  "Debrun": [
+   "repec:gai:rpaper:125@20353",
+   "repec:gai:wpaper:0113@22838"
+  ],
+  "Ostry": [
+   "repec:gai:rpaper:125@20353",
+   "repec:gai:wpaper:0113@22838"
+  ],
+  "Burnside": [
+   "repec:gai:rpaper:125@20353",
+   "repec:gai:wpaper:0113@22838"
+  ]
+ },
+ "Samake": {
+  "Celasun": [
+   "repec:gai:rpaper:125@20353",
+   "repec:gai:wpaper:0113@22838"
+  ],
+  "Debrun": [
+   "repec:gai:rpaper:125@20353",
+   "repec:gai:wpaper:0113@22838"
+  ],
+  "Ostry": [
+   "repec:gai:rpaper:125@20353",
+   "repec:gai:wpaper:0113@22838"
+  ],
+  "Burnside": [
+   "repec:gai:rpaper:125@20353",
+   "repec:gai:wpaper:0113@22838"
+  ]
+ },
+ "Debrun": {
+  "Tanner": [
+   "repec:gai:rpaper:125@20353",
+   "repec:gai:wpaper:0113@22838"
+  ],
+  "Samake": [
+   "repec:gai:rpaper:125@20353",
+   "repec:gai:wpaper:0113@22838"
+  ],
+  "Burnside": [
+   "repec:gai:rpaper:125@20353",
+   "repec:gai:wpaper:0113@22838"
+  ]
+ },
+ "Ostry": {
+  "Tanner": [
+   "repec:gai:rpaper:125@20353",
+   "repec:gai:wpaper:0113@22838"
+  ],
+  "Samake": [
+   "repec:gai:rpaper:125@20353",
+   "repec:gai:wpaper:0113@22838"
+  ],
+  "Burnside": [
+   "repec:gai:rpaper:125@20353",
+   "repec:gai:wpaper:0113@22838"
+  ],
+  "Ghosh": [
+   "repec:rnp:ecopol:ep1711@24446"
+  ],
+  "Habermeier": [
+   "repec:rnp:ecopol:ep1711@24446"
+  ],
+  "Chamon": [
+   "repec:rnp:ecopol:ep1711@24446"
+  ],
+  "Qureshi": [
+   "repec:rnp:ecopol:ep1711@24446"
+  ],
+  "Reinhardt": [
+   "repec:rnp:ecopol:ep1711@24446"
+  ]
+ },
+ "Burnside": {
+  "Celasun": [
+   "repec:gai:rpaper:125@20353",
+   "repec:gai:wpaper:0113@22838"
+  ],
+  "Debrun": [
+   "repec:gai:rpaper:125@20353",
+   "repec:gai:wpaper:0113@22838"
+  ],
+  "Ostry": [
+   "repec:gai:rpaper:125@20353",
+   "repec:gai:wpaper:0113@22838"
+  ],
+  "Tanner": [
+   "repec:gai:rpaper:125@20353",
+   "repec:gai:wpaper:0113@22838"
+  ],
+  "Samake": [
+   "repec:gai:rpaper:125@20353",
+   "repec:gai:wpaper:0113@22838"
+  ],
+  "Chalk": [
+   "repec:gai:rpaper:125@23607",
+   "repec:gai:wpaper:0113@25895"
+  ],
+  "Hemming": [
+   "repec:gai:rpaper:125@23607",
+   "repec:gai:wpaper:0113@25895"
+  ],
+  "Giammarioli": [
+   "repec:gai:rpaper:125@23607",
+   "repec:gai:wpaper:0113@25895"
+  ],
+  "Nickel": [
+   "repec:gai:rpaper:125@23607",
+   "repec:gai:wpaper:0113@25895"
+  ],
+  "Rother": [
+   "repec:gai:rpaper:125@23607",
+   "repec:gai:wpaper:0113@25895"
+  ],
+  "Ph": [
+   "repec:gai:rpaper:125@23607",
+   "repec:gai:wpaper:0113@25895"
+  ],
+  "Vidal": [
+   "repec:gai:rpaper:125@23607",
+   "repec:gai:wpaper:0113@25895"
+  ]
+ },
+ "Brixi": {
+  "IMF": [
+   "repec:gai:rpaper:125@20693",
+   "repec:gai:wpaper:0113@23195"
+  ]
+ },
+ "Schick": {
+  "IMF": [
+   "repec:gai:rpaper:125@20693",
+   "repec:gai:wpaper:0113@23195"
+  ]
+ },
+ "Chalk": {
+  "Burnside": [
+   "repec:gai:rpaper:125@23607",
+   "repec:gai:wpaper:0113@25895"
+  ],
+  "Giammarioli": [
+   "repec:gai:rpaper:125@23607",
+   "repec:gai:wpaper:0113@25895"
+  ],
+  "Nickel": [
+   "repec:gai:rpaper:125@23607",
+   "repec:gai:wpaper:0113@25895"
+  ],
+  "Rother": [
+   "repec:gai:rpaper:125@23607",
+   "repec:gai:wpaper:0113@25895"
+  ],
+  "Ph": [
+   "repec:gai:rpaper:125@23607",
+   "repec:gai:wpaper:0113@25895"
+  ],
+  "Vidal": [
+   "repec:gai:rpaper:125@23607",
+   "repec:gai:wpaper:0113@25895"
+  ]
+ },
+ "Hemming": {
+  "Burnside": [
+   "repec:gai:rpaper:125@23607",
+   "repec:gai:wpaper:0113@25895"
+  ],
+  "Giammarioli": [
+   "repec:gai:rpaper:125@23607",
+   "repec:gai:wpaper:0113@25895"
+  ],
+  "Nickel": [
+   "repec:gai:rpaper:125@23607",
+   "repec:gai:wpaper:0113@25895"
+  ],
+  "Rother": [
+   "repec:gai:rpaper:125@23607",
+   "repec:gai:wpaper:0113@25895"
+  ],
+  "Ph": [
+   "repec:gai:rpaper:125@23607",
+   "repec:gai:wpaper:0113@25895"
+  ],
+  "Vidal": [
+   "repec:gai:rpaper:125@23607",
+   "repec:gai:wpaper:0113@25895"
+  ]
+ },
+ "Giammarioli": {
+  "Burnside": [
+   "repec:gai:rpaper:125@23607",
+   "repec:gai:wpaper:0113@25895"
+  ],
+  "Chalk": [
+   "repec:gai:rpaper:125@23607",
+   "repec:gai:wpaper:0113@25895"
+  ],
+  "Hemming": [
+   "repec:gai:rpaper:125@23607",
+   "repec:gai:wpaper:0113@25895"
+  ]
+ },
+ "Nickel": {
+  "Burnside": [
+   "repec:gai:rpaper:125@23607",
+   "repec:gai:wpaper:0113@25895"
+  ],
+  "Chalk": [
+   "repec:gai:rpaper:125@23607",
+   "repec:gai:wpaper:0113@25895"
+  ],
+  "Hemming": [
+   "repec:gai:rpaper:125@23607",
+   "repec:gai:wpaper:0113@25895"
+  ]
+ },
+ "Ph": {
+  "Burnside": [
+   "repec:gai:rpaper:125@23607",
+   "repec:gai:wpaper:0113@25895"
+  ],
+  "Chalk": [
+   "repec:gai:rpaper:125@23607",
+   "repec:gai:wpaper:0113@25895"
+  ],
+  "Hemming": [
+   "repec:gai:rpaper:125@23607",
+   "repec:gai:wpaper:0113@25895"
+  ]
+ },
+ "Vidal": {
+  "Burnside": [
+   "repec:gai:rpaper:125@23607",
+   "repec:gai:wpaper:0113@25895"
+  ],
+  "Chalk": [
+   "repec:gai:rpaper:125@23607",
+   "repec:gai:wpaper:0113@25895"
+  ],
+  "Hemming": [
+   "repec:gai:rpaper:125@23607",
+   "repec:gai:wpaper:0113@25895"
+  ]
+ },
+ "OECD": {
+  "IMF": [
+   "repec:gai:rpaper:125@11484",
+   "repec:gai:wpaper:0113@11617"
+  ]
+ },
+ "Sandmo": {
+  "Yitzhaki": [
+   "repec:gai:wpaper:0050@17845",
+   "repec:ris:apltrx:0084@18585"
+  ],
+  "Aizenman": [
+   "repec:gai:wpaper:0050@17845",
+   "repec:ris:apltrx:0084@18585"
+  ],
+  "Jinjarak": [
+   "repec:gai:wpaper:0050@17845",
+   "repec:ris:apltrx:0084@18585"
+  ],
+  "McCarten": [
+   "repec:gai:wpaper:0050@17845",
+   "repec:ris:apltrx:0084@18585"
+  ]
+ },
+ "Yitzhaki": {
+  "Sandmo": [
+   "repec:gai:wpaper:0050@17845",
+   "repec:ris:apltrx:0084@18585"
+  ],
+  "Aizenman": [
+   "repec:gai:wpaper:0050@17845",
+   "repec:ris:apltrx:0084@18585"
+  ],
+  "Jinjarak": [
+   "repec:gai:wpaper:0050@17845",
+   "repec:ris:apltrx:0084@18585"
+  ],
+  "McCarten": [
+   "repec:gai:wpaper:0050@17845",
+   "repec:ris:apltrx:0084@18585"
+  ]
+ },
+ "Aizenman": {
+  "Sandmo": [
+   "repec:gai:wpaper:0050@17845",
+   "repec:ris:apltrx:0084@18585"
+  ],
+  "Yitzhaki": [
+   "repec:gai:wpaper:0050@17845",
+   "repec:ris:apltrx:0084@18585"
+  ],
+  "McCarten": [
+   "repec:gai:wpaper:0050@17845",
+   "repec:ris:apltrx:0084@18585"
+  ]
+ },
+ "Jinjarak": {
+  "Sandmo": [
+   "repec:gai:wpaper:0050@17845",
+   "repec:ris:apltrx:0084@18585"
+  ],
+  "Yitzhaki": [
+   "repec:gai:wpaper:0050@17845",
+   "repec:ris:apltrx:0084@18585"
+  ],
+  "McCarten": [
+   "repec:gai:wpaper:0050@17845",
+   "repec:ris:apltrx:0084@18585"
+  ]
+ },
+ "McCarten": {
+  "Sandmo": [
+   "repec:gai:wpaper:0050@17845",
+   "repec:ris:apltrx:0084@18585"
+  ],
+  "Yitzhaki": [
+   "repec:gai:wpaper:0050@17845",
+   "repec:ris:apltrx:0084@18585"
+  ],
+  "Aizenman": [
+   "repec:gai:wpaper:0050@17845",
+   "repec:ris:apltrx:0084@18585"
+  ],
+  "Jinjarak": [
+   "repec:gai:wpaper:0050@17845",
+   "repec:ris:apltrx:0084@18585"
+  ]
+ },
+ "Lucas": {
+  "Keynes": [
+   "repec:gai:wpaper:0076@38539"
+  ],
+  "Samuelson": [
+   "repec:gai:wpaper:0076@38539"
+  ],
+  "Hicks": [
+   "repec:gai:wpaper:0076@38539"
+  ],
+  "Klein": [
+   "repec:gai:wpaper:0076@38539"
+  ]
+ },
+ "Keynes": {
+  "Lucas": [
+   "repec:gai:wpaper:0076@38539"
+  ],
+  "Sargent": [
+   "repec:gai:wpaper:0076@38539"
+  ],
+  "Samuelson": [
+   "repec:gai:wpaper:0076@10398",
+   "repec:gai:wpaper:0076@38539"
+  ],
+  "Hicks": [
+   "repec:gai:wpaper:0076@10398",
+   "repec:gai:wpaper:0076@38539"
+  ],
+  "Klein": [
+   "repec:gai:wpaper:0076@10398",
+   "repec:gai:wpaper:0076@38539"
+  ]
+ },
+ "Sargent": {
+  "Keynes": [
+   "repec:gai:wpaper:0076@38539"
+  ],
+  "Samuelson": [
+   "repec:gai:wpaper:0076@38539"
+  ],
+  "Hicks": [
+   "repec:gai:wpaper:0076@38539"
+  ],
+  "Klein": [
+   "repec:gai:wpaper:0076@38539"
+  ]
+ },
+ "Samuelson": {
+  "Lucas": [
+   "repec:gai:wpaper:0076@38539"
+  ],
+  "Sargent": [
+   "repec:gai:wpaper:0076@38539"
+  ],
+  "Keynes": [
+   "repec:gai:wpaper:0076@10398",
+   "repec:gai:wpaper:0076@38539"
+  ],
+  "Hicks": [
+   "repec:gai:wpaper:0076@10398",
+   "repec:gai:wpaper:0076@38539"
+  ],
+  "Klein": [
+   "repec:gai:wpaper:0076@10398",
+   "repec:gai:wpaper:0076@38539"
+  ]
+ },
+ "Hicks": {
+  "Lucas": [
+   "repec:gai:wpaper:0076@38539"
+  ],
+  "Sargent": [
+   "repec:gai:wpaper:0076@38539"
+  ],
+  "Samuelson": [
+   "repec:gai:wpaper:0076@10398",
+   "repec:gai:wpaper:0076@38539"
+  ],
+  "Keynes": [
+   "repec:gai:wpaper:0076@10398",
+   "repec:gai:wpaper:0076@38539"
+  ],
+  "Klein": [
+   "repec:gai:wpaper:0076@10398",
+   "repec:gai:wpaper:0076@38539"
+  ]
+ },
+ "Klein": {
+  "Lucas": [
+   "repec:gai:wpaper:0076@38539"
+  ],
+  "Sargent": [
+   "repec:gai:wpaper:0076@38539"
+  ],
+  "Samuelson": [
+   "repec:gai:wpaper:0076@10398",
+   "repec:gai:wpaper:0076@38539"
+  ],
+  "Hicks": [
+   "repec:gai:wpaper:0076@10398",
+   "repec:gai:wpaper:0076@38539"
+  ],
+  "Keynes": [
+   "repec:gai:wpaper:0076@10398",
+   "repec:gai:wpaper:0076@38539"
+  ],
+  "Levine": [
+   "repec:rnp:ecopol:ep1711@13100"
+  ],
+  "Zervos": [
+   "repec:rnp:ecopol:ep1711@13100"
+  ]
+ },
+ "Knobel": {
+  "Drobyshevsky": [
+   "repec:gai:wpaper:0076@45221"
+  ],
+  "Sinelnikov-Murylev": [
+   "repec:gai:wpaper:0076@45221"
+  ],
+  "Sokolov": [
+   "repec:gai:wpaper:0076@45221"
+  ]
+ },
+ "Drobyshevsky": {
+  "Knobel": [
+   "repec:gai:wpaper:0076@45221"
+  ],
+  "Sokolov": [
+   "repec:gai:wpaper:0076@45221"
+  ],
+  "Sinelnikov-Murylev": [
+   "repec:gai:wpaper:0076@27716"
+  ],
+  "Arkhipov": [
+   "repec:gai:wpaper:0076@27716"
+  ],
+  "Batkibekov": [
+   "repec:gai:wpaper:0076@27716"
+  ],
+  "Trunin": [
+   "repec:gai:wpaper:0076@27716"
+  ],
+  "Kadochnikov": [
+   "repec:gai:wpaper:0076@27716"
+  ],
+  "Malinina": [
+   "repec:gai:wpaper:0076@27716"
+  ]
+ },
+ "Sinelnikov-Murylev": {
+  "Knobel": [
+   "repec:gai:wpaper:0076@45221"
+  ],
+  "Sokolov": [
+   "repec:gai:wpaper:0076@45221"
+  ],
+  "Drobyshevsky": [
+   "repec:gai:wpaper:0076@27716"
+  ],
+  "Kadochnikov": [
+   "repec:gai:wpaper:0076@27716"
+  ],
+  "Arkhipov": [
+   "repec:gai:wpaper:0076@27716"
+  ],
+  "Batkibekov": [
+   "repec:gai:wpaper:0076@27716"
+  ],
+  "Trunin": [
+   "repec:gai:wpaper:0076@27716"
+  ],
+  "Malinina": [
+   "repec:gai:wpaper:0076@27716"
+  ],
+  "Rodrik": [
+   "repec:gai:wpaper:0076@5956"
+  ],
+  "Durlauf": [
+   "repec:gai:wpaper:0076@5956"
+  ],
+  "Johnson": [
+   "repec:gai:wpaper:0076@5956"
+  ],
+  "Temple": [
+   "repec:gai:wpaper:0076@5956"
+  ],
+  "Mokyr": [
+   "repec:gai:wpaper:0076@5956"
+  ]
+ },
+ "Sokolov": {
+  "Knobel": [
+   "repec:gai:wpaper:0076@45221"
+  ],
+  "Drobyshevsky": [
+   "repec:gai:wpaper:0076@45221"
+  ],
+  "Sinelnikov-Murylev": [
+   "repec:gai:wpaper:0076@45221"
+  ]
+ },
+ "World": {
+  "Tanzi": [
+   "repec:gai:wpaper:0076@30005",
+   "repec:gai:wpaper:0096@18951"
+  ],
+  "Zee": [
+   "repec:gai:wpaper:0076@30005",
+   "repec:gai:wpaper:0096@18951"
+  ],
+  "IMF": [
+   "repec:gai:wpaper:0076@30005",
+   "repec:gai:wpaper:0076@13236",
+   "repec:gai:wpaper:0096@18951"
+  ],
+  "Arrow": [
+   "repec:gai:wpaper:0076@5877"
+  ],
+  "Dasgupta": [
+   "repec:gai:wpaper:0076@5877"
+  ],
+  "Goulder": [
+   "repec:gai:wpaper:0076@5877"
+  ],
+  "Mumford": [
+   "repec:gai:wpaper:0076@5877"
+  ],
+  "Oleson": [
+   "repec:gai:wpaper:0076@5877"
+  ],
+  "Stiglitz": [
+   "repec:gai:wpaper:0076@5877"
+  ],
+  "Sen": [
+   "repec:gai:wpaper:0076@5877"
+  ],
+  "Fitoussi": [
+   "repec:gai:wpaper:0076@5877"
+  ]
+ },
+ "Tanzi": {
+  "World": [
+   "repec:gai:wpaper:0076@30005",
+   "repec:gai:wpaper:0096@18951"
+  ],
+  "Bank": [
+   "repec:gai:wpaper:0076@30005",
+   "repec:gai:wpaper:0096@18951"
+  ],
+  "Alesina": [
+   "repec:gai:wpaper:0076@31993"
+  ],
+  "Ardagna": [
+   "repec:gai:wpaper:0076@31993"
+  ],
+  "Perotti": [
+   "repec:gai:wpaper:0076@31993"
+  ],
+  "Schiantarelli": [
+   "repec:gai:wpaper:0076@31993"
+  ],
+  "IMF": [
+   "repec:gai:wpaper:0076@30005",
+   "repec:gai:wpaper:0096@18951"
+  ],
+  "Feldstein": [
+   "repec:gai:wpaper:0076@31993"
+  ]
+ },
+ "Zee": {
+  "World": [
+   "repec:gai:wpaper:0076@30005",
+   "repec:gai:wpaper:0096@18951"
+  ],
+  "Bank": [
+   "repec:gai:wpaper:0076@30005",
+   "repec:gai:wpaper:0096@18951"
+  ],
+  "Alesina": [
+   "repec:gai:wpaper:0076@31993"
+  ],
+  "Ardagna": [
+   "repec:gai:wpaper:0076@31993"
+  ],
+  "Perotti": [
+   "repec:gai:wpaper:0076@31993"
+  ],
+  "Schiantarelli": [
+   "repec:gai:wpaper:0076@31993"
+  ],
+  "IMF": [
+   "repec:gai:wpaper:0076@30005",
+   "repec:gai:wpaper:0096@18951"
+  ],
+  "Feldstein": [
+   "repec:gai:wpaper:0076@31993"
+  ]
+ },
+ "Bank": {
+  "Tanzi": [
+   "repec:gai:wpaper:0076@30005",
+   "repec:gai:wpaper:0096@18951"
+  ],
+  "Zee": [
+   "repec:gai:wpaper:0076@30005",
+   "repec:gai:wpaper:0096@18951"
+  ],
+  "IMF": [
+   "repec:gai:wpaper:0076@30005",
+   "repec:gai:wpaper:0076@13236",
+   "repec:gai:wpaper:0096@18951"
+  ],
+  "Arrow": [
+   "repec:gai:wpaper:0076@5877"
+  ],
+  "Dasgupta": [
+   "repec:gai:wpaper:0076@5877"
+  ],
+  "Goulder": [
+   "repec:gai:wpaper:0076@5877"
+  ],
+  "Mumford": [
+   "repec:gai:wpaper:0076@5877"
+  ],
+  "Oleson": [
+   "repec:gai:wpaper:0076@5877"
+  ],
+  "Stiglitz": [
+   "repec:gai:wpaper:0076@5877"
+  ],
+  "Sen": [
+   "repec:gai:wpaper:0076@5877"
+  ],
+  "Fitoussi": [
+   "repec:gai:wpaper:0076@5877"
+  ]
+ },
+ "Entov": {
+  "Helpman": [
+   "repec:gai:wpaper:0076@19012"
+  ]
+ },
+ "Helpman": {
+  "Entov": [
+   "repec:gai:wpaper:0076@19012"
+  ],
+  "Radygin": [
+   "repec:gai:wpaper:0076@19012"
+  ],
+  "Mezheraups": [
+   "repec:gai:wpaper:0076@19012"
+  ],
+  "Shvetsov": [
+   "repec:gai:wpaper:0076@19012"
+  ],
+  "Solow": [
+   "repec:gai:wpaper:0096@16621"
+  ]
+ },
+ "Radygin": {
+  "Helpman": [
+   "repec:gai:wpaper:0076@19012"
+  ]
+ },
+ "Mezheraups": {
+  "Helpman": [
+   "repec:gai:wpaper:0076@19012"
+  ]
+ },
+ "Shvetsov": {
+  "Helpman": [
+   "repec:gai:wpaper:0076@19012"
+  ]
+ },
+ "Arrow": {
+  "World": [
+   "repec:gai:wpaper:0076@5877"
+  ],
+  "Bank": [
+   "repec:gai:wpaper:0076@5877"
+  ],
+  "Stiglitz": [
+   "repec:gai:wpaper:0076@5877"
+  ],
+  "Sen": [
+   "repec:gai:wpaper:0076@5877"
+  ],
+  "Fitoussi": [
+   "repec:gai:wpaper:0076@5877"
+  ]
+ },
+ "Dasgupta": {
+  "World": [
+   "repec:gai:wpaper:0076@5877"
+  ],
+  "Bank": [
+   "repec:gai:wpaper:0076@5877"
+  ],
+  "Stiglitz": [
+   "repec:gai:wpaper:0076@5877"
+  ],
+  "Sen": [
+   "repec:gai:wpaper:0076@5877"
+  ],
+  "Fitoussi": [
+   "repec:gai:wpaper:0076@5877"
+  ]
+ },
+ "Goulder": {
+  "World": [
+   "repec:gai:wpaper:0076@5877"
+  ],
+  "Bank": [
+   "repec:gai:wpaper:0076@5877"
+  ],
+  "Stiglitz": [
+   "repec:gai:wpaper:0076@5877"
+  ],
+  "Sen": [
+   "repec:gai:wpaper:0076@5877"
+  ],
+  "Fitoussi": [
+   "repec:gai:wpaper:0076@5877"
+  ]
+ },
+ "Mumford": {
+  "World": [
+   "repec:gai:wpaper:0076@5877"
+  ],
+  "Bank": [
+   "repec:gai:wpaper:0076@5877"
+  ],
+  "Stiglitz": [
+   "repec:gai:wpaper:0076@5877"
+  ],
+  "Sen": [
+   "repec:gai:wpaper:0076@5877"
+  ],
+  "Fitoussi": [
+   "repec:gai:wpaper:0076@5877"
+  ]
+ },
+ "Oleson": {
+  "World": [
+   "repec:gai:wpaper:0076@5877"
+  ],
+  "Bank": [
+   "repec:gai:wpaper:0076@5877"
+  ],
+  "Stiglitz": [
+   "repec:gai:wpaper:0076@5877"
+  ],
+  "Sen": [
+   "repec:gai:wpaper:0076@5877"
+  ],
+  "Fitoussi": [
+   "repec:gai:wpaper:0076@5877"
+  ]
+ },
+ "Stiglitz": {
+  "World": [
+   "repec:gai:wpaper:0076@5877"
+  ],
+  "Bank": [
+   "repec:gai:wpaper:0076@5877"
+  ],
+  "Arrow": [
+   "repec:gai:wpaper:0076@5877"
+  ],
+  "Dasgupta": [
+   "repec:gai:wpaper:0076@5877"
+  ],
+  "Goulder": [
+   "repec:gai:wpaper:0076@5877"
+  ],
+  "Mumford": [
+   "repec:gai:wpaper:0076@5877"
+  ],
+  "Oleson": [
+   "repec:gai:wpaper:0076@5877"
+  ],
+  "Eichengreen": [
+   "repec:rnp:ecopol:ep1711@24834"
+  ],
+  "Rose": [
+   "repec:rnp:ecopol:ep1711@24834"
+  ],
+  "Neely": [
+   "repec:rnp:ecopol:ep1711@24834"
+  ],
+  "Obstfeld": [
+   "repec:rnp:ecopol:ep1711@24834"
+  ]
+ },
+ "Sen": {
+  "World": [
+   "repec:gai:wpaper:0076@5877"
+  ],
+  "Bank": [
+   "repec:gai:wpaper:0076@5877"
+  ],
+  "Arrow": [
+   "repec:gai:wpaper:0076@5877"
+  ],
+  "Dasgupta": [
+   "repec:gai:wpaper:0076@5877"
+  ],
+  "Goulder": [
+   "repec:gai:wpaper:0076@5877"
+  ],
+  "Mumford": [
+   "repec:gai:wpaper:0076@5877"
+  ],
+  "Oleson": [
+   "repec:gai:wpaper:0076@5877"
+  ]
+ },
+ "Fitoussi": {
+  "World": [
+   "repec:gai:wpaper:0076@5877"
+  ],
+  "Bank": [
+   "repec:gai:wpaper:0076@5877"
+  ],
+  "Arrow": [
+   "repec:gai:wpaper:0076@5877"
+  ],
+  "Dasgupta": [
+   "repec:gai:wpaper:0076@5877"
+  ],
+  "Goulder": [
+   "repec:gai:wpaper:0076@5877"
+  ],
+  "Mumford": [
+   "repec:gai:wpaper:0076@5877"
+  ],
+  "Oleson": [
+   "repec:gai:wpaper:0076@5877"
+  ]
+ },
+ "Islam": {
+  "IMF": [
+   "repec:gai:wpaper:0076@25622"
+  ],
+  "Young": [
+   "repec:gai:wpaper:0076@25622"
+  ],
+  "Mankiw": [
+   "repec:gai:wpaper:0076@25622"
+  ],
+  "Romer": [
+   "repec:gai:wpaper:0076@25622"
+  ],
+  "Weil": [
+   "repec:gai:wpaper:0076@25622"
+  ]
+ },
+ "Young": {
+  "Islam": [
+   "repec:gai:wpaper:0076@25622"
+  ],
+  "IMF": [
+   "repec:gai:wpaper:0076@25622"
+  ],
+  "Mankiw": [
+   "repec:gai:wpaper:0076@25622"
+  ],
+  "Romer": [
+   "repec:gai:wpaper:0076@25622"
+  ],
+  "Weil": [
+   "repec:gai:wpaper:0076@25622"
+  ]
+ },
+ "Mankiw": {
+  "Islam": [
+   "repec:gai:wpaper:0076@25622"
+  ],
+  "Young": [
+   "repec:gai:wpaper:0076@25622"
+  ],
+  "IMF": [
+   "repec:gai:wpaper:0076@25622"
+  ],
+  "Phelps": [
+   "repec:rnp:ecopol:ep1457@8543"
+  ],
+  "Friedman": [
+   "repec:rnp:ecopol:ep1457@8543"
+  ]
+ },
+ "Romer": {
+  "Islam": [
+   "repec:gai:wpaper:0076@25622"
+  ],
+  "Young": [
+   "repec:gai:wpaper:0076@25622"
+  ],
+  "IMF": [
+   "repec:gai:wpaper:0076@25622"
+  ]
+ },
+ "Weil": {
+  "Islam": [
+   "repec:gai:wpaper:0076@25622"
+  ],
+  "Young": [
+   "repec:gai:wpaper:0076@25622"
+  ],
+  "IMF": [
+   "repec:gai:wpaper:0076@25622"
+  ]
+ },
+ "King": {
+  "Kydland": [
+   "repec:gai:wpaper:0076@11782",
+   "repec:gai:wpaper:0076@38652"
+  ],
+  "Prescott": [
+   "repec:gai:wpaper:0076@11782",
+   "repec:gai:wpaper:0076@38652"
+  ]
+ },
+ "Kydland": {
+  "King": [
+   "repec:gai:wpaper:0076@11782",
+   "repec:gai:wpaper:0076@38652"
+  ],
+  "Plosser": [
+   "repec:gai:wpaper:0076@11782",
+   "repec:gai:wpaper:0076@38652"
+  ],
+  "Rebelo": [
+   "repec:gai:wpaper:0076@11782",
+   "repec:gai:wpaper:0076@38652"
+  ]
+ },
+ "Prescott": {
+  "King": [
+   "repec:gai:wpaper:0076@11782",
+   "repec:gai:wpaper:0076@38652"
+  ],
+  "Plosser": [
+   "repec:gai:wpaper:0076@11782",
+   "repec:gai:wpaper:0076@38652"
+  ],
+  "Rebelo": [
+   "repec:gai:wpaper:0076@11782",
+   "repec:gai:wpaper:0076@38652"
+  ]
+ },
+ "Plosser": {
+  "Kydland": [
+   "repec:gai:wpaper:0076@11782",
+   "repec:gai:wpaper:0076@38652"
+  ],
+  "Prescott": [
+   "repec:gai:wpaper:0076@11782",
+   "repec:gai:wpaper:0076@38652"
+  ]
+ },
+ "Rebelo": {
+  "Kydland": [
+   "repec:gai:wpaper:0076@11782",
+   "repec:gai:wpaper:0076@38652"
+  ],
+  "Prescott": [
+   "repec:gai:wpaper:0076@11782",
+   "repec:gai:wpaper:0076@38652"
+  ]
+ },
+ "Alesina": {
+  "Feldstein": [
+   "repec:gai:wpaper:0076@31993"
+  ],
+  "Tanzi": [
+   "repec:gai:wpaper:0076@31993"
+  ],
+  "Zee": [
+   "repec:gai:wpaper:0076@31993"
+  ],
+  "Bartolini": [
+   "repec:rnp:ecopol:ep1711@14391"
+  ],
+  "Drazen": [
+   "repec:rnp:ecopol:ep1711@14391"
+  ],
+  "Grilli": [
+   "repec:rnp:ecopol:ep1711@14391"
+  ],
+  "Milesi-Ferretti": [
+   "repec:rnp:ecopol:ep1711@14391"
+  ]
+ },
+ "Feldstein": {
+  "Alesina": [
+   "repec:gai:wpaper:0076@31993"
+  ],
+  "Ardagna": [
+   "repec:gai:wpaper:0076@31993"
+  ],
+  "Perotti": [
+   "repec:gai:wpaper:0076@31993"
+  ],
+  "Schiantarelli": [
+   "repec:gai:wpaper:0076@31993"
+  ],
+  "Tanzi": [
+   "repec:gai:wpaper:0076@31993"
+  ],
+  "Zee": [
+   "repec:gai:wpaper:0076@31993"
+  ]
+ },
+ "Ardagna": {
+  "Feldstein": [
+   "repec:gai:wpaper:0076@31993"
+  ],
+  "Tanzi": [
+   "repec:gai:wpaper:0076@31993"
+  ],
+  "Zee": [
+   "repec:gai:wpaper:0076@31993"
+  ]
+ },
+ "Perotti": {
+  "Feldstein": [
+   "repec:gai:wpaper:0076@31993"
+  ],
+  "Tanzi": [
+   "repec:gai:wpaper:0076@31993"
+  ],
+  "Zee": [
+   "repec:gai:wpaper:0076@31993"
+  ],
+  "Blanchard": [
+   "repec:gai:wpaper:0076@40056",
+   "repec:gai:wpaper:0096@16344"
+  ],
+  "Monacelli": [
+   "repec:gai:wpaper:0076@40056",
+   "repec:gai:wpaper:0096@16344"
+  ]
+ },
+ "Schiantarelli": {
+  "Feldstein": [
+   "repec:gai:wpaper:0076@31993"
+  ],
+  "Tanzi": [
+   "repec:gai:wpaper:0076@31993"
+  ],
+  "Zee": [
+   "repec:gai:wpaper:0076@31993"
+  ]
+ },
+ "Arkhipov": {
+  "Drobyshevsky": [
+   "repec:gai:wpaper:0076@27716"
+  ],
+  "Kadochnikov": [
+   "repec:gai:wpaper:0076@27716"
+  ],
+  "Sinelnikov-Murylev": [
+   "repec:gai:wpaper:0076@27716"
+  ],
+  "Malinina": [
+   "repec:gai:wpaper:0076@27716"
+  ]
+ },
+ "Batkibekov": {
+  "Drobyshevsky": [
+   "repec:gai:wpaper:0076@27716"
+  ],
+  "Kadochnikov": [
+   "repec:gai:wpaper:0076@27716"
+  ],
+  "Sinelnikov-Murylev": [
+   "repec:gai:wpaper:0076@27716"
+  ],
+  "Malinina": [
+   "repec:gai:wpaper:0076@27716"
+  ]
+ },
+ "Trunin": {
+  "Drobyshevsky": [
+   "repec:gai:wpaper:0076@27716"
+  ],
+  "Kadochnikov": [
+   "repec:gai:wpaper:0076@27716"
+  ],
+  "Sinelnikov-Murylev": [
+   "repec:gai:wpaper:0076@27716"
+  ],
+  "Malinina": [
+   "repec:gai:wpaper:0076@27716"
+  ]
+ },
+ "Kadochnikov": {
+  "Sinelnikov-Murylev": [
+   "repec:gai:wpaper:0076@27716"
+  ],
+  "Arkhipov": [
+   "repec:gai:wpaper:0076@27716"
+  ],
+  "Drobyshevsky": [
+   "repec:gai:wpaper:0076@27716"
+  ],
+  "Batkibekov": [
+   "repec:gai:wpaper:0076@27716"
+  ],
+  "Trunin": [
+   "repec:gai:wpaper:0076@27716"
+  ],
+  "Malinina": [
+   "repec:gai:wpaper:0076@27716"
+  ]
+ },
+ "Malinina": {
+  "Sinelnikov-Murylev": [
+   "repec:gai:wpaper:0076@27716"
+  ],
+  "Arkhipov": [
+   "repec:gai:wpaper:0076@27716"
+  ],
+  "Drobyshevsky": [
+   "repec:gai:wpaper:0076@27716"
+  ],
+  "Batkibekov": [
+   "repec:gai:wpaper:0076@27716"
+  ],
+  "Trunin": [
+   "repec:gai:wpaper:0076@27716"
+  ],
+  "Kadochnikov": [
+   "repec:gai:wpaper:0076@27716"
+  ]
+ },
+ "Rodrik": {
+  "Durlauf": [
+   "repec:gai:wpaper:0076@5956",
+   "repec:gai:wpaper:0096@7281"
+  ],
+  "Johnson": [
+   "repec:gai:wpaper:0076@5956",
+   "repec:gai:wpaper:0096@7281"
+  ],
+  "Temple": [
+   "repec:gai:wpaper:0076@5956",
+   "repec:gai:wpaper:0096@7281"
+  ],
+  "Mokyr": [
+   "repec:gai:wpaper:0076@5956",
+   "repec:gai:wpaper:0096@7281"
+  ],
+  "Kazakova": [
+   "repec:gai:wpaper:0076@5956"
+  ],
+  "Sinelnikov-Murylev": [
+   "repec:gai:wpaper:0076@5956"
+  ],
+  "Obstfeld": [
+   "repec:rnp:ecopol:ep1711@6870"
+  ],
+  "Taylor": [
+   "repec:rnp:ecopol:ep1711@6870"
+  ]
+ },
+ "Durlauf": {
+  "Rodrik": [
+   "repec:gai:wpaper:0076@5956",
+   "repec:gai:wpaper:0096@7281"
+  ],
+  "Mokyr": [
+   "repec:gai:wpaper:0076@5956",
+   "repec:gai:wpaper:0096@7281"
+  ],
+  "Kazakova": [
+   "repec:gai:wpaper:0076@5956"
+  ],
+  "Sinelnikov-Murylev": [
+   "repec:gai:wpaper:0076@5956"
+  ]
+ },
+ "Johnson": {
+  "Rodrik": [
+   "repec:gai:wpaper:0076@5956",
+   "repec:gai:wpaper:0096@7281"
+  ],
+  "Mokyr": [
+   "repec:gai:wpaper:0076@5956",
+   "repec:gai:wpaper:0096@7281"
+  ],
+  "Kazakova": [
+   "repec:gai:wpaper:0076@5956"
+  ],
+  "Sinelnikov-Murylev": [
+   "repec:gai:wpaper:0076@5956"
+  ],
+  "Mauro": [
+   "repec:rnp:ecopol:1532@8428"
+  ]
+ },
+ "Temple": {
+  "Rodrik": [
+   "repec:gai:wpaper:0076@5956",
+   "repec:gai:wpaper:0096@7281"
+  ],
+  "Mokyr": [
+   "repec:gai:wpaper:0076@5956",
+   "repec:gai:wpaper:0096@7281"
+  ],
+  "Kazakova": [
+   "repec:gai:wpaper:0076@5956"
+  ],
+  "Sinelnikov-Murylev": [
+   "repec:gai:wpaper:0076@5956"
+  ]
+ },
+ "Mokyr": {
+  "Rodrik": [
+   "repec:gai:wpaper:0076@5956",
+   "repec:gai:wpaper:0096@7281"
+  ],
+  "Durlauf": [
+   "repec:gai:wpaper:0076@5956",
+   "repec:gai:wpaper:0096@7281"
+  ],
+  "Johnson": [
+   "repec:gai:wpaper:0076@5956",
+   "repec:gai:wpaper:0096@7281"
+  ],
+  "Temple": [
+   "repec:gai:wpaper:0076@5956",
+   "repec:gai:wpaper:0096@7281"
+  ],
+  "Kazakova": [
+   "repec:gai:wpaper:0076@5956"
+  ],
+  "Sinelnikov-Murylev": [
+   "repec:gai:wpaper:0076@5956"
+  ]
+ },
+ "Kazakova": {
+  "Rodrik": [
+   "repec:gai:wpaper:0076@5956"
+  ],
+  "Durlauf": [
+   "repec:gai:wpaper:0076@5956"
+  ],
+  "Johnson": [
+   "repec:gai:wpaper:0076@5956"
+  ],
+  "Temple": [
+   "repec:gai:wpaper:0076@5956"
+  ],
+  "Mokyr": [
+   "repec:gai:wpaper:0076@5956"
+  ]
+ },
+ "Monacelli": {
+  "Blanchard": [
+   "repec:gai:wpaper:0076@40056",
+   "repec:gai:wpaper:0096@16344"
+  ],
+  "Perotti": [
+   "repec:gai:wpaper:0076@40056",
+   "repec:gai:wpaper:0096@16344"
+  ]
+ },
+ "Aschauer": {
+  "Barro": [
+   "repec:gai:wpaper:0076@31913"
+  ]
+ },
+ "Barro": {
+  "Aschauer": [
+   "repec:gai:wpaper:0076@31913"
+  ],
+  "Futagami": [
+   "repec:rnp:ppaper:021915@93689"
+  ],
+  "Morita": [
+   "repec:rnp:ppaper:021915@93689"
+  ],
+  "Shibata": [
+   "repec:rnp:ppaper:021915@93689"
+  ]
+ },
+ "Treisman": {
+  "Gylfason": [
+   "repec:gai:wpaper:0096@12184"
+  ],
+  "Mehlum": [
+   "repec:gai:wpaper:0096@12184"
+  ],
+  "Moene": [
+   "repec:gai:wpaper:0096@12184"
+  ],
+  "Torvik": [
+   "repec:gai:wpaper:0096@12184"
+  ]
+ },
+ "Gylfason": {
+  "Treisman": [
+   "repec:gai:wpaper:0096@12184"
+  ],
+  "Mehlum": [
+   "repec:gai:wpaper:0096@12184"
+  ],
+  "Moene": [
+   "repec:gai:wpaper:0096@12184"
+  ],
+  "Torvik": [
+   "repec:gai:wpaper:0096@12184"
+  ]
+ },
+ "Griffith": {
+  "Aiyar": [
+   "repec:gai:wpaper:0096@12320"
+  ],
+  "Duval": [
+   "repec:gai:wpaper:0096@12320"
+  ],
+  "Puy": [
+   "repec:gai:wpaper:0096@12320"
+  ],
+  "Wu": [
+   "repec:gai:wpaper:0096@12320"
+  ],
+  "Zhang": [
+   "repec:gai:wpaper:0096@12320"
+  ]
+ },
+ "Aiyar": {
+  "Griffith": [
+   "repec:gai:wpaper:0096@12320"
+  ]
+ },
+ "Duval": {
+  "Griffith": [
+   "repec:gai:wpaper:0096@12320"
+  ]
+ },
+ "Puy": {
+  "Griffith": [
+   "repec:gai:wpaper:0096@12320"
+  ]
+ },
+ "Wu": {
+  "Griffith": [
+   "repec:gai:wpaper:0096@12320"
+  ]
+ },
+ "Zhang": {
+  "Griffith": [
+   "repec:gai:wpaper:0096@12320"
+  ]
+ },
+ "Sachs": {
+  "Auty": [
+   "repec:gai:wpaper:0096@12121"
+  ],
+  "Warner": [
+   "repec:gai:wpaper:0096@12121"
+  ],
+  "Calvo": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Dornbusch": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Chang": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Velasco": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Mendoza": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Eichengreen": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Hausmann": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Panizza": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Ahrend": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Goujard": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Schwellnus": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ]
+ },
+ "Auty": {
+  "Sachs": [
+   "repec:gai:wpaper:0096@12121"
+  ],
+  "Warner": [
+   "repec:gai:wpaper:0096@12121"
+  ]
+ },
+ "Warner": {
+  "Auty": [
+   "repec:gai:wpaper:0096@12121"
+  ],
+  "Sachs": [
+   "repec:gai:wpaper:0096@12121"
+  ]
+ },
+ "Blankenau": {
+  "IMF": [
+   "repec:gai:wpaper:0096@3726"
+  ],
+  "European": [
+   "repec:gai:wpaper:0096@3726"
+  ],
+  "Commission": [
+   "repec:gai:wpaper:0096@3726"
+  ]
+ },
+ "Simpson": {
+  "IMF": [
+   "repec:gai:wpaper:0096@3726"
+  ],
+  "European": [
+   "repec:gai:wpaper:0096@3726"
+  ],
+  "Commission": [
+   "repec:gai:wpaper:0096@3726"
+  ]
+ },
+ "European": {
+  "Blankenau": [
+   "repec:gai:wpaper:0096@3726"
+  ],
+  "Simpson": [
+   "repec:gai:wpaper:0096@3726"
+  ],
+  "IMF": [
+   "repec:gai:wpaper:0096@3726"
+  ]
+ },
+ "Commission": {
+  "Blankenau": [
+   "repec:gai:wpaper:0096@3726"
+  ],
+  "Simpson": [
+   "repec:gai:wpaper:0096@3726"
+  ],
+  "IMF": [
+   "repec:gai:wpaper:0096@3726"
+  ]
+ },
+ "Solow": {
+  "Helpman": [
+   "repec:gai:wpaper:0096@16621"
+  ]
+ },
+ "Balli": {
+  "Hepp": [
+   "repec:nea:journl:y:2018:i:40:p:61-83@10002"
+  ],
+  "Hagen": [
+   "repec:nea:journl:y:2018:i:40:p:61-83@10002"
+  ],
+  "Melitz": [
+   "repec:nea:journl:y:2018:i:40:p:61-83@10002"
+  ],
+  "Zumer": [
+   "repec:nea:journl:y:2018:i:40:p:61-83@10002"
+  ]
+ },
+ "Hepp": {
+  "Balli": [
+   "repec:nea:journl:y:2018:i:40:p:61-83@10002"
+  ],
+  "Basher": [
+   "repec:nea:journl:y:2018:i:40:p:61-83@10002"
+  ],
+  "Louis": [
+   "repec:nea:journl:y:2018:i:40:p:61-83@10002"
+  ],
+  "Melitz": [
+   "repec:nea:journl:y:2018:i:40:p:61-83@10002",
+   "repec:nea:journl:y:2018:i:40:p:61-83@12357"
+  ],
+  "Zumer": [
+   "repec:nea:journl:y:2018:i:40:p:61-83@10002",
+   "repec:nea:journl:y:2018:i:40:p:61-83@12357"
+  ]
+ },
+ "Hagen": {
+  "Balli": [
+   "repec:nea:journl:y:2018:i:40:p:61-83@10002"
+  ],
+  "Basher": [
+   "repec:nea:journl:y:2018:i:40:p:61-83@10002"
+  ],
+  "Louis": [
+   "repec:nea:journl:y:2018:i:40:p:61-83@10002"
+  ],
+  "Melitz": [
+   "repec:nea:journl:y:2018:i:40:p:61-83@10002",
+   "repec:nea:journl:y:2018:i:40:p:61-83@12357"
+  ],
+  "Zumer": [
+   "repec:nea:journl:y:2018:i:40:p:61-83@10002",
+   "repec:nea:journl:y:2018:i:40:p:61-83@12357"
+  ]
+ },
+ "Basher": {
+  "Hepp": [
+   "repec:nea:journl:y:2018:i:40:p:61-83@10002"
+  ],
+  "Hagen": [
+   "repec:nea:journl:y:2018:i:40:p:61-83@10002"
+  ],
+  "Melitz": [
+   "repec:nea:journl:y:2018:i:40:p:61-83@10002"
+  ],
+  "Zumer": [
+   "repec:nea:journl:y:2018:i:40:p:61-83@10002"
+  ]
+ },
+ "Louis": {
+  "Hepp": [
+   "repec:nea:journl:y:2018:i:40:p:61-83@10002"
+  ],
+  "Hagen": [
+   "repec:nea:journl:y:2018:i:40:p:61-83@10002"
+  ],
+  "Melitz": [
+   "repec:nea:journl:y:2018:i:40:p:61-83@10002"
+  ],
+  "Zumer": [
+   "repec:nea:journl:y:2018:i:40:p:61-83@10002"
+  ]
+ },
+ "Melitz": {
+  "Balli": [
+   "repec:nea:journl:y:2018:i:40:p:61-83@10002"
+  ],
+  "Basher": [
+   "repec:nea:journl:y:2018:i:40:p:61-83@10002"
+  ],
+  "Louis": [
+   "repec:nea:journl:y:2018:i:40:p:61-83@10002"
+  ],
+  "Hepp": [
+   "repec:nea:journl:y:2018:i:40:p:61-83@10002",
+   "repec:nea:journl:y:2018:i:40:p:61-83@12357"
+  ],
+  "Hagen": [
+   "repec:nea:journl:y:2018:i:40:p:61-83@10002",
+   "repec:nea:journl:y:2018:i:40:p:61-83@12357"
+  ]
+ },
+ "Zumer": {
+  "Balli": [
+   "repec:nea:journl:y:2018:i:40:p:61-83@10002"
+  ],
+  "Basher": [
+   "repec:nea:journl:y:2018:i:40:p:61-83@10002"
+  ],
+  "Louis": [
+   "repec:nea:journl:y:2018:i:40:p:61-83@10002"
+  ],
+  "Hepp": [
+   "repec:nea:journl:y:2018:i:40:p:61-83@10002",
+   "repec:nea:journl:y:2018:i:40:p:61-83@12357"
+  ],
+  "Hagen": [
+   "repec:nea:journl:y:2018:i:40:p:61-83@10002",
+   "repec:nea:journl:y:2018:i:40:p:61-83@12357"
+  ]
+ },
+ "Asdrubali": {
+  "Bayoumi": [
+   "repec:nea:journl:y:2018:i:40:p:61-83@11325"
+  ],
+  "Masson": [
+   "repec:nea:journl:y:2018:i:40:p:61-83@11325"
+  ]
+ },
+ "Bayoumi": {
+  "Asdrubali": [
+   "repec:nea:journl:y:2018:i:40:p:61-83@11325"
+  ],
+  "Sørensen": [
+   "repec:nea:journl:y:2018:i:40:p:61-83@11325"
+  ],
+  "Yosha": [
+   "repec:nea:journl:y:2018:i:40:p:61-83@11325"
+  ]
+ },
+ "Masson": {
+  "Asdrubali": [
+   "repec:nea:journl:y:2018:i:40:p:61-83@11325"
+  ],
+  "Sørensen": [
+   "repec:nea:journl:y:2018:i:40:p:61-83@11325"
+  ],
+  "Yosha": [
+   "repec:nea:journl:y:2018:i:40:p:61-83@11325"
+  ]
+ },
+ "Sørensen": {
+  "Bayoumi": [
+   "repec:nea:journl:y:2018:i:40:p:61-83@11325"
+  ],
+  "Masson": [
+   "repec:nea:journl:y:2018:i:40:p:61-83@11325"
+  ]
+ },
+ "Yosha": {
+  "Bayoumi": [
+   "repec:nea:journl:y:2018:i:40:p:61-83@11325"
+  ],
+  "Masson": [
+   "repec:nea:journl:y:2018:i:40:p:61-83@11325"
+  ]
+ },
+ "Knetter": {
+  "Идрисов": [
+   "repec:rnp:ecopol:1532@51485"
+  ]
+ },
+ "Трунин": {
+  "Идрисов": [
+   "repec:rnp:ecopol:1532@53961"
+  ],
+  "Каукин": [
+   "repec:rnp:ecopol:1532@53961"
+  ],
+  "Пономарев": [
+   "repec:rnp:ecopol:1532@53961"
+  ]
+ },
+ "Каукин": {
+  "Трунин": [
+   "repec:rnp:ecopol:1532@53961"
+  ]
+ },
+ "Пономарев": {
+  "Трунин": [
+   "repec:rnp:ecopol:1532@53961"
+  ]
+ },
+ "Mendoza": {
+  "Bleaney": [
+   "repec:rnp:ecopol:1532@18356"
+  ],
+  "Greenaway": [
+   "repec:rnp:ecopol:1532@18356"
+  ],
+  "Calvo": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Dornbusch": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Chang": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Velasco": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Radelet": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Sachs": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Ahrend": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Goujard": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Schwellnus": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Eichengreen": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Hausmann": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Panizza": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ]
+ },
+ "Bleaney": {
+  "Mendoza": [
+   "repec:rnp:ecopol:1532@18356"
+  ],
+  "Bernstein": [
+   "repec:rnp:ecopol:1532@1161"
+  ]
+ },
+ "Greenaway": {
+  "Mendoza": [
+   "repec:rnp:ecopol:1532@18356"
+  ],
+  "Bernstein": [
+   "repec:rnp:ecopol:1532@1161"
+  ]
+ },
+ "Mauro": {
+  "Acemoglu": [
+   "repec:rnp:ecopol:1532@8428"
+  ],
+  "Johnson": [
+   "repec:rnp:ecopol:1532@8428"
+  ],
+  "Robinson": [
+   "repec:rnp:ecopol:1532@8428"
+  ]
+ },
+ "Acemoglu": {
+  "Mauro": [
+   "repec:rnp:ecopol:1532@8428"
+  ]
+ },
+ "Mundell": {
+  "Markusen": [
+   "repec:rnp:ecopol:1532@4763"
+  ],
+  "Fleming": [
+   "repec:rnp:ecopol:ep1711@16445"
+  ]
+ },
+ "Markusen": {
+  "Mundell": [
+   "repec:rnp:ecopol:1532@4763"
+  ]
+ },
+ "Bernstein": {
+  "Bleaney": [
+   "repec:rnp:ecopol:1532@1161"
+  ],
+  "Greenaway": [
+   "repec:rnp:ecopol:1532@1161"
+  ]
+ },
+ "Бессонов": {
+  "Энтов": [
+   "repec:rnp:ecopol:ep1457@26522"
+  ],
+  "Луговой": [
+   "repec:rnp:ecopol:ep1457@26522"
+  ],
+  "Астафьева": [
+   "repec:rnp:ecopol:ep1457@26522"
+  ],
+  "Воскобойников": [
+   "repec:rnp:ecopol:ep1457@26522"
+  ],
+  "Турунцева": [
+   "repec:rnp:ecopol:ep1457@26522"
+  ],
+  "Некипелов": [
+   "repec:rnp:ecopol:ep1457@26522"
+  ]
+ },
+ "Энтов": {
+  "Бессонов": [
+   "repec:rnp:ecopol:ep1457@26522"
+  ]
+ },
+ "Луговой": {
+  "Бессонов": [
+   "repec:rnp:ecopol:ep1457@26522"
+  ]
+ },
+ "Астафьева": {
+  "Бессонов": [
+   "repec:rnp:ecopol:ep1457@26522"
+  ]
+ },
+ "Воскобойников": {
+  "Бессонов": [
+   "repec:rnp:ecopol:ep1457@26522"
+  ]
+ },
+ "Турунцева": {
+  "Бессонов": [
+   "repec:rnp:ecopol:ep1457@26522"
+  ]
+ },
+ "Некипелов": {
+  "Бессонов": [
+   "repec:rnp:ecopol:ep1457@26522"
+  ],
+  "Ершов": [
+   "repec:rnp:ecopol:ep1711@5426"
+  ],
+  "Головнин": [
+   "repec:rnp:ecopol:ep1711@5426"
+  ]
+ },
+ "Ball": {
+  "Phelps": [
+   "repec:rnp:ecopol:ep1457@8543"
+  ],
+  "Friedman": [
+   "repec:rnp:ecopol:ep1457@8543"
+  ]
+ },
+ "Phelps": {
+  "Ball": [
+   "repec:rnp:ecopol:ep1457@8543"
+  ],
+  "Mankiw": [
+   "repec:rnp:ecopol:ep1457@8543"
+  ],
+  "Friedman": [
+   "repec:rnp:ecopol:ep1457@8543"
+  ]
+ },
+ "Friedman": {
+  "Ball": [
+   "repec:rnp:ecopol:ep1457@8543"
+  ],
+  "Mankiw": [
+   "repec:rnp:ecopol:ep1457@8543"
+  ],
+  "Phelps": [
+   "repec:rnp:ecopol:ep1457@8543"
+  ]
+ },
+ "Fleming": {
+  "Mundell": [
+   "repec:rnp:ecopol:ep1711@16445"
+  ]
+ },
+ "Calvo": {
+  "Dornbusch": [
+   "repec:rnp:ecopol:ep1711@7016",
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Radelet": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Sachs": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Chang": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Velasco": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Mendoza": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Eichengreen": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Hausmann": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Panizza": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Ahrend": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Goujard": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Schwellnus": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Reinhart": [
+   "repec:rnp:ecopol:ep1711@33901"
+  ],
+  "Izquierdo": [
+   "repec:rnp:ecopol:ep1711@33901"
+  ],
+  "Mejia": [
+   "repec:rnp:ecopol:ep1711@33901"
+  ]
+ },
+ "Dornbusch": {
+  "Calvo": [
+   "repec:rnp:ecopol:ep1711@7016",
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Radelet": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Sachs": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Chang": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Velasco": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Mendoza": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Eichengreen": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Hausmann": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Panizza": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Ahrend": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Goujard": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Schwellnus": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Fischer": [
+   "repec:rnp:ecopol:ep1711@25127"
+  ]
+ },
+ "Radelet": {
+  "Calvo": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Dornbusch": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Chang": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Velasco": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Mendoza": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Eichengreen": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Hausmann": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Panizza": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Ahrend": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Goujard": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Schwellnus": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ]
+ },
+ "Chang": {
+  "Calvo": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Dornbusch": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Radelet": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Sachs": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Mendoza": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Eichengreen": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Hausmann": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Panizza": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Ahrend": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Goujard": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Schwellnus": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ]
+ },
+ "Velasco": {
+  "Calvo": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Gertler": [
+   "repec:rnp:ecopol:ep1711@12024"
+  ],
+  "Rogoff": [
+   "repec:rnp:ecopol:ep1711@12024"
+  ],
+  "Alfaro": [
+   "repec:rnp:ecopol:ep1711@12024"
+  ],
+  "Kalemli-Ozcan": [
+   "repec:rnp:ecopol:ep1711@12024"
+  ],
+  "Volosovych": [
+   "repec:rnp:ecopol:ep1711@12024"
+  ],
+  "Dornbusch": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Radelet": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Sachs": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Mendoza": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Eichengreen": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Hausmann": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Panizza": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Ahrend": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Goujard": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Schwellnus": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ]
+ },
+ "Eichengreen": {
+  "Calvo": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Edwards": [
+   "repec:rnp:ecopol:ep1711@13477"
+  ],
+  "Obstfeld": [
+   "repec:rnp:ecopol:ep1711@24834"
+  ],
+  "Stiglitz": [
+   "repec:rnp:ecopol:ep1711@24834"
+  ],
+  "Neely": [
+   "repec:rnp:ecopol:ep1711@24834"
+  ],
+  "Dornbusch": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Kraay": [
+   "repec:rnp:ecopol:ep1711@13477"
+  ],
+  "Chanda": [
+   "repec:rnp:ecopol:ep1711@13477"
+  ],
+  "Chinn": [
+   "repec:rnp:ecopol:ep1711@13477"
+  ],
+  "Ito": [
+   "repec:rnp:ecopol:ep1711@13477"
+  ],
+  "Chang": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Velasco": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Radelet": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Sachs": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Ahrend": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Goujard": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Schwellnus": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Mendoza": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ]
+ },
+ "Hausmann": {
+  "Calvo": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Dornbusch": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Chang": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Velasco": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Radelet": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Sachs": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Ahrend": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Goujard": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Schwellnus": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Mendoza": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ]
+ },
+ "Panizza": {
+  "Calvo": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Dornbusch": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Chang": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Velasco": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Radelet": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Sachs": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Ahrend": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Goujard": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Schwellnus": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Mendoza": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ]
+ },
+ "Ahrend": {
+  "Calvo": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Dornbusch": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Chang": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Velasco": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Radelet": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Sachs": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Mendoza": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Eichengreen": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Hausmann": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Panizza": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ]
+ },
+ "Goujard": {
+  "Calvo": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Dornbusch": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Chang": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Velasco": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Radelet": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Sachs": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Mendoza": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Eichengreen": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Hausmann": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Panizza": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ]
+ },
+ "Schwellnus": {
+  "Calvo": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Dornbusch": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Chang": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Velasco": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Radelet": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Sachs": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Mendoza": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Eichengreen": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Hausmann": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ],
+  "Panizza": [
+   "repec:rnp:ecopol:ep1711@18387"
+  ]
+ },
+ "Jadhav": {
+  "Guonan": [
+   "repec:rnp:ecopol:ep1711@29596",
+   "repec:rnp:ecopol:ep1711@39432",
+   "repec:rnp:ecopol:ep1711@41665"
+  ],
+  "McCauley": [
+   "repec:rnp:ecopol:ep1711@29596",
+   "repec:rnp:ecopol:ep1711@39432",
+   "repec:rnp:ecopol:ep1711@41665"
+  ],
+  "Hutchison": [
+   "repec:rnp:ecopol:ep1711@29596",
+   "repec:rnp:ecopol:ep1711@41665"
+  ],
+  "Kendall": [
+   "repec:rnp:ecopol:ep1711@29596",
+   "repec:rnp:ecopol:ep1711@41665"
+  ],
+  "Pasricha": [
+   "repec:rnp:ecopol:ep1711@29596",
+   "repec:rnp:ecopol:ep1711@41665"
+  ],
+  "Singh": [
+   "repec:rnp:ecopol:ep1711@29596",
+   "repec:rnp:ecopol:ep1711@41665"
+  ]
+ },
+ "Guonan": {
+  "Jadhav": [
+   "repec:rnp:ecopol:ep1711@29596",
+   "repec:rnp:ecopol:ep1711@39432",
+   "repec:rnp:ecopol:ep1711@41665"
+  ],
+  "Hutchison": [
+   "repec:rnp:ecopol:ep1711@29596",
+   "repec:rnp:ecopol:ep1711@41665"
+  ],
+  "Kendall": [
+   "repec:rnp:ecopol:ep1711@29596",
+   "repec:rnp:ecopol:ep1711@41665"
+  ],
+  "Pasricha": [
+   "repec:rnp:ecopol:ep1711@29596",
+   "repec:rnp:ecopol:ep1711@41665"
+  ],
+  "Singh": [
+   "repec:rnp:ecopol:ep1711@29596",
+   "repec:rnp:ecopol:ep1711@41665"
+  ]
+ },
+ "McCauley": {
+  "Jadhav": [
+   "repec:rnp:ecopol:ep1711@29596",
+   "repec:rnp:ecopol:ep1711@39432",
+   "repec:rnp:ecopol:ep1711@41665"
+  ],
+  "Hutchison": [
+   "repec:rnp:ecopol:ep1711@29596",
+   "repec:rnp:ecopol:ep1711@41665"
+  ],
+  "Kendall": [
+   "repec:rnp:ecopol:ep1711@29596",
+   "repec:rnp:ecopol:ep1711@41665"
+  ],
+  "Pasricha": [
+   "repec:rnp:ecopol:ep1711@29596",
+   "repec:rnp:ecopol:ep1711@41665"
+  ],
+  "Singh": [
+   "repec:rnp:ecopol:ep1711@29596",
+   "repec:rnp:ecopol:ep1711@41665"
+  ]
+ },
+ "Hutchison": {
+  "Jadhav": [
+   "repec:rnp:ecopol:ep1711@29596",
+   "repec:rnp:ecopol:ep1711@41665"
+  ],
+  "Guonan": [
+   "repec:rnp:ecopol:ep1711@29596",
+   "repec:rnp:ecopol:ep1711@41665"
+  ],
+  "McCauley": [
+   "repec:rnp:ecopol:ep1711@29596",
+   "repec:rnp:ecopol:ep1711@41665"
+  ]
+ },
+ "Kendall": {
+  "Jadhav": [
+   "repec:rnp:ecopol:ep1711@29596",
+   "repec:rnp:ecopol:ep1711@41665"
+  ],
+  "Guonan": [
+   "repec:rnp:ecopol:ep1711@29596",
+   "repec:rnp:ecopol:ep1711@41665"
+  ],
+  "McCauley": [
+   "repec:rnp:ecopol:ep1711@29596",
+   "repec:rnp:ecopol:ep1711@41665"
+  ]
+ },
+ "Pasricha": {
+  "Jadhav": [
+   "repec:rnp:ecopol:ep1711@29596",
+   "repec:rnp:ecopol:ep1711@41665"
+  ],
+  "Guonan": [
+   "repec:rnp:ecopol:ep1711@29596",
+   "repec:rnp:ecopol:ep1711@41665"
+  ],
+  "McCauley": [
+   "repec:rnp:ecopol:ep1711@29596",
+   "repec:rnp:ecopol:ep1711@41665"
+  ]
+ },
+ "Singh": {
+  "Jadhav": [
+   "repec:rnp:ecopol:ep1711@29596",
+   "repec:rnp:ecopol:ep1711@41665"
+  ],
+  "Guonan": [
+   "repec:rnp:ecopol:ep1711@29596",
+   "repec:rnp:ecopol:ep1711@41665"
+  ],
+  "McCauley": [
+   "repec:rnp:ecopol:ep1711@29596",
+   "repec:rnp:ecopol:ep1711@41665"
+  ]
+ },
+ "Levine": {
+  "Klein": [
+   "repec:rnp:ecopol:ep1711@13100"
+  ],
+  "Olivei": [
+   "repec:rnp:ecopol:ep1711@13100"
+  ]
+ },
+ "Olivei": {
+  "Levine": [
+   "repec:rnp:ecopol:ep1711@13100"
+  ],
+  "Zervos": [
+   "repec:rnp:ecopol:ep1711@13100"
+  ]
+ },
+ "Zervos": {
+  "Klein": [
+   "repec:rnp:ecopol:ep1711@13100"
+  ],
+  "Olivei": [
+   "repec:rnp:ecopol:ep1711@13100"
+  ]
+ },
+ "Ершов": {
+  "Некипелов": [
+   "repec:rnp:ecopol:ep1711@5426"
+  ],
+  "Головнин": [
+   "repec:rnp:ecopol:ep1711@5426"
+  ]
+ },
+ "Головнин": {
+  "Некипелов": [
+   "repec:rnp:ecopol:ep1711@5426"
+  ],
+  "Ершов": [
+   "repec:rnp:ecopol:ep1711@5426"
+  ]
+ },
+ "Chamon": {
+  "Edison": [
+   "repec:rnp:ecopol:ep1711@35492"
+  ],
+  "Reinhart": [
+   "repec:rnp:ecopol:ep1711@35492"
+  ],
+  "Ostry": [
+   "repec:rnp:ecopol:ep1711@24446"
+  ],
+  "Ghosh": [
+   "repec:rnp:ecopol:ep1711@24446"
+  ],
+  "Habermeier": [
+   "repec:rnp:ecopol:ep1711@24446"
+  ],
+  "Qureshi": [
+   "repec:rnp:ecopol:ep1711@24446"
+  ],
+  "Reinhardt": [
+   "repec:rnp:ecopol:ep1711@24446"
+  ]
+ },
+ "Edison": {
+  "Chamon": [
+   "repec:rnp:ecopol:ep1711@35492"
+  ],
+  "Garcia": [
+   "repec:rnp:ecopol:ep1711@35492"
+  ]
+ },
+ "Garcia": {
+  "Edison": [
+   "repec:rnp:ecopol:ep1711@35492"
+  ],
+  "Reinhart": [
+   "repec:rnp:ecopol:ep1711@35492"
+  ],
+  "Cardoso": [
+   "repec:rnp:ecopol:ep1711@32493",
+   "repec:rnp:ecopol:ep1711@37437"
+  ],
+  "Goldfajn": [
+   "repec:rnp:ecopol:ep1711@32493",
+   "repec:rnp:ecopol:ep1711@37437"
+  ]
+ },
+ "Tornell": {
+  "Gertler": [
+   "repec:rnp:ecopol:ep1711@12024"
+  ],
+  "Rogoff": [
+   "repec:rnp:ecopol:ep1711@12024"
+  ],
+  "Alfaro": [
+   "repec:rnp:ecopol:ep1711@12024"
+  ],
+  "Kalemli-Ozcan": [
+   "repec:rnp:ecopol:ep1711@12024"
+  ],
+  "Volosovych": [
+   "repec:rnp:ecopol:ep1711@12024"
+  ]
+ },
+ "Gertler": {
+  "Tornell": [
+   "repec:rnp:ecopol:ep1711@12024"
+  ],
+  "Velasco": [
+   "repec:rnp:ecopol:ep1711@12024"
+  ],
+  "Alfaro": [
+   "repec:rnp:ecopol:ep1711@12024"
+  ],
+  "Kalemli-Ozcan": [
+   "repec:rnp:ecopol:ep1711@12024"
+  ],
+  "Volosovych": [
+   "repec:rnp:ecopol:ep1711@12024"
+  ]
+ },
+ "Alfaro": {
+  "Tornell": [
+   "repec:rnp:ecopol:ep1711@12024"
+  ],
+  "Velasco": [
+   "repec:rnp:ecopol:ep1711@12024"
+  ],
+  "Gertler": [
+   "repec:rnp:ecopol:ep1711@12024"
+  ],
+  "Rogoff": [
+   "repec:rnp:ecopol:ep1711@12024"
+  ]
+ },
+ "Kalemli-Ozcan": {
+  "Tornell": [
+   "repec:rnp:ecopol:ep1711@12024"
+  ],
+  "Velasco": [
+   "repec:rnp:ecopol:ep1711@12024"
+  ],
+  "Gertler": [
+   "repec:rnp:ecopol:ep1711@12024"
+  ],
+  "Rogoff": [
+   "repec:rnp:ecopol:ep1711@12024"
+  ]
+ },
+ "Volosovych": {
+  "Tornell": [
+   "repec:rnp:ecopol:ep1711@12024"
+  ],
+  "Velasco": [
+   "repec:rnp:ecopol:ep1711@12024"
+  ],
+  "Gertler": [
+   "repec:rnp:ecopol:ep1711@12024"
+  ],
+  "Rogoff": [
+   "repec:rnp:ecopol:ep1711@12024"
+  ]
+ },
+ "Flood": {
+  "Krugman": [
+   "repec:rnp:ecopol:ep1711@36207"
+  ]
+ },
+ "Krugman": {
+  "Flood": [
+   "repec:rnp:ecopol:ep1711@36207"
+  ],
+  "Garber": [
+   "repec:rnp:ecopol:ep1711@36207"
+  ]
+ },
+ "Garber": {
+  "Krugman": [
+   "repec:rnp:ecopol:ep1711@36207"
+  ]
+ },
+ "Ghosh": {
+  "Ostry": [
+   "repec:rnp:ecopol:ep1711@24446"
+  ],
+  "Habermeier": [
+   "repec:rnp:ecopol:ep1711@24446"
+  ],
+  "Chamon": [
+   "repec:rnp:ecopol:ep1711@24446"
+  ],
+  "Qureshi": [
+   "repec:rnp:ecopol:ep1711@24446"
+  ],
+  "Reinhardt": [
+   "repec:rnp:ecopol:ep1711@24446"
+  ]
+ },
+ "Habermeier": {
+  "Ostry": [
+   "repec:rnp:ecopol:ep1711@24446"
+  ],
+  "Ghosh": [
+   "repec:rnp:ecopol:ep1711@24446"
+  ],
+  "Chamon": [
+   "repec:rnp:ecopol:ep1711@24446"
+  ],
+  "Qureshi": [
+   "repec:rnp:ecopol:ep1711@24446"
+  ]
+ },
+ "Qureshi": {
+  "Ostry": [
+   "repec:rnp:ecopol:ep1711@24446"
+  ],
+  "Ghosh": [
+   "repec:rnp:ecopol:ep1711@24446"
+  ],
+  "Chamon": [
+   "repec:rnp:ecopol:ep1711@24446"
+  ],
+  "Habermeier": [
+   "repec:rnp:ecopol:ep1711@24446"
+  ],
+  "Reinhardt": [
+   "repec:rnp:ecopol:ep1711@24446"
+  ]
+ },
+ "Reinhardt": {
+  "Ostry": [
+   "repec:rnp:ecopol:ep1711@24446"
+  ],
+  "Ghosh": [
+   "repec:rnp:ecopol:ep1711@24446"
+  ],
+  "Chamon": [
+   "repec:rnp:ecopol:ep1711@24446"
+  ],
+  "Qureshi": [
+   "repec:rnp:ecopol:ep1711@24446"
+  ]
+ },
+ "Cardoso": {
+  "Garcia": [
+   "repec:rnp:ecopol:ep1711@32493",
+   "repec:rnp:ecopol:ep1711@37437"
+  ],
+  "Valpassos": [
+   "repec:rnp:ecopol:ep1711@32493",
+   "repec:rnp:ecopol:ep1711@37437"
+  ]
+ },
+ "Valpassos": {
+  "Cardoso": [
+   "repec:rnp:ecopol:ep1711@32493",
+   "repec:rnp:ecopol:ep1711@37437"
+  ],
+  "Goldfajn": [
+   "repec:rnp:ecopol:ep1711@32493",
+   "repec:rnp:ecopol:ep1711@37437"
+  ]
+ },
+ "Goldfajn": {
+  "Garcia": [
+   "repec:rnp:ecopol:ep1711@32493",
+   "repec:rnp:ecopol:ep1711@37437"
+  ],
+  "Valpassos": [
+   "repec:rnp:ecopol:ep1711@32493",
+   "repec:rnp:ecopol:ep1711@37437"
+  ]
+ },
+ "Izquierdo": {
+  "Reinhart": [
+   "repec:rnp:ecopol:ep1711@33901"
+  ],
+  "Calvo": [
+   "repec:rnp:ecopol:ep1711@33901"
+  ]
+ },
+ "Mejia": {
+  "Reinhart": [
+   "repec:rnp:ecopol:ep1711@33901"
+  ],
+  "Calvo": [
+   "repec:rnp:ecopol:ep1711@33901"
+  ]
+ },
+ "Edwards": {
+  "Kraay": [
+   "repec:rnp:ecopol:ep1711@13477"
+  ],
+  "Arteta": [
+   "repec:rnp:ecopol:ep1711@13477"
+  ],
+  "Eichengreen": [
+   "repec:rnp:ecopol:ep1711@13477"
+  ],
+  "Wyplosz": [
+   "repec:rnp:ecopol:ep1711@13477"
+  ],
+  "Chanda": [
+   "repec:rnp:ecopol:ep1711@13477"
+  ],
+  "Chinn": [
+   "repec:rnp:ecopol:ep1711@13477"
+  ],
+  "Ito": [
+   "repec:rnp:ecopol:ep1711@13477"
+  ]
+ },
+ "Kraay": {
+  "Edwards": [
+   "repec:rnp:ecopol:ep1711@13477"
+  ],
+  "Arteta": [
+   "repec:rnp:ecopol:ep1711@13477"
+  ],
+  "Eichengreen": [
+   "repec:rnp:ecopol:ep1711@13477"
+  ],
+  "Wyplosz": [
+   "repec:rnp:ecopol:ep1711@13477"
+  ],
+  "Chinn": [
+   "repec:rnp:ecopol:ep1711@13477"
+  ],
+  "Ito": [
+   "repec:rnp:ecopol:ep1711@13477"
+  ],
+  "Chanda": [
+   "repec:rnp:ecopol:ep1711@13477"
+  ]
+ },
+ "Arteta": {
+  "Edwards": [
+   "repec:rnp:ecopol:ep1711@13477"
+  ],
+  "Kraay": [
+   "repec:rnp:ecopol:ep1711@13477"
+  ],
+  "Chanda": [
+   "repec:rnp:ecopol:ep1711@13477"
+  ],
+  "Chinn": [
+   "repec:rnp:ecopol:ep1711@13477"
+  ],
+  "Ito": [
+   "repec:rnp:ecopol:ep1711@13477"
+  ]
+ },
+ "Wyplosz": {
+  "Edwards": [
+   "repec:rnp:ecopol:ep1711@13477"
+  ],
+  "Kraay": [
+   "repec:rnp:ecopol:ep1711@13477"
+  ],
+  "Chanda": [
+   "repec:rnp:ecopol:ep1711@13477"
+  ],
+  "Chinn": [
+   "repec:rnp:ecopol:ep1711@13477"
+  ],
+  "Ito": [
+   "repec:rnp:ecopol:ep1711@13477"
+  ]
+ },
+ "Chanda": {
+  "Edwards": [
+   "repec:rnp:ecopol:ep1711@13477"
+  ],
+  "Arteta": [
+   "repec:rnp:ecopol:ep1711@13477"
+  ],
+  "Eichengreen": [
+   "repec:rnp:ecopol:ep1711@13477"
+  ],
+  "Wyplosz": [
+   "repec:rnp:ecopol:ep1711@13477"
+  ],
+  "Chinn": [
+   "repec:rnp:ecopol:ep1711@13477"
+  ],
+  "Ito": [
+   "repec:rnp:ecopol:ep1711@13477"
+  ],
+  "Kraay": [
+   "repec:rnp:ecopol:ep1711@13477"
+  ]
+ },
+ "Chinn": {
+  "Edwards": [
+   "repec:rnp:ecopol:ep1711@13477"
+  ],
+  "Arteta": [
+   "repec:rnp:ecopol:ep1711@13477"
+  ],
+  "Eichengreen": [
+   "repec:rnp:ecopol:ep1711@13477"
+  ],
+  "Wyplosz": [
+   "repec:rnp:ecopol:ep1711@13477"
+  ],
+  "Kraay": [
+   "repec:rnp:ecopol:ep1711@13477"
+  ],
+  "Chanda": [
+   "repec:rnp:ecopol:ep1711@13477"
+  ]
+ },
+ "Ito": {
+  "Edwards": [
+   "repec:rnp:ecopol:ep1711@13477"
+  ],
+  "Arteta": [
+   "repec:rnp:ecopol:ep1711@13477"
+  ],
+  "Eichengreen": [
+   "repec:rnp:ecopol:ep1711@13477"
+  ],
+  "Wyplosz": [
+   "repec:rnp:ecopol:ep1711@13477"
+  ],
+  "Kraay": [
+   "repec:rnp:ecopol:ep1711@13477"
+  ],
+  "Chanda": [
+   "repec:rnp:ecopol:ep1711@13477"
+  ]
+ },
+ "Obstfeld": {
+  "Eichengreen": [
+   "repec:rnp:ecopol:ep1711@24834"
+  ],
+  "Rose": [
+   "repec:rnp:ecopol:ep1711@24834"
+  ],
+  "Neely": [
+   "repec:rnp:ecopol:ep1711@24834"
+  ],
+  "Stiglitz": [
+   "repec:rnp:ecopol:ep1711@24834"
+  ],
+  "Rodrik": [
+   "repec:rnp:ecopol:ep1711@6870"
+  ]
+ },
+ "Rose": {
+  "Obstfeld": [
+   "repec:rnp:ecopol:ep1711@24834"
+  ],
+  "Stiglitz": [
+   "repec:rnp:ecopol:ep1711@24834"
+  ],
+  "Neely": [
+   "repec:rnp:ecopol:ep1711@24834"
+  ]
+ },
+ "Neely": {
+  "Eichengreen": [
+   "repec:rnp:ecopol:ep1711@24834"
+  ],
+  "Rose": [
+   "repec:rnp:ecopol:ep1711@24834"
+  ],
+  "Obstfeld": [
+   "repec:rnp:ecopol:ep1711@24834"
+  ],
+  "Stiglitz": [
+   "repec:rnp:ecopol:ep1711@24834"
+  ]
+ },
+ "Bartolini": {
+  "Alesina": [
+   "repec:rnp:ecopol:ep1711@14391"
+  ],
+  "Grilli": [
+   "repec:rnp:ecopol:ep1711@14391"
+  ],
+  "Milesi-Ferrett": [
+   "repec:rnp:ecopol:ep1711@14391"
+  ],
+  "Milesi-Ferretti": [
+   "repec:rnp:ecopol:ep1711@14391"
+  ]
+ },
+ "Grilli": {
+  "Bartolini": [
+   "repec:rnp:ecopol:ep1711@14391"
+  ],
+  "Drazen": [
+   "repec:rnp:ecopol:ep1711@14391"
+  ],
+  "Alesina": [
+   "repec:rnp:ecopol:ep1711@14391"
+  ],
+  "Milesi-Ferretti": [
+   "repec:rnp:ecopol:ep1711@14391"
+  ],
+  "Milesi-Ferrett": [
+   "repec:rnp:ecopol:ep1711@14391"
+  ]
+ },
+ "Milesi-Ferrett": {
+  "Bartolini": [
+   "repec:rnp:ecopol:ep1711@14391"
+  ],
+  "Drazen": [
+   "repec:rnp:ecopol:ep1711@14391"
+  ],
+  "Grilli": [
+   "repec:rnp:ecopol:ep1711@14391"
+  ],
+  "Milesi-Ferretti": [
+   "repec:rnp:ecopol:ep1711@14391"
+  ]
+ },
+ "Drazen": {
+  "Alesina": [
+   "repec:rnp:ecopol:ep1711@14391"
+  ],
+  "Grilli": [
+   "repec:rnp:ecopol:ep1711@14391"
+  ],
+  "Milesi-Ferrett": [
+   "repec:rnp:ecopol:ep1711@14391"
+  ],
+  "Milesi-Ferretti": [
+   "repec:rnp:ecopol:ep1711@14391"
+  ]
+ },
+ "Milesi-Ferretti": {
+  "Bartolini": [
+   "repec:rnp:ecopol:ep1711@14391"
+  ],
+  "Drazen": [
+   "repec:rnp:ecopol:ep1711@14391"
+  ],
+  "Alesina": [
+   "repec:rnp:ecopol:ep1711@14391"
+  ],
+  "Grilli": [
+   "repec:rnp:ecopol:ep1711@14391"
+  ],
+  "Milesi-Ferrett": [
+   "repec:rnp:ecopol:ep1711@14391"
+  ]
+ },
+ "Abdelal": {
+  "Bordo": [
+   "repec:rnp:ecopol:ep1711@17371"
+  ]
+ },
+ "Bordo": {
+  "Abdelal": [
+   "repec:rnp:ecopol:ep1711@17371"
+  ]
+ },
+ "Fischer": {
+  "Dornbusch": [
+   "repec:rnp:ecopol:ep1711@25127"
+  ]
+ },
+ "Crespo": {
+  "Mello": [
+   "repec:rnp:ecopol:ep1711@28265"
+  ],
+  "Potterie": [
+   "repec:rnp:ecopol:ep1711@38766"
+  ],
+  "Lichtenberg": [
+   "repec:rnp:ecopol:ep1711@38766"
+  ]
+ },
+ "Mello": {
+  "Crespo": [
+   "repec:rnp:ecopol:ep1711@28265"
+  ],
+  "Fontoura": [
+   "repec:rnp:ecopol:ep1711@28265"
+  ]
+ },
+ "Fontoura": {
+  "Mello": [
+   "repec:rnp:ecopol:ep1711@28265"
+  ],
+  "Potterie": [
+   "repec:rnp:ecopol:ep1711@38766"
+  ],
+  "Lichtenberg": [
+   "repec:rnp:ecopol:ep1711@38766"
+  ]
+ },
+ "Potterie": {
+  "Crespo": [
+   "repec:rnp:ecopol:ep1711@38766"
+  ],
+  "Fontoura": [
+   "repec:rnp:ecopol:ep1711@38766"
+  ]
+ },
+ "Lichtenberg": {
+  "Crespo": [
+   "repec:rnp:ecopol:ep1711@38766"
+  ],
+  "Fontoura": [
+   "repec:rnp:ecopol:ep1711@38766"
+  ]
+ },
+ "Taylor": {
+  "Rodrik": [
+   "repec:rnp:ecopol:ep1711@6870"
+  ]
+ },
+ "Sussman": {
+  "Razin": [
+   "repec:rnp:ecopol:ep1711@19965"
+  ],
+  "Sadka": [
+   "repec:rnp:ecopol:ep1711@19965"
+  ]
+ },
+ "Razin": {
+  "Sussman": [
+   "repec:rnp:ecopol:ep1711@19965"
+  ]
+ },
+ "Sadka": {
+  "Sussman": [
+   "repec:rnp:ecopol:ep1711@19965"
+  ]
+ },
+ "Futagami": {
+  "Barro": [
+   "repec:rnp:ppaper:021915@93689"
+  ]
+ },
+ "Morita": {
+  "Barro": [
+   "repec:rnp:ppaper:021915@93689"
+  ]
+ },
+ "Shibata": {
+  "Barro": [
+   "repec:rnp:ppaper:021915@93689"
+  ]
+ }
+}
