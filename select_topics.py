@@ -1,0 +1,89 @@
+#! /usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+"""
+from collections import Counter, defaultdict
+
+from pymongo import MongoClient
+
+
+MONGO_URI = 'mongodb://localhost:27017/'
+
+AUTHOR = 'Oates'
+
+
+def main():
+  client = MongoClient(MONGO_URI, compressors='snappy')
+  mdb = client['cirtec']
+  contexts = mdb.contexts
+
+  print_author_topics_by_frags(contexts, AUTHOR)
+  print()
+  print_freq_topics_by_frags(contexts, 100)
+
+
+def print_author_topics_by_frags(contexts, author:str):
+  topics = {}
+  topics_cnt = Counter()
+  coaut = defaultdict(Counter)
+  for i, doc in enumerate(contexts.aggregate(
+    [{'$match': {'cocit_authors': author, 'topics': {'$exists': True}}}, {
+      '$lookup': {
+        'from': 'topics', 'localField': 'topics.topic', 'foreignField': '_id',
+        'as': 'tops'}}, {'$project': {'cocit_authors': True, 'tops': True}}]),
+    1):
+    # print(i, doc)
+    coauthors = frozenset(c for c in doc['cocit_authors'] if c != AUTHOR)
+    for topic in doc['tops']:
+      title = topic['topic']
+      topics_cnt[title] += 1
+      if title not in topics:
+        topics[title] = topic
+
+      for ca in coauthors:
+        coaut[ca][title] += 1
+  print(f"'{AUTHOR}' co-cited with topics:")
+  sort_key = key = lambda kv: (-kv[1], kv[0])
+  for n, i in sorted(topics_cnt.items(), key=sort_key):
+    msg = (f'{i} '
+           f'avg: {topics[n]["probability_average"]} '
+           f'std: {topics[n]["probability_std"]} '
+           f'"{n}"')
+    print(msg)
+  print('including by co-cited authors:')
+  for i, (co, cnts) in enumerate(
+    sorted(coaut.items(), key=lambda kv: (-sum(kv[1].values()), kv[0])), 1):
+    # print(i, co, cnts)
+    # print(
+    #   f"  {i} '{co}': "
+    #   f"{', '.join('in fragment %s repeats: %s' % (f, c) for f, c in cnts.items())}")
+    print(' ', i, f"'{co}'")
+    for t, c in sorted(cnts.items(), key=sort_key):
+      print('  ', c, f'"{t}"')
+
+
+def print_freq_topics_by_frags(contexts, freq:int=100):
+  for doc in contexts.aggregate([
+    {'$unwind': '$topics'},
+    {'$group': {'_id': '$topics.topic', 'count': {'$sum': 1}}},
+    {'$match': {'count': {'$gte': freq}}},
+    {'$project': {'count': False}},
+    {'$lookup': {
+      'from': 'contexts', 'localField': '_id', 'foreignField': 'topics.topic',
+      'as': "contexts"}},
+    {'$unwind': "$contexts"},
+    {'$unwind': "$contexts.topics"},
+    {'$match': {'$expr': {'$eq': ["$_id", "$contexts.topics.topic"]}}},
+    {'$match': {'contexts.frag_num': {'$gt': 0}}},
+    {'$group': {
+      '_id': '$contexts.frag_num', 'count': {'$sum': 1},
+      'topics': {'$addToSet': '$_id'}}},
+    {'$sort': {'_id': 1}}
+  ]):
+    print('fragment:', doc['_id'], 'cnt:', doc['count'])
+    for t in sorted(doc['topics']):
+      print(f'  "{t}"')
+
+
+if __name__ == '__main__':
+  main()

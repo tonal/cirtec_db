@@ -1,0 +1,48 @@
+default namespace = ""
+
+start =
+    element bundle {
+        attribute bunshid { xsd:NCName },
+        attribute cit_count { xsd:integer },
+        attribute cro_count { xsd:integer },
+        attribute dis_count { xsd:integer },
+        attribute pub_count { xsd:integer },
+        element ref {
+            attribute found_in { xsd:NMTOKEN },
+            attribute futli { xsd:anyURI },
+            attribute num { xsd:integer },
+            attribute refs { xsd:integer },
+            element reference {
+                attribute author { text },
+                attribute cor_cnt { xsd:integer },
+                attribute doi { text }?,
+                attribute end { xsd:integer },
+                attribute handle { xsd:anyURI }?,
+                attribute handle_sup { xsd:anyURI }?,
+                attribute num { xsd:integer },
+                attribute start { xsd:integer },
+                attribute title { text },
+                attribute url { xsd:anyURI }?,
+                attribute year { text },
+                element from_pdf { text }
+            }+,
+            element intextref {
+                element Prefix { text },
+                element Suffix { text },
+                element Start { xsd:integer },
+                element End { xsd:integer },
+                element Exact { text },
+                element Reference {
+                    attribute end { xsd:integer }?,
+                    attribute exact { text }?,
+                    attribute start { xsd:integer }?,
+                    xsd:integer
+                }+
+            }+,
+            element citer {
+                element author { text }+,
+                element title { text }+,
+                element year { xsd:integer }?
+            }
+        }+
+    }

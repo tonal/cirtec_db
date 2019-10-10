@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
+Загрузка контекстов цитирования
 """
 from collections import Counter
 from functools import partial
@@ -14,6 +15,7 @@ from pymongo import MongoClient
 
 
 MONGO_URI = 'mongodb://localhost:27017/'
+# MONGO_URI = 'mongodb://frigate:27017/'
 
 # LINKS = 'http://cirtec.ranepa.ru/cgi/spadist4bundle.cgi?code=linked_papers&c=Sergey-Sinelnikov-Murylev'
 LINKS = 'http://cirtec.repec.org/cgi/spadist4bundle.cgi?code=linked_papers&c=Sergey-Sinelnikov-Murylev'
@@ -66,7 +68,7 @@ def main():
         # print('      exct:', exact)
         # print('      suff:', suffix)
         mcont_update(
-          dict(_id=f'{pub_id}_{start}'),
+          dict(_id=f'{pub_id}@{start}'),
           {'$set': dict(
             pub_id=pub_id, frag_num=fnum, start=start, end=end,
             prefix=prefix, exact=exact, suffix=suffix)})
@@ -76,6 +78,7 @@ def main():
   print(msg)
 
   curs = mcont.aggregate([
+    {'$match': {'frag_num': {'$gt': 0}}},
     {'$group': {'_id': '$frag_num', 'count': {'$sum': 1}}},
     {'$sort': {'_id': 1}}
   ])

@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
+Загрузка файла со-цитированных авторов
 """
 from collections import Counter
 from functools import partial
@@ -11,6 +12,7 @@ from pymongo.errors import DuplicateKeyError
 
 COCITS = 'linked_papers_cocits_aunas.json'
 MONGO_URI = 'mongodb://localhost:27017/'
+# MONGO_URI = 'mongodb://frigate:27017/'
 
 
 def main():
@@ -41,7 +43,7 @@ def main():
         pub_id, start = cont.split('@')
         print('   ', k, pub_id, start)
         mcont_update(
-          dict(_id=f'{pub_id}_{start}'),
+          dict(_id=f'{pub_id}@{start}'),
           {'$addToSet': {'cocit_authors': {'$each': [author, coauthor]}}})
         try:
           mpubs_insert(dict(_id=pub_id))
