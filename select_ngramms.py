@@ -70,7 +70,7 @@ def print_author_ngramms_by_frags(contexts, author:str):
     ]), 1
   ):
     # print(i, doc)
-    coauthors = frozenset(c for c in doc['cocit_authors'] if c != AUTHOR)
+    coauthors = frozenset(c for c in doc['cocit_authors'] if c != author)
     for ngramm in doc['ngramms']:
       title = ngramm['title']
       topics_cnt[title] += 1
@@ -79,7 +79,7 @@ def print_author_ngramms_by_frags(contexts, author:str):
 
       for ca in coauthors:
         coaut[ca][title] += 1
-  print(f"'{AUTHOR}' co-cited with topics:")
+  print(f"'{author}' co-cited with topics:")
   sort_key = key = lambda kv: (-kv[1], kv[0])
   for n, i in sorted(topics_cnt.items(), key=sort_key):
     msg = (f'  {i} '
