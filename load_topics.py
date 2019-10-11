@@ -33,7 +33,8 @@ def main():
 
   i = 0
   for i, topic in enumerate(tlp['topics'], 1):
-    title = topic['topic']
+    title = topic.pop('topic')
+    topic['title'] = title
     topic['number'] = int(topic['number'])
     topic['probability_average'] = float(topic['probability_average'])
     topic['probability_std'] = float(topic['probability_std'])
@@ -47,12 +48,11 @@ def main():
   for i, cont in enumerate(tlp['contexts'], 1):
     ref_key, topic, probab = get_as_tuple(cont)
     pub_id, num, start = ref_key.rsplit('_', 2)
-    mcont_update(
-      dict(_id=f'{pub_id}@{start}'),
-      {
-        '$set': {'ref_num': int(num)},
-        '$addToSet': {
-          'topics': {'topic': topic, 'probability': float(probab)}}})
+    cont_id = f'{pub_id}@{start}'
+    mcont_update(dict(_id=cont_id), {'$set': {'ref_num': int(num)}})
+    mtops_update(dict(_id=topic),
+      {'$addToSet': {
+        'linked_papers': {'cont_id': cont_id, 'probability': float(probab)}}})
 
   print(i, len(cnts))
 

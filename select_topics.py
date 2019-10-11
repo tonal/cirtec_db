@@ -15,27 +15,31 @@ AUTHOR = 'Oates'
 def main():
   client = MongoClient(MONGO_URI, compressors='snappy')
   mdb = client['cirtec']
-  contexts = mdb.contexts
 
-  print_author_topics_by_frags(contexts, AUTHOR)
+  print_freq_topics_by_frags(mdb.topics, 100)
   print()
-  print_freq_topics_by_frags(contexts, 100)
+  print_author_topics_by_frags(mdb.contexts, AUTHOR)
 
 
 def print_author_topics_by_frags(contexts, author:str):
   topics = {}
   topics_cnt = Counter()
   coaut = defaultdict(Counter)
-  for i, doc in enumerate(contexts.aggregate(
-    [{'$match': {'cocit_authors': author, 'topics': {'$exists': True}}}, {
-      '$lookup': {
-        'from': 'topics', 'localField': 'topics.topic', 'foreignField': '_id',
-        'as': 'tops'}}, {'$project': {'cocit_authors': True, 'tops': True}}]),
-    1):
+  for i, doc in enumerate(
+    contexts.aggregate([
+      {'$match': {'cocit_authors': author}},
+      {'$project': {'prefix': False, 'suffix': False, 'exact': False}},
+      {'$lookup': {
+        'from': 'topics', 'localField': '_id',
+        'foreignField': 'linked_papers.cont_id', 'as': 'tops'}},
+      {'$project': {'cocit_authors': True, 'tops': True}}
+    ]),
+    1
+  ):
     # print(i, doc)
     coauthors = frozenset(c for c in doc['cocit_authors'] if c != AUTHOR)
     for topic in doc['tops']:
-      title = topic['topic']
+      title = topic['title']
       topics_cnt[title] += 1
       if title not in topics:
         topics[title] = topic
@@ -62,21 +66,21 @@ def print_author_topics_by_frags(contexts, author:str):
       print('  ', c, f'"{t}"')
 
 
-def print_freq_topics_by_frags(contexts, freq:int=100):
-  for doc in contexts.aggregate([
-    {'$unwind': '$topics'},
-    {'$group': {'_id': '$topics.topic', 'count': {'$sum': 1}}},
-    {'$match': {'count': {'$gte': freq}}},
-    {'$project': {'count': False}},
-    {'$lookup': {
-      'from': 'contexts', 'localField': '_id', 'foreignField': 'topics.topic',
-      'as': "contexts"}},
-    {'$unwind': "$contexts"},
-    {'$unwind': "$contexts.topics"},
-    {'$match': {'$expr': {'$eq': ["$_id", "$contexts.topics.topic"]}}},
-    {'$match': {'contexts.frag_num': {'$gt': 0}}},
+def print_freq_topics_by_frags(topics, freq:int=100):
+  for doc in topics.aggregate([
+    {'$unwind': '$linked_papers'},
     {'$group': {
-      '_id': '$contexts.frag_num', 'count': {'$sum': 1},
+      '_id': '$title', 'count': {'$sum': 1},
+      'conts': {'$addToSet': '$linked_papers.cont_id'}}},
+    {'$match': {'count': {'$gte': freq}}}, # {'$project': {'count': false}},
+    {'$unwind': '$conts'},
+    {'$lookup': {
+      'from': 'contexts', 'localField': 'conts', 'foreignField': '_id',
+      'as': 'context'}},
+    {'$unwind': '$context'},
+    {'$match': {'context.frag_num': {'$gt': 0}}},
+    {'$group': {
+      '_id': '$context.frag_num', 'count': {'$sum': 1},
       'topics': {'$addToSet': '$_id'}}},
     {'$sort': {'_id': 1}}
   ]):
