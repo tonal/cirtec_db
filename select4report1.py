@@ -4,7 +4,7 @@
 """
 from collections import Counter, defaultdict
 from operator import itemgetter
-from typing import Optional, Sequence
+from typing import Optional, Sequence, Union, Tuple
 
 from pymongo import MongoClient
 
@@ -17,15 +17,17 @@ def main():
   mdb = client['cirtec']
 
   contexts = mdb.contexts
-  # print_freq_contexts(contexts)
-  # print()
-  # print_freq_contexts_by_pubs(mdb)
-  # print()
-  # print_freq_cocitauth_by_frags(contexts, 50)
-  # print()
-  # print_freq_ngramm_by_frag(mdb)
-  # print()
+  print_freq_contexts(contexts)
+  print()
+  print_freq_contexts_by_pubs(mdb)
+  print()
+  print_freq_cocitauth_by_frags(contexts, 50)
+  print()
+  print_freq_ngramm_by_frag(mdb)
+  print()
   print_freq_topics_by_frags(mdb)
+  print()
+  print_freqs_table(mdb)
 
 
 def print_freq_contexts(contexts):
@@ -48,6 +50,7 @@ def print_freq_contexts_by_pubs(mdb):
   Распределение цитирований по 5-ти фрагментам для отдельных публикаций
   заданного автора.
   """
+  print('Распределение цитирований по 5-ти фрагментам')
   publications = mdb.publications
   pubs = {
     pdoc['_id']: (pdoc['name'], Counter())
@@ -77,6 +80,7 @@ def print_freq_contexts_by_pubs(mdb):
 
 def print_freq_cocitauth_by_frags(contexts, topn:int=5):
   """Кросс-распределение «5 фрагментов» - «со-цитируемые авторы»"""
+  print('Кросс-распределение «5 фрагментов» - «со-цитируемые авторы»')
   top50 = tuple(
     (doc['_id'], doc['count']) for doc in contexts.aggregate([
       {'$match': {'frag_num': {'$gt': 0}, 'cocit_authors': {'$exists': True}}},
@@ -114,17 +118,8 @@ def print_freq_cocitauth_by_frags(contexts, topn:int=5):
 
 def print_freq_ngramm_by_frag(mdb, topn:int=10, *, nka:int=2, ltype:str='lemmas'):
   """Кросс-распределение «5 фрагментов» - «фразы из контекстов цитирований»"""
+  print('Кросс-распределение «5 фрагментов» - «фразы из контекстов цитирований»')
   n_gramms = mdb.n_gramms
-  # get_as_tuple = itemgetter('_id', 'count', 'conts')
-  # topN = tuple(
-  #   get_as_tuple(doc) for doc in n_gramms.aggregate([
-  #     {'$match': {'nka': nka, 'type': ltype}},
-  #     {'$unwind': '$linked_papers'},
-  #     {'$group': {
-  #       '_id': '$title', 'count': {'$sum': '$linked_papers.cnt'}, # }},
-  #       'conts': {'$addToSet': '$linked_papers.cont_id'}}},
-  #     {'$sort': {'count': -1, '_id': 1}},
-  #     {'$limit': topn}]))
 
   topN = get_topn(
     n_gramms, topn, preselect=[{'$match': {'nka': nka, 'type': ltype}}],
@@ -167,8 +162,9 @@ def print_freq_ngramm_by_frag(mdb, topn:int=10, *, nka:int=2, ltype:str='lemmas'
 
 
 def get_topn(
-  colls, topn:int=10, *, preselect:Optional[Sequence]=None, sum_expr=1
-):
+  colls, topn:int=10, *, preselect:Optional[Sequence]=None,
+  sum_expr:Union[int, str]=1
+) -> Tuple:
   get_as_tuple = itemgetter('_id', 'count', 'conts')
   if preselect:
     pipeline = list(preselect)
@@ -189,6 +185,7 @@ def get_topn(
 
 def print_freq_topics_by_frags(mdb, topn:int=20):
   """Кросс-распределение «5 фрагментов» - «топики контекстов цитирований»"""
+  print('Кросс-распределение «5 фрагментов» - «топики контекстов цитирований»')
   topics = mdb.topics
   topN = get_topn(topics, topn=topn)
 
@@ -224,6 +221,93 @@ def print_freq_topics_by_frags(mdb, topn:int=20):
       # print(i, co, cnts)
       msg = f'{"/".join(str(cnts[i]) for i in range(1, 6))}'
       print(f"   {j:<2d} '{co}': {msg} ({sum(cnts.values())})")
+
+
+def print_freqs_table(mdb):
+  """Объединенная таблица где для каждого из 5 фрагментов"""
+  print('Объединенная таблица где для каждого из 5 фрагментов')
+  contexts = mdb.contexts
+  curs = contexts.aggregate([
+    {'$match': {'frag_num': {'$gt': 0}}},
+    {'$group': {'_id': '$frag_num', 'count': {'$sum': 1}}},
+    {'$sort': {'_id': 1}}])
+  cnts = Counter({doc['_id']: int(doc["count"]) for doc in curs})
+
+  get_as_tuple = itemgetter('_id', 'count', 'lst')
+
+  curs = contexts.aggregate([
+    {'$match': {'frag_num': {'$gt': 0}}},
+    {'$project': {'prefix': False, 'suffix': False, 'exact': False}},
+    {'$unwind': '$cocit_authors'},
+    {'$group': {
+      '_id': '$frag_num', 'count': {'$sum': 1},
+      'lst': {'$addToSet': '$cocit_authors'}}},
+    # {'$sort': {'_id': 1}}
+  ])
+  cocit_auths = {
+    fn: (cnt, tuple(sorted(cca)))
+    for fn, cnt, cca in (get_as_tuple(doc) for doc in curs)
+  }
+
+  n_gramms = mdb.n_gramms
+
+  curs = n_gramms.aggregate([
+    {'$match': {'nka': 2, 'type': 'lemmas'}},
+    {'$unwind': '$linked_papers'},
+    {'$group': {
+      '_id': '$title', 'count': {'$sum': '$linked_papers.cnt'},
+      'cont_ids': {'$addToSet': '$linked_papers.cont_id'}}},
+    {'$sort': {'count': -1, '_id': 1}},
+    {'$limit': 50},
+    {'$lookup': {
+      'from': 'contexts', 'localField': 'cont_ids', 'foreignField': '_id',
+      'as': 'cont'}},
+    {'$project': {'cont_ids': False}},
+    {'$unwind': '$cont'},
+    {'$group': {
+      '_id': '$cont.frag_num', 'count': {'$sum': 1},
+      'lst': {'$addToSet': '$_id'}}}
+  ])
+  ngramms = {
+    fn: (cnt, tuple(ngr))
+    for fn, cnt, ngr in (get_as_tuple(doc) for doc in curs)
+  }
+
+  curs = mdb.topics.aggregate([
+    {'$unwind': '$linked_papers'},
+    {'$group': {
+      '_id': '$title', 'count': {'$sum': 1},
+      'cont_ids': {'$addToSet': '$linked_papers.cont_id'}}},
+    {'$sort': {'count': -1, '_id': 1}},
+    {'$lookup': {
+      'from': 'contexts', 'localField': 'cont_ids', 'foreignField': '_id',
+      'as': 'cont'}},
+    {'$project': {'cont_ids': False}},
+    {'$unwind': '$cont'},
+    {'$group': {
+        '_id': '$cont.frag_num', 'count': {'$sum': 1},
+        'lst': {'$addToSet': '$_id'}}}
+  ])
+  topics = {
+    fn: (cnt, tuple(ngr))
+    for fn, cnt, ngr in (get_as_tuple(doc) for doc in curs)
+  }
+
+  for i in range(1, 6):
+    print('Фрагмент:', i)
+    print('  контекстов:', cnts[i])
+    cca = cocit_auths.get(i)
+    if cca:
+      cnt, au = cca
+      print(
+        f'  со-цитируемых авторов: ({cnt})', ', '.join(f"'{a}'" for a in au))
+    else:
+      print('  со-цитируемых авторов: нет')
+    print(
+      f'  фразы: ({ngramms[i][0]})', ', '.join(f"'{n}'" for n in ngramms[i][1]))
+    print(
+      f'  топики: {topics[i][0]}', ', '.join(f"'{n}'" for n in topics[i][1]))
+
 
 
 if __name__ == '__main__':
