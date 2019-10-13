@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
+Группа Б. Показатели со-цитирований из контекстов цитирований
 """
 from collections import Counter, defaultdict
 from operator import itemgetter
@@ -19,10 +20,10 @@ def main():
   mdb = client['cirtec']
 
   contexts = mdb.contexts
-  # print_freq_cocitauth_by_frags(contexts, 50)
-  # print()
-  # print_top_author_ngramms_by_frags(mdb, 10)
-  # print()
+  print_freq_cocitauth_by_frags(contexts, 50)
+  print()
+  print_top_author_ngramms_by_frags(mdb, 10)
+  print()
   print_top_author_topics_by_frags(mdb, 10)
 
 

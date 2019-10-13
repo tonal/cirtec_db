@@ -1,3 +1,740 @@
+Кросс-распределение «5 фрагментов» - «со-цитируемые авторы»
+1  'IMF' co-cited in fragments 5/3/3/0/0 (11)
+   1  'Bank': in fragment 2 repeats: 1, in fragment 3 repeats: 2
+   2  'World': in fragment 2 repeats: 1, in fragment 3 repeats: 2
+   3  'Brixi': in fragment 2 repeats: 2
+   4  'Clements': in fragment 1 repeats: 2
+   5  'Coady': in fragment 1 repeats: 2
+   6  'Gupta': in fragment 1 repeats: 2
+   7  'Maisonneuve': in fragment 1 repeats: 2
+   8  'Martins': in fragment 1 repeats: 2
+   9  'OECD': in fragment 1 repeats: 2
+   10 'Schick': in fragment 2 repeats: 2
+   11 'Tanzi': in fragment 3 repeats: 2
+   12 'Zee': in fragment 3 repeats: 2
+   13 'Blankenau': in fragment 1 repeats: 1
+   14 'Commission': in fragment 1 repeats: 1
+   15 'European': in fragment 1 repeats: 1
+   16 'Islam': in fragment 3 repeats: 1
+   17 'Mankiw': in fragment 3 repeats: 1
+   18 'Romer': in fragment 3 repeats: 1
+   19 'Simpson': in fragment 1 repeats: 1
+   20 'Weil': in fragment 3 repeats: 1
+   21 'Young': in fragment 3 repeats: 1
+2  'Auerbach' co-cited in fragments 0/2/4/0/0 (6)
+   1  'Gale': in fragment 2 repeats: 2, in fragment 3 repeats: 4
+   2  'Orszag': in fragment 2 repeats: 2, in fragment 3 repeats: 4
+   3  'Burns': in fragment 2 repeats: 2
+   4  'Evans': in fragment 2 repeats: 2
+   5  'Gokhale': in fragment 2 repeats: 2
+   6  'Green': in fragment 2 repeats: 2
+   7  'Hoeller': in fragment 3 repeats: 2
+   8  'Kotlikoff': in fragment 2 repeats: 2
+   9  'Merola': in fragment 3 repeats: 2
+   10 'Phillips': in fragment 2 repeats: 2
+   11 'Raffelhuschen': in fragment 2 repeats: 2
+   12 'Smetters': in fragment 2 repeats: 2
+   13 'Sutherland': in fragment 3 repeats: 2
+3  'Gale' co-cited in fragments 0/2/4/0/0 (6)
+   1  'Auerbach': in fragment 2 repeats: 2, in fragment 3 repeats: 4
+   2  'Orszag': in fragment 2 repeats: 2, in fragment 3 repeats: 4
+   3  'Burns': in fragment 2 repeats: 2
+   4  'Evans': in fragment 2 repeats: 2
+   5  'Gokhale': in fragment 2 repeats: 2
+   6  'Green': in fragment 2 repeats: 2
+   7  'Hoeller': in fragment 3 repeats: 2
+   8  'Kotlikoff': in fragment 2 repeats: 2
+   9  'Merola': in fragment 3 repeats: 2
+   10 'Phillips': in fragment 2 repeats: 2
+   11 'Raffelhuschen': in fragment 2 repeats: 2
+   12 'Smetters': in fragment 2 repeats: 2
+   13 'Sutherland': in fragment 3 repeats: 2
+4  'Orszag' co-cited in fragments 0/2/4/0/0 (6)
+   1  'Auerbach': in fragment 2 repeats: 2, in fragment 3 repeats: 4
+   2  'Gale': in fragment 2 repeats: 2, in fragment 3 repeats: 4
+   3  'Burns': in fragment 2 repeats: 2
+   4  'Evans': in fragment 2 repeats: 2
+   5  'Gokhale': in fragment 2 repeats: 2
+   6  'Green': in fragment 2 repeats: 2
+   7  'Hoeller': in fragment 3 repeats: 2
+   8  'Kotlikoff': in fragment 2 repeats: 2
+   9  'Merola': in fragment 3 repeats: 2
+   10 'Phillips': in fragment 2 repeats: 2
+   11 'Raffelhuschen': in fragment 2 repeats: 2
+   12 'Smetters': in fragment 2 repeats: 2
+   13 'Sutherland': in fragment 3 repeats: 2
+5  'Идрисов' co-cited in fragments 2/0/0/4/0 (6)
+   1  'Mehlum': in fragment 4 repeats: 2
+   2  'Moene': in fragment 4 repeats: 2
+   3  'Robinson': in fragment 4 repeats: 2
+   4  'Ross': in fragment 4 repeats: 2
+   5  'Torvik': in fragment 4 repeats: 2
+   6  'Verdier': in fragment 4 repeats: 2
+   7  'Волчкова': in fragment 4 repeats: 2
+   8  'Гуриев': in fragment 4 repeats: 2
+   9  'Егоров': in fragment 4 repeats: 2
+   10 'Казакова': in fragment 4 repeats: 2
+   11 'Кнобель': in fragment 4 repeats: 2
+   12 'Полбин': in fragment 4 repeats: 2
+   13 'Полтерович': in fragment 4 repeats: 2
+   14 'Попов': in fragment 4 repeats: 2
+   15 'Синельников-Мурылев': in fragment 1 repeats: 2
+   16 'Сонин': in fragment 4 repeats: 2
+   17 'Суслова': in fragment 4 repeats: 2
+   18 'Тонис': in fragment 4 repeats: 2
+   19 'Knetter': in fragment 4 repeats: 1
+   20 'Каукин': in fragment 4 repeats: 1
+   21 'Пономарев': in fragment 4 repeats: 1
+   22 'Трунин': in fragment 4 repeats: 1
+6  'Bank' co-cited in fragments 1/1/2/0/0 (4)
+   1  'World': in fragment 1 repeats: 1, in fragment 2 repeats: 1, in fragment 3 repeats: 2
+   2  'IMF': in fragment 2 repeats: 1, in fragment 3 repeats: 2
+   3  'Tanzi': in fragment 3 repeats: 2
+   4  'Zee': in fragment 3 repeats: 2
+   5  'Arrow': in fragment 1 repeats: 1
+   6  'Dasgupta': in fragment 1 repeats: 1
+   7  'Fitoussi': in fragment 1 repeats: 1
+   8  'Goulder': in fragment 1 repeats: 1
+   9  'Mumford': in fragment 1 repeats: 1
+   10 'Oleson': in fragment 1 repeats: 1
+   11 'Sen': in fragment 1 repeats: 1
+   12 'Stiglitz': in fragment 1 repeats: 1
+7  'Blanchard' co-cited in fragments 0/3/0/1/0 (4)
+   1  'Horne': in fragment 2 repeats: 2
+   2  'Monacelli': in fragment 2 repeats: 1, in fragment 4 repeats: 1
+   3  'Perotti': in fragment 2 repeats: 1, in fragment 4 repeats: 1
+8  'Burnside' co-cited in fragments 0/4/0/0/0 (4)
+   1  'Celasun': in fragment 2 repeats: 2
+   2  'Chalk': in fragment 2 repeats: 2
+   3  'Debrun': in fragment 2 repeats: 2
+   4  'Giammarioli': in fragment 2 repeats: 2
+   5  'Hemming': in fragment 2 repeats: 2
+   6  'Nickel': in fragment 2 repeats: 2
+   7  'Ostry': in fragment 2 repeats: 2
+   8  'Ph': in fragment 2 repeats: 2
+   9  'Rother': in fragment 2 repeats: 2
+   10 'Samake': in fragment 2 repeats: 2
+   11 'Tanner': in fragment 2 repeats: 2
+   12 'Vidal': in fragment 2 repeats: 2
+9  'Oates' co-cited in fragments 0/4/0/0/0 (4)
+   1  'Musgrave': in fragment 2 repeats: 2
+   2  'Tiebout': in fragment 2 repeats: 2
+   3  'Fjeldstad': in fragment 2 repeats: 1
+10 'Reinhart' co-cited in fragments 2/0/2/0/0 (4)
+   1  'Kumar': in fragment 1 repeats: 2
+   2  'Rogoff': in fragment 1 repeats: 2
+   3  'Woo': in fragment 1 repeats: 2
+   4  'Calvo': in fragment 3 repeats: 1
+   5  'Chamon': in fragment 3 repeats: 1
+   6  'Edison': in fragment 3 repeats: 1
+   7  'Garcia': in fragment 3 repeats: 1
+   8  'Izquierdo': in fragment 3 repeats: 1
+   9  'Mejia': in fragment 3 repeats: 1
+11 'Rother' co-cited in fragments 2/2/0/0/0 (4)
+   1  'Baum': in fragment 1 repeats: 2
+   2  'Burnside': in fragment 2 repeats: 2
+   3  'Cecchetti': in fragment 1 repeats: 2
+   4  'Chalk': in fragment 2 repeats: 2
+   5  'Checherita-Westphal': in fragment 1 repeats: 2
+   6  'Giammarioli': in fragment 2 repeats: 2
+   7  'Hemming': in fragment 2 repeats: 2
+   8  'Mohanty': in fragment 1 repeats: 2
+   9  'Nickel': in fragment 2 repeats: 2
+   10 'Ph': in fragment 2 repeats: 2
+   11 'Vidal': in fragment 2 repeats: 2
+   12 'Zampolli': in fragment 1 repeats: 2
+12 'World' co-cited in fragments 1/1/2/0/0 (4)
+   1  'Bank': in fragment 1 repeats: 1, in fragment 2 repeats: 1, in fragment 3 repeats: 2
+   2  'IMF': in fragment 2 repeats: 1, in fragment 3 repeats: 2
+   3  'Tanzi': in fragment 3 repeats: 2
+   4  'Zee': in fragment 3 repeats: 2
+   5  'Arrow': in fragment 1 repeats: 1
+   6  'Dasgupta': in fragment 1 repeats: 1
+   7  'Fitoussi': in fragment 1 repeats: 1
+   8  'Goulder': in fragment 1 repeats: 1
+   9  'Mumford': in fragment 1 repeats: 1
+   10 'Oleson': in fragment 1 repeats: 1
+   11 'Sen': in fragment 1 repeats: 1
+   12 'Stiglitz': in fragment 1 repeats: 1
+13 'Calvo' co-cited in fragments 1/1/1/0/0 (3)
+   1  'Dornbusch': in fragment 1 repeats: 1, in fragment 2 repeats: 1
+   2  'Ahrend': in fragment 2 repeats: 1
+   3  'Chang': in fragment 2 repeats: 1
+   4  'Eichengreen': in fragment 2 repeats: 1
+   5  'Goujard': in fragment 2 repeats: 1
+   6  'Hausmann': in fragment 2 repeats: 1
+   7  'Izquierdo': in fragment 3 repeats: 1
+   8  'Mejia': in fragment 3 repeats: 1
+   9  'Mendoza': in fragment 2 repeats: 1
+   10 'Panizza': in fragment 2 repeats: 1
+   11 'Radelet': in fragment 2 repeats: 1
+   12 'Reinhart': in fragment 3 repeats: 1
+   13 'Sachs': in fragment 2 repeats: 1
+   14 'Schwellnus': in fragment 2 repeats: 1
+   15 'Velasco': in fragment 2 repeats: 1
+14 'Dornbusch' co-cited in fragments 1/2/0/0/0 (3)
+   1  'Calvo': in fragment 1 repeats: 1, in fragment 2 repeats: 1
+   2  'Ahrend': in fragment 2 repeats: 1
+   3  'Chang': in fragment 2 repeats: 1
+   4  'Eichengreen': in fragment 2 repeats: 1
+   5  'Fischer': in fragment 2 repeats: 1
+   6  'Goujard': in fragment 2 repeats: 1
+   7  'Hausmann': in fragment 2 repeats: 1
+   8  'Mendoza': in fragment 2 repeats: 1
+   9  'Panizza': in fragment 2 repeats: 1
+   10 'Radelet': in fragment 2 repeats: 1
+   11 'Sachs': in fragment 2 repeats: 1
+   12 'Schwellnus': in fragment 2 repeats: 1
+   13 'Velasco': in fragment 2 repeats: 1
+15 'Eichengreen' co-cited in fragments 1/2/0/0/0 (3)
+   1  'Ahrend': in fragment 2 repeats: 1
+   2  'Arteta': in fragment 1 repeats: 1
+   3  'Calvo': in fragment 2 repeats: 1
+   4  'Chanda': in fragment 1 repeats: 1
+   5  'Chang': in fragment 2 repeats: 1
+   6  'Chinn': in fragment 1 repeats: 1
+   7  'Dornbusch': in fragment 2 repeats: 1
+   8  'Edwards': in fragment 1 repeats: 1
+   9  'Goujard': in fragment 2 repeats: 1
+   10 'Hausmann': in fragment 2 repeats: 1
+   11 'Ito': in fragment 1 repeats: 1
+   12 'Kraay': in fragment 1 repeats: 1
+   13 'Mendoza': in fragment 2 repeats: 1
+   14 'Neely': in fragment 2 repeats: 1
+   15 'Obstfeld': in fragment 2 repeats: 1
+   16 'Panizza': in fragment 2 repeats: 1
+   17 'Radelet': in fragment 2 repeats: 1
+   18 'Rose': in fragment 2 repeats: 1
+   19 'Sachs': in fragment 2 repeats: 1
+   20 'Schwellnus': in fragment 2 repeats: 1
+   21 'Stiglitz': in fragment 2 repeats: 1
+   22 'Velasco': in fragment 2 repeats: 1
+   23 'Wyplosz': in fragment 1 repeats: 1
+16 'Garcia' co-cited in fragments 0/0/3/0/0 (3)
+   1  'Cardoso': in fragment 3 repeats: 2
+   2  'Goldfajn': in fragment 3 repeats: 2
+   3  'Valpassos': in fragment 3 repeats: 2
+   4  'Chamon': in fragment 3 repeats: 1
+   5  'Edison': in fragment 3 repeats: 1
+   6  'Reinhart': in fragment 3 repeats: 1
+17 'Guonan' co-cited in fragments 0/0/3/0/0 (3)
+   1  'Jadhav': in fragment 3 repeats: 3
+   2  'McCauley': in fragment 3 repeats: 3
+   3  'Hutchison': in fragment 3 repeats: 2
+   4  'Kendall': in fragment 3 repeats: 2
+   5  'Pasricha': in fragment 3 repeats: 2
+   6  'Singh': in fragment 3 repeats: 2
+18 'Jadhav' co-cited in fragments 0/0/3/0/0 (3)
+   1  'Guonan': in fragment 3 repeats: 3
+   2  'McCauley': in fragment 3 repeats: 3
+   3  'Hutchison': in fragment 3 repeats: 2
+   4  'Kendall': in fragment 3 repeats: 2
+   5  'Pasricha': in fragment 3 repeats: 2
+   6  'Singh': in fragment 3 repeats: 2
+19 'Johnson' co-cited in fragments 3/0/0/0/0 (3)
+   1  'Durlauf': in fragment 1 repeats: 2
+   2  'Mokyr': in fragment 1 repeats: 2
+   3  'Rodrik': in fragment 1 repeats: 2
+   4  'Temple': in fragment 1 repeats: 2
+   5  'Acemoglu': in fragment 1 repeats: 1
+   6  'Kazakova': in fragment 1 repeats: 1
+   7  'Mauro': in fragment 1 repeats: 1
+   8  'Robinson': in fragment 1 repeats: 1
+   9  'Sinelnikov-Murylev': in fragment 1 repeats: 1
+20 'Klein' co-cited in fragments 2/0/0/1/0 (3)
+   1  'Hicks': in fragment 1 repeats: 1, in fragment 4 repeats: 1
+   2  'Keynes': in fragment 1 repeats: 1, in fragment 4 repeats: 1
+   3  'Samuelson': in fragment 1 repeats: 1, in fragment 4 repeats: 1
+   4  'Levine': in fragment 1 repeats: 1
+   5  'Lucas': in fragment 4 repeats: 1
+   6  'Olivei': in fragment 1 repeats: 1
+   7  'Sargent': in fragment 4 repeats: 1
+   8  'Zervos': in fragment 1 repeats: 1
+21 'McCauley' co-cited in fragments 0/0/3/0/0 (3)
+   1  'Guonan': in fragment 3 repeats: 3
+   2  'Jadhav': in fragment 3 repeats: 3
+   3  'Hutchison': in fragment 3 repeats: 2
+   4  'Kendall': in fragment 3 repeats: 2
+   5  'Pasricha': in fragment 3 repeats: 2
+   6  'Singh': in fragment 3 repeats: 2
+22 'Mehlum' co-cited in fragments 0/1/0/2/0 (3)
+   1  'Moene': in fragment 2 repeats: 1, in fragment 4 repeats: 2
+   2  'Torvik': in fragment 2 repeats: 1, in fragment 4 repeats: 2
+   3  'Robinson': in fragment 4 repeats: 2
+   4  'Ross': in fragment 4 repeats: 2
+   5  'Verdier': in fragment 4 repeats: 2
+   6  'Волчкова': in fragment 4 repeats: 2
+   7  'Гуриев': in fragment 4 repeats: 2
+   8  'Егоров': in fragment 4 repeats: 2
+   9  'Идрисов': in fragment 4 repeats: 2
+   10 'Казакова': in fragment 4 repeats: 2
+   11 'Кнобель': in fragment 4 repeats: 2
+   12 'Полбин': in fragment 4 repeats: 2
+   13 'Полтерович': in fragment 4 repeats: 2
+   14 'Попов': in fragment 4 repeats: 2
+   15 'Сонин': in fragment 4 repeats: 2
+   16 'Суслова': in fragment 4 repeats: 2
+   17 'Тонис': in fragment 4 repeats: 2
+   18 'Gylfason': in fragment 2 repeats: 1
+   19 'Treisman': in fragment 2 repeats: 1
+23 'Moene' co-cited in fragments 0/1/0/2/0 (3)
+   1  'Mehlum': in fragment 2 repeats: 1, in fragment 4 repeats: 2
+   2  'Torvik': in fragment 2 repeats: 1, in fragment 4 repeats: 2
+   3  'Robinson': in fragment 4 repeats: 2
+   4  'Ross': in fragment 4 repeats: 2
+   5  'Verdier': in fragment 4 repeats: 2
+   6  'Волчкова': in fragment 4 repeats: 2
+   7  'Гуриев': in fragment 4 repeats: 2
+   8  'Егоров': in fragment 4 repeats: 2
+   9  'Идрисов': in fragment 4 repeats: 2
+   10 'Казакова': in fragment 4 repeats: 2
+   11 'Кнобель': in fragment 4 repeats: 2
+   12 'Полбин': in fragment 4 repeats: 2
+   13 'Полтерович': in fragment 4 repeats: 2
+   14 'Попов': in fragment 4 repeats: 2
+   15 'Сонин': in fragment 4 repeats: 2
+   16 'Суслова': in fragment 4 repeats: 2
+   17 'Тонис': in fragment 4 repeats: 2
+   18 'Gylfason': in fragment 2 repeats: 1
+   19 'Treisman': in fragment 2 repeats: 1
+24 'Ostry' co-cited in fragments 0/3/0/0/0 (3)
+   1  'Burnside': in fragment 2 repeats: 2
+   2  'Celasun': in fragment 2 repeats: 2
+   3  'Debrun': in fragment 2 repeats: 2
+   4  'Samake': in fragment 2 repeats: 2
+   5  'Tanner': in fragment 2 repeats: 2
+   6  'Chamon': in fragment 2 repeats: 1
+   7  'Ghosh': in fragment 2 repeats: 1
+   8  'Habermeier': in fragment 2 repeats: 1
+   9  'Qureshi': in fragment 2 repeats: 1
+   10 'Reinhardt': in fragment 2 repeats: 1
+25 'Perotti' co-cited in fragments 0/1/1/1/0 (3)
+   1  'Blanchard': in fragment 2 repeats: 1, in fragment 4 repeats: 1
+   2  'Monacelli': in fragment 2 repeats: 1, in fragment 4 repeats: 1
+   3  'Alesina': in fragment 3 repeats: 1
+   4  'Ardagna': in fragment 3 repeats: 1
+   5  'Feldstein': in fragment 3 repeats: 1
+   6  'Schiantarelli': in fragment 3 repeats: 1
+   7  'Tanzi': in fragment 3 repeats: 1
+   8  'Zee': in fragment 3 repeats: 1
+26 'Robinson' co-cited in fragments 1/0/0/2/0 (3)
+   1  'Mehlum': in fragment 4 repeats: 2
+   2  'Moene': in fragment 4 repeats: 2
+   3  'Ross': in fragment 4 repeats: 2
+   4  'Torvik': in fragment 4 repeats: 2
+   5  'Verdier': in fragment 4 repeats: 2
+   6  'Волчкова': in fragment 4 repeats: 2
+   7  'Гуриев': in fragment 4 repeats: 2
+   8  'Егоров': in fragment 4 repeats: 2
+   9  'Идрисов': in fragment 4 repeats: 2
+   10 'Казакова': in fragment 4 repeats: 2
+   11 'Кнобель': in fragment 4 repeats: 2
+   12 'Полбин': in fragment 4 repeats: 2
+   13 'Полтерович': in fragment 4 repeats: 2
+   14 'Попов': in fragment 4 repeats: 2
+   15 'Сонин': in fragment 4 repeats: 2
+   16 'Суслова': in fragment 4 repeats: 2
+   17 'Тонис': in fragment 4 repeats: 2
+   18 'Acemoglu': in fragment 1 repeats: 1
+   19 'Johnson': in fragment 1 repeats: 1
+   20 'Mauro': in fragment 1 repeats: 1
+27 'Rodrik' co-cited in fragments 3/0/0/0/0 (3)
+   1  'Durlauf': in fragment 1 repeats: 2
+   2  'Johnson': in fragment 1 repeats: 2
+   3  'Mokyr': in fragment 1 repeats: 2
+   4  'Temple': in fragment 1 repeats: 2
+   5  'Kazakova': in fragment 1 repeats: 1
+   6  'Obstfeld': in fragment 1 repeats: 1
+   7  'Sinelnikov-Murylev': in fragment 1 repeats: 1
+   8  'Taylor': in fragment 1 repeats: 1
+28 'Rogoff' co-cited in fragments 3/0/0/0/0 (3)
+   1  'Kumar': in fragment 1 repeats: 2
+   2  'Reinhart': in fragment 1 repeats: 2
+   3  'Woo': in fragment 1 repeats: 2
+   4  'Alfaro': in fragment 1 repeats: 1
+   5  'Gertler': in fragment 1 repeats: 1
+   6  'Kalemli-Ozcan': in fragment 1 repeats: 1
+   7  'Tornell': in fragment 1 repeats: 1
+   8  'Velasco': in fragment 1 repeats: 1
+   9  'Volosovych': in fragment 1 repeats: 1
+29 'Sinelnikov-Murylev' co-cited in fragments 1/0/1/1/0 (3)
+   1  'Drobyshevsky': in fragment 3 repeats: 1, in fragment 4 repeats: 1
+   2  'Arkhipov': in fragment 3 repeats: 1
+   3  'Batkibekov': in fragment 3 repeats: 1
+   4  'Durlauf': in fragment 1 repeats: 1
+   5  'Johnson': in fragment 1 repeats: 1
+   6  'Kadochnikov': in fragment 3 repeats: 1
+   7  'Kazakova': in fragment 1 repeats: 1
+   8  'Knobel': in fragment 4 repeats: 1
+   9  'Malinina': in fragment 3 repeats: 1
+   10 'Mokyr': in fragment 1 repeats: 1
+   11 'Rodrik': in fragment 1 repeats: 1
+   12 'Sokolov': in fragment 4 repeats: 1
+   13 'Temple': in fragment 1 repeats: 1
+   14 'Trunin': in fragment 3 repeats: 1
+30 'Tanzi' co-cited in fragments 0/0/3/0/0 (3)
+   1  'Zee': in fragment 3 repeats: 3
+   2  'Bank': in fragment 3 repeats: 2
+   3  'IMF': in fragment 3 repeats: 2
+   4  'World': in fragment 3 repeats: 2
+   5  'Alesina': in fragment 3 repeats: 1
+   6  'Ardagna': in fragment 3 repeats: 1
+   7  'Feldstein': in fragment 3 repeats: 1
+   8  'Perotti': in fragment 3 repeats: 1
+   9  'Schiantarelli': in fragment 3 repeats: 1
+31 'Torvik' co-cited in fragments 0/1/0/2/0 (3)
+   1  'Mehlum': in fragment 2 repeats: 1, in fragment 4 repeats: 2
+   2  'Moene': in fragment 2 repeats: 1, in fragment 4 repeats: 2
+   3  'Robinson': in fragment 4 repeats: 2
+   4  'Ross': in fragment 4 repeats: 2
+   5  'Verdier': in fragment 4 repeats: 2
+   6  'Волчкова': in fragment 4 repeats: 2
+   7  'Гуриев': in fragment 4 repeats: 2
+   8  'Егоров': in fragment 4 repeats: 2
+   9  'Идрисов': in fragment 4 repeats: 2
+   10 'Казакова': in fragment 4 repeats: 2
+   11 'Кнобель': in fragment 4 repeats: 2
+   12 'Полбин': in fragment 4 repeats: 2
+   13 'Полтерович': in fragment 4 repeats: 2
+   14 'Попов': in fragment 4 repeats: 2
+   15 'Сонин': in fragment 4 repeats: 2
+   16 'Суслова': in fragment 4 repeats: 2
+   17 'Тонис': in fragment 4 repeats: 2
+   18 'Gylfason': in fragment 2 repeats: 1
+   19 'Treisman': in fragment 2 repeats: 1
+32 'Zee' co-cited in fragments 0/0/3/0/0 (3)
+   1  'Tanzi': in fragment 3 repeats: 3
+   2  'Bank': in fragment 3 repeats: 2
+   3  'IMF': in fragment 3 repeats: 2
+   4  'World': in fragment 3 repeats: 2
+   5  'Alesina': in fragment 3 repeats: 1
+   6  'Ardagna': in fragment 3 repeats: 1
+   7  'Feldstein': in fragment 3 repeats: 1
+   8  'Perotti': in fragment 3 repeats: 1
+   9  'Schiantarelli': in fragment 3 repeats: 1
+33 'Aizenman' co-cited in fragments 0/2/0/0/0 (2)
+   1  'Jinjarak': in fragment 2 repeats: 2
+   2  'McCarten': in fragment 2 repeats: 2
+   3  'Sandmo': in fragment 2 repeats: 2
+   4  'Yitzhaki': in fragment 2 repeats: 2
+34 'Alesina' co-cited in fragments 0/1/1/0/0 (2)
+   1  'Ardagna': in fragment 3 repeats: 1
+   2  'Bartolini': in fragment 2 repeats: 1
+   3  'Drazen': in fragment 2 repeats: 1
+   4  'Feldstein': in fragment 3 repeats: 1
+   5  'Grilli': in fragment 2 repeats: 1
+   6  'Milesi-Ferrett': in fragment 2 repeats: 1
+   7  'Milesi-Ferretti': in fragment 2 repeats: 1
+   8  'Perotti': in fragment 3 repeats: 1
+   9  'Schiantarelli': in fragment 3 repeats: 1
+   10 'Tanzi': in fragment 3 repeats: 1
+   11 'Zee': in fragment 3 repeats: 1
+35 'Barro' co-cited in fragments 0/0/2/0/0 (2)
+   1  'Aschauer': in fragment 3 repeats: 1
+   2  'Futagami': in fragment 3 repeats: 1
+   3  'Morita': in fragment 3 repeats: 1
+   4  'Shibata': in fragment 3 repeats: 1
+36 'Baum' co-cited in fragments 2/0/0/0/0 (2)
+   1  'Cecchetti': in fragment 1 repeats: 2
+   2  'Checherita-Westphal': in fragment 1 repeats: 2
+   3  'Mohanty': in fragment 1 repeats: 2
+   4  'Rother': in fragment 1 repeats: 2
+   5  'Zampolli': in fragment 1 repeats: 2
+37 'Bleaney' co-cited in fragments 1/1/0/0/0 (2)
+   1  'Greenaway': in fragment 1 repeats: 1, in fragment 2 repeats: 1
+   2  'Bernstein': in fragment 1 repeats: 1
+   3  'Mendoza': in fragment 2 repeats: 1
+38 'Brixi' co-cited in fragments 0/2/0/0/0 (2)
+   1  'IMF': in fragment 2 repeats: 2
+   2  'Schick': in fragment 2 repeats: 2
+39 'Burns' co-cited in fragments 0/2/0/0/0 (2)
+   1  'Auerbach': in fragment 2 repeats: 2
+   2  'Evans': in fragment 2 repeats: 2
+   3  'Gale': in fragment 2 repeats: 2
+   4  'Gokhale': in fragment 2 repeats: 2
+   5  'Green': in fragment 2 repeats: 2
+   6  'Kotlikoff': in fragment 2 repeats: 2
+   7  'Orszag': in fragment 2 repeats: 2
+   8  'Phillips': in fragment 2 repeats: 2
+   9  'Raffelhuschen': in fragment 2 repeats: 2
+   10 'Smetters': in fragment 2 repeats: 2
+40 'Cardoso' co-cited in fragments 0/0/2/0/0 (2)
+   1  'Garcia': in fragment 3 repeats: 2
+   2  'Goldfajn': in fragment 3 repeats: 2
+   3  'Valpassos': in fragment 3 repeats: 2
+41 'Cecchetti' co-cited in fragments 2/0/0/0/0 (2)
+   1  'Baum': in fragment 1 repeats: 2
+   2  'Checherita-Westphal': in fragment 1 repeats: 2
+   3  'Mohanty': in fragment 1 repeats: 2
+   4  'Rother': in fragment 1 repeats: 2
+   5  'Zampolli': in fragment 1 repeats: 2
+42 'Celasun' co-cited in fragments 0/2/0/0/0 (2)
+   1  'Burnside': in fragment 2 repeats: 2
+   2  'Debrun': in fragment 2 repeats: 2
+   3  'Ostry': in fragment 2 repeats: 2
+   4  'Samake': in fragment 2 repeats: 2
+   5  'Tanner': in fragment 2 repeats: 2
+43 'Chalk' co-cited in fragments 0/2/0/0/0 (2)
+   1  'Burnside': in fragment 2 repeats: 2
+   2  'Giammarioli': in fragment 2 repeats: 2
+   3  'Hemming': in fragment 2 repeats: 2
+   4  'Nickel': in fragment 2 repeats: 2
+   5  'Ph': in fragment 2 repeats: 2
+   6  'Rother': in fragment 2 repeats: 2
+   7  'Vidal': in fragment 2 repeats: 2
+44 'Chamon' co-cited in fragments 0/1/1/0/0 (2)
+   1  'Edison': in fragment 3 repeats: 1
+   2  'Garcia': in fragment 3 repeats: 1
+   3  'Ghosh': in fragment 2 repeats: 1
+   4  'Habermeier': in fragment 2 repeats: 1
+   5  'Ostry': in fragment 2 repeats: 1
+   6  'Qureshi': in fragment 2 repeats: 1
+   7  'Reinhardt': in fragment 2 repeats: 1
+   8  'Reinhart': in fragment 3 repeats: 1
+45 'Checherita-Westphal' co-cited in fragments 2/0/0/0/0 (2)
+   1  'Baum': in fragment 1 repeats: 2
+   2  'Cecchetti': in fragment 1 repeats: 2
+   3  'Mohanty': in fragment 1 repeats: 2
+   4  'Rother': in fragment 1 repeats: 2
+   5  'Zampolli': in fragment 1 repeats: 2
+46 'Clements' co-cited in fragments 2/0/0/0/0 (2)
+   1  'Coady': in fragment 1 repeats: 2
+   2  'Gupta': in fragment 1 repeats: 2
+   3  'IMF': in fragment 1 repeats: 2
+   4  'Maisonneuve': in fragment 1 repeats: 2
+   5  'Martins': in fragment 1 repeats: 2
+47 'Coady' co-cited in fragments 2/0/0/0/0 (2)
+   1  'Clements': in fragment 1 repeats: 2
+   2  'Gupta': in fragment 1 repeats: 2
+   3  'IMF': in fragment 1 repeats: 2
+   4  'Maisonneuve': in fragment 1 repeats: 2
+   5  'Martins': in fragment 1 repeats: 2
+48 'Crespo' co-cited in fragments 0/1/1/0/0 (2)
+   1  'Fontoura': in fragment 2 repeats: 1, in fragment 3 repeats: 1
+   2  'Lichtenberg': in fragment 3 repeats: 1
+   3  'Mello': in fragment 2 repeats: 1
+   4  'Potterie': in fragment 3 repeats: 1
+49 'Debrun' co-cited in fragments 0/2/0/0/0 (2)
+   1  'Burnside': in fragment 2 repeats: 2
+   2  'Celasun': in fragment 2 repeats: 2
+   3  'Ostry': in fragment 2 repeats: 2
+   4  'Samake': in fragment 2 repeats: 2
+   5  'Tanner': in fragment 2 repeats: 2
+50 'Drobyshevsky' co-cited in fragments 0/0/1/1/0 (2)
+   1  'Sinelnikov-Murylev': in fragment 3 repeats: 1, in fragment 4 repeats: 1
+   2  'Arkhipov': in fragment 3 repeats: 1
+   3  'Batkibekov': in fragment 3 repeats: 1
+   4  'Kadochnikov': in fragment 3 repeats: 1
+   5  'Knobel': in fragment 4 repeats: 1
+   6  'Malinina': in fragment 3 repeats: 1
+   7  'Sokolov': in fragment 4 repeats: 1
+   8  'Trunin': in fragment 3 repeats: 1
+
+Кросс-распределение «со-цитирования» - «фразы из контекстов цитирований»
+1   'IMF' 28/16/15/0/0 (11)
+   1   'фискальный риск': 0/6/0/0/0 (6)
+   2   'пенсионный система': 4/0/0/0/0 (4)
+   3   'различный страна': 4/0/0/0/0 (4)
+   4   'разный страна': 4/0/0/0/0 (4)
+   5   'состояние бюджет': 4/0/0/0/0 (4)
+   6   'страна смотреть': 4/0/0/0/0 (4)
+   7   'фискальный уязвимость': 0/4/0/0/0 (4)
+   8   'detail see': 1/0/2/0/0 (3)
+   9   'example see': 0/0/3/0/0 (3)
+   10  'component establish': 0/0/2/0/0 (2)
+   11  'economic growth': 0/1/1/0/0 (2)
+   12  'man bear': 0/0/2/0/0 (2)
+   13  'бюджетный кризис': 0/2/0/0/0 (2)
+   14  'бюджетный устойчивость': 2/0/0/0/0 (2)
+   15  'иной фактор': 0/2/0/0/0 (2)
+   16  'макроэкономический шок': 0/2/0/0/0 (2)
+   17  'оценка бюджетный': 2/0/0/0/0 (2)
+   18  'экономика привести': 0/2/0/0/0 (2)
+   19  'budget expenditure': 1/0/0/0/0 (1)
+   20  'budget revenue': 1/0/0/0/0 (1)
+   21  'defence expenditure': 0/0/1/0/0 (1)
+   22  'economic policy': 0/0/1/0/0 (1)
+   23  'institutional development': 0/1/0/0/0 (1)
+   24  'longterm economic': 0/1/0/0/0 (1)
+   25  'national economy': 0/0/1/0/0 (1)
+   26  'see see': 0/0/1/0/0 (1)
+   27  'see идрисов': 0/0/1/0/0 (1)
+   28  'technological progress': 0/0/1/0/0 (1)
+   29  'бюджетный разрыв': 1/0/0/0/0 (1)
+   30  'др detail': 0/0/1/0/0 (1)
+   31  'идрисов синельниковмурылев': 0/0/1/0/0 (1)
+   32  'метод оценка': 1/0/0/0/0 (1)
+   33  'развитый страна': 0/1/0/0/0 (1)
+   34  'российский экономика': 1/0/0/0/0 (1)
+   35  'энтов др': 0/0/1/0/0 (1)
+2   'Auerbach' 0/17/13/0/0 (6)
+   1   'бюджетный разрыв': 0/4/8/0/0 (12)
+   2   'бюджетный устойчивость': 0/1/2/0/0 (3)
+   3   'fiscal gap': 0/0/2/0/0 (2)
+   4   'бюджетный ограничение': 0/2/0/0/0 (2)
+   5   'ограничение государство': 0/2/0/0/0 (2)
+   6   'оценка бюджетный': 0/2/0/0/0 (2)
+   7   'смотреть например': 0/0/2/0/0 (2)
+   8   'точка зрение': 0/0/2/0/0 (2)
+   9   'фискальный политика': 0/1/1/0/0 (2)
+   10  'государственный долг': 0/1/0/0/0 (1)
+   11  'межвременный бюджетный': 0/1/0/0/0 (1)
+   12  'можно найти': 0/1/0/0/0 (1)
+   13  'настоящий работа': 0/1/0/0/0 (1)
+   14  'основа оценка': 0/1/0/0/0 (1)
+   15  'позволять получить': 0/1/0/0/0 (1)
+   16  'работа предлагать': 0/1/0/0/0 (1)
+   17  'развитый страна': 0/1/0/0/0 (1)
+   18  'ряд работа': 0/1/0/0/0 (1)
+3   'Gale' 0/17/13/0/0 (6)
+   1   'бюджетный разрыв': 0/4/8/0/0 (12)
+   2   'бюджетный устойчивость': 0/1/2/0/0 (3)
+   3   'fiscal gap': 0/0/2/0/0 (2)
+   4   'бюджетный ограничение': 0/2/0/0/0 (2)
+   5   'ограничение государство': 0/2/0/0/0 (2)
+   6   'оценка бюджетный': 0/2/0/0/0 (2)
+   7   'смотреть например': 0/0/2/0/0 (2)
+   8   'точка зрение': 0/0/2/0/0 (2)
+   9   'фискальный политика': 0/1/1/0/0 (2)
+   10  'государственный долг': 0/1/0/0/0 (1)
+   11  'межвременный бюджетный': 0/1/0/0/0 (1)
+   12  'можно найти': 0/1/0/0/0 (1)
+   13  'настоящий работа': 0/1/0/0/0 (1)
+   14  'основа оценка': 0/1/0/0/0 (1)
+   15  'позволять получить': 0/1/0/0/0 (1)
+   16  'работа предлагать': 0/1/0/0/0 (1)
+   17  'развитый страна': 0/1/0/0/0 (1)
+   18  'ряд работа': 0/1/0/0/0 (1)
+4   'Orszag' 0/17/13/0/0 (6)
+   1   'бюджетный разрыв': 0/4/8/0/0 (12)
+   2   'бюджетный устойчивость': 0/1/2/0/0 (3)
+   3   'fiscal gap': 0/0/2/0/0 (2)
+   4   'бюджетный ограничение': 0/2/0/0/0 (2)
+   5   'ограничение государство': 0/2/0/0/0 (2)
+   6   'оценка бюджетный': 0/2/0/0/0 (2)
+   7   'смотреть например': 0/0/2/0/0 (2)
+   8   'точка зрение': 0/0/2/0/0 (2)
+   9   'фискальный политика': 0/1/1/0/0 (2)
+   10  'государственный долг': 0/1/0/0/0 (1)
+   11  'межвременный бюджетный': 0/1/0/0/0 (1)
+   12  'можно найти': 0/1/0/0/0 (1)
+   13  'настоящий работа': 0/1/0/0/0 (1)
+   14  'основа оценка': 0/1/0/0/0 (1)
+   15  'позволять получить': 0/1/0/0/0 (1)
+   16  'работа предлагать': 0/1/0/0/0 (1)
+   17  'развитый страна': 0/1/0/0/0 (1)
+   18  'ряд работа': 0/1/0/0/0 (1)
+5   'Идрисов' 9/0/0/20/0 (6)
+   1   'бюджетный политика': 2/0/0/0/0 (2)
+   2   'мировой цена': 2/0/0/0/0 (2)
+   3   'неторгуемый товар': 0/0/0/2/0 (2)
+   4   'обменный курс': 0/0/0/2/0 (2)
+   5   'приводить рост': 0/0/0/2/0 (2)
+   6   'процентный ставка': 0/0/0/2/0 (2)
+   7   'рост цена': 0/0/0/2/0 (2)
+   8   'товар услуга': 0/0/0/2/0 (2)
+   9   'цена энергоноситель': 2/0/0/0/0 (2)
+   10  'человеческий капитал': 2/0/0/0/0 (2)
+   11  'бюджетный разрыв': 0/0/0/1/0 (1)
+   12  'единый цена': 0/0/0/1/0 (1)
+   13  'закон единый': 0/0/0/1/0 (1)
+   14  'национальный валюта': 0/0/0/1/0 (1)
+   15  'первый очередь': 0/0/0/1/0 (1)
+   16  'период год': 0/0/0/1/0 (1)
+   17  'реальный выражение': 1/0/0/0/0 (1)
+   18  'рост ввп': 0/0/0/1/0 (1)
+   19  'следовать отметить': 0/0/0/1/0 (1)
+   20  'страна оэср': 0/0/0/1/0 (1)
+   21  'темп рост': 0/0/0/1/0 (1)
+   22  'фактор производство': 0/0/0/1/0 (1)
+6   'Bank' 1/3/11/0/0 (4)
+   1   'component establish': 0/0/2/0/0 (2)
+   2   'detail see': 0/0/2/0/0 (2)
+   3   'example see': 0/0/2/0/0 (2)
+   4   'man bear': 0/0/2/0/0 (2)
+   5   'defence expenditure': 0/0/1/0/0 (1)
+   6   'economic growth': 0/1/0/0/0 (1)
+   7   'institutional development': 0/1/0/0/0 (1)
+   8   'longterm economic': 0/1/0/0/0 (1)
+   9   'national economy': 0/0/1/0/0 (1)
+   10  'see идрисов': 0/0/1/0/0 (1)
+   11  'technological progress': 0/0/1/0/0 (1)
+   12  'world bank': 1/0/0/0/0 (1)
+   13  'др detail': 0/0/1/0/0 (1)
+   14  'идрисов синельниковмурылев': 0/0/1/0/0 (1)
+   15  'энтов др': 0/0/1/0/0 (1)
+7   'Blanchard' 0/25/0/3/0 (4)
+   1   'ограничение государство': 0/3/0/0/0 (3)
+   2   'australia australia': 0/0/0/2/0 (2)
+   3   'canada canada': 0/0/0/2/0 (2)
+   4   'detail see': 0/2/0/0/0 (2)
+   5   'government expenditure': 0/0/0/2/0 (2)
+   6   'можно найти': 0/2/0/0/0 (2)
+   7   'позволять получить': 0/2/0/0/0 (2)
+   8   'реальный выражение': 0/2/0/0/0 (2)
+   9   'barro salaimartin': 0/1/0/0/0 (1)
+   10  'example see': 0/1/0/0/0 (1)
+   11  'interest rate': 0/1/0/0/0 (1)
+   12  'later positive': 0/1/0/0/0 (1)
+   13  'loan nonfinancial': 0/1/0/0/0 (1)
+   14  'mountford uh': 0/1/0/0/0 (1)
+   15  'negative respectively': 0/1/0/0/0 (1)
+   16  'nonfinancial sector': 0/1/0/0/0 (1)
+   17  'rate loan': 0/1/0/0/0 (1)
+   18  'respectively later': 0/1/0/0/0 (1)
+   19  'sector negative': 0/1/0/0/0 (1)
+   20  'see идрисов': 0/1/0/0/0 (1)
+   21  'бюджетный ограничение': 0/1/0/0/0 (1)
+   22  'др detail': 0/1/0/0/0 (1)
+   23  'идрисов синельниковмурылев': 0/1/0/0/0 (1)
+   24  'энтов др': 0/1/0/0/0 (1)
+8   'Burnside' 0/23/0/0/0 (4)
+   1   'фискальный риск': 0/4/0/0/0 (4)
+   2   'бюджетный ограничение': 0/3/0/0/0 (3)
+   3   'ограничение государство': 0/3/0/0/0 (3)
+   4   'государственный бюджет': 0/2/0/0/0 (2)
+   5   'государственный финансы': 0/2/0/0/0 (2)
+   6   'долгосрочный перспектива': 0/2/0/0/0 (2)
+   7   'иной фактор': 0/2/0/0/0 (2)
+   8   'можно найти': 0/2/0/0/0 (2)
+   9   'реальный выражение': 0/2/0/0/0 (2)
+   10  'смотреть например': 0/2/0/0/0 (2)
+   11  'фискальный уязвимость': 0/2/0/0/0 (2)
+   12  'позволять получить': 0/1/0/0/0 (1)
+9   'Oates' 0/18/0/0/0 (4)
+   1   'financial aid': 0/3/0/0/0 (3)
+   2   'macroeconomic stabilization': 0/2/0/0/0 (2)
+   3   'provision public': 0/2/0/0/0 (2)
+   4   'public goods': 0/2/0/0/0 (2)
+   5   'authority may': 0/1/0/0/0 (1)
+   6   'budget revenue': 0/1/0/0/0 (1)
+   7   'central government': 0/1/0/0/0 (1)
+   8   'financial crisis': 0/1/0/0/0 (1)
+   9   'income tax': 0/1/0/0/0 (1)
+   10  'level government': 0/1/0/0/0 (1)
+   11  'level provision': 0/1/0/0/0 (1)
+   12  'local government': 0/1/0/0/0 (1)
+   13  'national government': 0/1/0/0/0 (1)
+   14  'provision additional': 0/1/0/0/0 (1)
+   15  'see see': 0/1/0/0/0 (1)
+   16  'subnational authority': 0/1/0/0/0 (1)
+   17  'tax base': 0/1/0/0/0 (1)
+   18  'tax rate': 0/1/0/0/0 (1)
+10  'Reinhart' 12/0/7/0/0 (4)
+   1   'экономический рост': 4/0/0/0/0 (4)
+   2   'долговой нагрузка': 3/0/0/0/0 (3)
+   3   'значение госдолг': 2/0/0/0/0 (2)
+   4   'национальный валюта': 0/0/2/0/0 (2)
+   5   'реальный выражение': 0/0/2/0/0 (2)
+   6   'темп экономический': 2/0/0/0/0 (2)
+   7   'банковский сектор': 0/0/1/0/0 (1)
+   8   'бюджетный политика': 1/0/0/0/0 (1)
+   9   'государственный финансы': 1/0/0/0/0 (1)
+   10  'развиваться экономика': 1/0/0/0/0 (1)
+   11  'рост цена': 0/0/1/0/0 (1)
+   12  'состояние государственный': 1/0/0/0/0 (1)
+   13  'темп рост': 0/0/1/0/0 (1)
+
 Кросс-распределение «со-цитирования» - «топики контекстов цитирований»
 1   'IMF' 7/3/5/0/0 (11)
    1   'капитал, рост, страна, год, товар': 4/0/0/0/0 (4)
