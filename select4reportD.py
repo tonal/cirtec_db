@@ -1,13 +1,13 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Группа В. Показатели по повторяющимся фразам из контекстов цитирований
+Группа Г. Показатели по топикам для контекстов цитирований
 """
 from collections import Counter, defaultdict
 
 from pymongo import MongoClient
 
-from select4reportA import print_freq_ngramm_by_frag, get_topn
+from select4reportA import print_freq_topics_by_frags, get_topn
 
 MONGO_URI = 'mongodb://localhost:27017/'
 
@@ -17,27 +17,21 @@ def main():
   mdb = client['cirtec']
 
   contexts = mdb.contexts
-  print_freq_ngramm_by_frag(mdb, 50)
+  print_freq_topics_by_frags(mdb)
   print()
-  print_top_ngramms_top_author_by_frags(mdb, 50)
+  print_topics_top_author_by_frags(mdb)
   print()
-  print_top_ngramms_topics_by_frags(mdb, 50)
+  print_topics_top_ngramm_by_frags(mdb, 10)
 
 
-def print_top_ngramms_top_author_by_frags(
-  mdb, topn:int, *, topn_authors:int=500, nka:int=2, ltype:str='lemmas'
-):
-  """Кросс-распределение «фразы» - «со-цитирования»"""
-  print('Кросс-распределение «фразы» - «со-цитирования»')
+def print_topics_top_author_by_frags(mdb):
+  """Кросс-распределение «топики» - «со-цитирования»"""
+  print('Кросс-распределение «топики» - «со-цитирования»')
 
-  n_gramms = mdb.n_gramms
-  top_ngramms = get_topn(
-    n_gramms, topn, preselect=[{'$match': {'nka': nka, 'type': ltype}}],
-    sum_expr='$linked_papers.cnt')
+  top_topics = get_topn(mdb.topics, 100)
 
   contexts = mdb.contexts
-
-  for i, (ngramm, cnt, conts) in enumerate(top_ngramms, 1):
+  for i, (topic, cnt, conts) in enumerate(top_topics, 1):
     frags = Counter()
     congr = defaultdict(Counter)
 
@@ -53,7 +47,7 @@ def print_top_ngramms_top_author_by_frags(
       congr[ngr][fnum] += 1
 
     msg = f'{"/".join(str(frags[i]) for i in range(1, 6))}'
-    print(f"{i:<3d} '{ngramm}' {msg} ({sum(frags.values())})") # cnt})") #
+    print(f"{i:<3d} '{topic}' {msg} ({sum(frags.values())})") # cnt})") #
 
     for j, (co, cnts) in enumerate(
       sorted(congr.items(), key=lambda kv: (-sum(kv[1].values()), kv[0])), 1):
@@ -61,47 +55,49 @@ def print_top_ngramms_top_author_by_frags(
       print(f"   {j:<3d} '{co}': {msg} ({sum(cnts.values())})")
 
 
-def print_top_ngramms_topics_by_frags(
-  mdb, topn:int=10, *, nka:int=2, ltype:str='lemmas'
+def print_topics_top_ngramm_by_frags(
+  mdb, topn_gramms:int=10, nka:int=4, ltype:str='lemmas'
 ):
-  """Кросс-распределение «фразы» - «топики контекстов цитирований»"""
-  print('Кросс-распределение «фразы» - «топики контекстов цитирований»')
+  """Кросс-распределение «топики» - «фразы»"""
+  print('Кросс-распределение «топики» - «фразы»')
 
-  n_gramms = mdb.n_gramms
-  top_ngramms = get_topn(
-    n_gramms, topn, preselect=[{'$match': {'nka': nka, 'type': ltype}}],
-    sum_expr='$linked_papers.cnt')
+  top_topics = get_topn(mdb.topics, 100)
 
   contexts = mdb.contexts
-
-  for i, (ngrmm, cnt, conts) in enumerate(top_ngramms, 1):
+  for i, (topic, cnt, conts) in enumerate(top_topics, 1):
     frags = Counter()
     congr = defaultdict(Counter)
-
     for doc in contexts.aggregate([
       {'$match': {'frag_num': {'$gt': 0}, '_id': {'$in': conts}}},
       {'$project': {'prefix': False, 'suffix': False, 'exact': False}},
       {'$lookup': {
-        'from': 'topics', 'localField': '_id',
+        'from': 'n_gramms', 'localField': '_id',
         'foreignField': 'linked_papers.cont_id', 'as': 'cont'}},
       {'$unwind': '$cont'},
-      {'$unwind': '$cont.linked_papers'},
-      {'$match': {'$expr': {'$eq': ["$_id", "$cont.linked_papers.cont_id"]}}},
+      {'$match': {'cont.nka': nka, 'cont.type': ltype}},
+      # {'$unwind': '$cont.linked_papers'},
+      # {'$match': {'$expr': {'$eq': ["$_id", "$cont.linked_papers.cont_id"]}}},
       {'$project': {'cont.type': False}}, # 'cont.linked_papers': False,
+      {'$sort': {'cont.count_in_linked_papers': -1, 'cont.count_all': -1}},
+      # {'$limit': topn_gramms}
     ]):
       cont = doc['cont']
       ngr = cont['title']
+
       fnum = doc['frag_num']
       frags[fnum] += 1
-      congr[ngr][fnum] += 1
+      congr[ngr][fnum] += 1 # cont['linked_papers']['cnt']
+      if len(congr) == topn_gramms:
+        break
 
     msg = f'{"/".join(str(frags[i]) for i in range(1, 6))}'
-    print(f"{i:<2d} '{ngrmm}' {msg} ({sum(frags.values())})")
+    print(f"{i:<3d} '{topic}' {msg} ({sum(frags.values())})")
 
     for j, (co, cnts) in enumerate(
       sorted(congr.items(), key=lambda kv: (-sum(kv[1].values()), kv[0])), 1):
       msg = f'{"/".join(str(cnts[i]) for i in range(1, 6))}'
-      print(f"   {j:<2d} '{co}': {msg} ({sum(cnts.values())})")
+      print(f"   {j:<3d} '{co}': {msg} ({sum(cnts.values())})")
+
 
 
 if __name__ == '__main__':
