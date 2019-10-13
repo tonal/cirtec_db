@@ -81,16 +81,9 @@ def print_freq_contexts_by_pubs(mdb):
 def print_freq_cocitauth_by_frags(contexts, topn:int=5):
   """Кросс-распределение «5 фрагментов» - «со-цитируемые авторы»"""
   print('Кросс-распределение «5 фрагментов» - «со-цитируемые авторы»')
-  top50 = tuple(
-    (doc['_id'], doc['count']) for doc in contexts.aggregate([
-      {'$match': {'frag_num': {'$gt': 0}, 'cocit_authors': {'$exists': True}}},
-      {'$project': {'prefix': False, 'suffix': False, 'exact': False}},
-      {'$unwind': '$cocit_authors'},
-      {'$group': {'_id': '$cocit_authors', 'count': {'$sum': 1}}},
-      {'$sort': {'count': -1, '_id': 1}},
-      {'$limit': topn}]))
+  topN = get_topn_cocit_authors(contexts, topn)
 
-  for i, (cocitauthor, cnt) in enumerate(top50, 1):
+  for i, (cocitauthor, cnt) in enumerate(topN, 1):
     frags = Counter()
     coaut = defaultdict(Counter)
 
@@ -114,6 +107,30 @@ def print_freq_cocitauth_by_frags(contexts, topn:int=5):
       # print(i, co, cnts)
       print(f"   {j:<2d} '{co}': "
             f"{', '.join('in fragment %s repeats: %s' % (f, c) for f, c in cnts.items())}")
+
+
+def get_topn_cocit_authors(contexts, topn, *, include_conts:bool=False):
+  """Получить самых со-цитируемых авторов"""
+  if include_conts:
+    group = {
+      '$group': {
+        '_id': '$cocit_authors', 'count': {'$sum': 1},
+        'conts': {'$addToSet': '$_id'}}}
+    get_as_tuple = itemgetter('_id', 'count', 'conts')
+  else:
+    group = {'$group': {'_id': '$cocit_authors', 'count': {'$sum': 1}}}
+    get_as_tuple = itemgetter('_id', 'count')
+  top50 = tuple(
+    get_as_tuple(doc) for doc in contexts.aggregate([
+      {'$match': {'frag_num': {'$gt': 0}, 'cocit_authors': {'$exists': True}}},
+      {'$project': {'prefix': False, 'suffix': False, 'exact': False}},
+      {'$unwind': '$cocit_authors'},
+      # {'$group': {'_id': '$cocit_authors', 'count': {'$sum': 1}}},
+      group,
+      {'$sort': {'count': -1, '_id': 1}},
+      {'$limit': topn},
+  ]))
+  return top50
 
 
 def print_freq_ngramm_by_frag(mdb, topn:int=10, *, nka:int=2, ltype:str='lemmas'):

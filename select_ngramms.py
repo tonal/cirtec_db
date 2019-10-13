@@ -22,7 +22,8 @@ def main():
 
 
 def print_freq_ngramms_by_frags(
-  n_gramms, freq:int=100, *, nka:int=None, ltype:str=None):
+  n_gramms, freq:int=100, *, nka:int=None, ltype:str=None
+):
   if nka and ltype:
     pipeline = [{'$match': {'nka': nka, 'type': ltype}}, ]
   elif nka:
