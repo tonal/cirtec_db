@@ -12,19 +12,22 @@ from pathlib import Path
 from pymongo import MongoClient
 from pymongo.errors import DuplicateKeyError
 
+from utuls import load_config
+
+
 NGRAM_TEMPL = '*-gram-result.json'
 NGRAM_DIR = 'l'
 
-MONGO_URI = 'mongodb://localhost:27017/'
-# MONGO_URI = 'mongodb://frigate:27017/'
-
 
 def main():
-  with MongoClient(MONGO_URI, compressors='snappy') as client:
-    mdb = client['cirtec']
-    col_name = 'n_gramms'
-    mdb.drop_collection(col_name)
-    col_gramms = mdb[col_name]
+  conf = load_config()
+  conf_mongo = conf['mongodb']
+
+  with MongoClient(conf_mongo['uri'], compressors='snappy') as client:
+    mdb = client[conf_mongo['db']] # 'cirtec'
+
+    mdb.drop_collection('n_gramms')
+    col_gramms = mdb['n_gramms']
     insert = col_gramms.insert_one
     obj_type = 'lemmas'
 
@@ -61,7 +64,7 @@ def main():
           print(' ', cnt, ngram_doc)
           # return
       print(' ', cnt, ngram_doc)
-  print(cnt)
+    print(cnt)
 
 
 if __name__ == '__main__':

@@ -5,7 +5,6 @@
 """
 from collections import Counter
 from functools import partial
-from pathlib import Path
 import re
 from urllib.parse import urlparse, parse_qs
 
@@ -13,10 +12,9 @@ import requests
 # from lxml import etree
 from parsel import Selector
 from pymongo import MongoClient
-import yaml
 
-MONGO_URI = 'mongodb://localhost:27017/'
-# MONGO_URI = 'mongodb://frigate:27017/'
+from utuls import load_config
+
 
 # LINKS = 'http://cirtec.ranepa.ru/cgi/spadist4bundle.cgi?code=linked_papers&c=Sergey-Sinelnikov-Murylev'
 LINKS = 'http://cirtec.repec.org/cgi/spadist4bundle.cgi?code=linked_papers&c=Sergey-Sinelnikov-Murylev'
@@ -89,13 +87,6 @@ def main():
   cnts = Counter({doc['_id']: int(doc["count"]) for doc in curs})
   msg2 = f'{"/".join(str(cnts[i]) for i in range(1, 6))}'
   print(msg2)
-
-
-def load_config():
-  path = Path(__file__).resolve()
-  conf = yaml.full_load(
-    path.with_name('config.yaml').open('r', encoding='utf-8'))
-  return conf
 
 
 if __name__ == '__main__':
