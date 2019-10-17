@@ -8,26 +8,27 @@ from typing import Optional, Sequence, Union, Tuple
 
 from pymongo import MongoClient
 
-
-MONGO_URI = 'mongodb://localhost:27017/'
+from utuls import load_config
 
 
 def main():
-  client = MongoClient(MONGO_URI, compressors='snappy')
-  mdb = client['cirtec']
+  conf = load_config()
+  conf_mongo = conf['mongodb']
+  with MongoClient(conf_mongo['uri'], compressors='snappy') as client:
+    mdb = client[conf_mongo['db']] # 'cirtec'
 
-  contexts = mdb.contexts
-  print_freq_contexts(contexts)
-  print()
-  print_freq_contexts_by_pubs(mdb)
-  print()
-  print_freq_cocitauth_by_frags(contexts, 50)
-  print()
-  print_freq_ngramm_by_frag(mdb)
-  print()
-  print_freq_topics_by_frags(mdb)
-  print()
-  print_freqs_table(mdb)
+    contexts = mdb.contexts
+    print_freq_contexts(contexts)
+    print()
+    print_freq_contexts_by_pubs(mdb)
+    print()
+    print_freq_cocitauth_by_frags(contexts, 50)
+    print()
+    print_freq_ngramm_by_frag(mdb)
+    print()
+    print_freq_topics_by_frags(mdb)
+    print()
+    print_freqs_table(mdb)
 
 
 def print_freq_contexts(contexts):

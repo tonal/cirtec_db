@@ -8,20 +8,21 @@ from collections import Counter, defaultdict
 from pymongo import MongoClient
 
 from select4reportA import print_freq_ngramm_by_frag, get_topn
-
-MONGO_URI = 'mongodb://localhost:27017/'
+from utuls import load_config
 
 
 def main():
-  client = MongoClient(MONGO_URI, compressors='snappy')
-  mdb = client['cirtec']
+  conf = load_config()
+  conf_mongo = conf['mongodb']
+  with MongoClient(conf_mongo['uri'], compressors='snappy') as client:
+    mdb = client[conf_mongo['db']] # 'cirtec'
 
-  contexts = mdb.contexts
-  print_freq_ngramm_by_frag(mdb, 50)
-  print()
-  print_top_ngramms_top_author_by_frags(mdb, 50)
-  print()
-  print_top_ngramms_topics_by_frags(mdb, 50)
+    contexts = mdb.contexts
+    print_freq_ngramm_by_frag(mdb, 50)
+    print()
+    print_top_ngramms_top_author_by_frags(mdb, 50)
+    print()
+    print_top_ngramms_topics_by_frags(mdb, 50)
 
 
 def print_top_ngramms_top_author_by_frags(

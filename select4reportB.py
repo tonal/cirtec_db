@@ -11,20 +11,21 @@ from pymongo import MongoClient
 
 from select4reportA import (
   print_freq_cocitauth_by_frags, get_topn_cocit_authors, get_topn)
-
-MONGO_URI = 'mongodb://localhost:27017/'
+from utuls import load_config
 
 
 def main():
-  client = MongoClient(MONGO_URI, compressors='snappy')
-  mdb = client['cirtec']
+  conf = load_config()
+  conf_mongo = conf['mongodb']
+  with MongoClient(conf_mongo['uri'], compressors='snappy') as client:
+    mdb = client[conf_mongo['db']] # 'cirtec'
 
-  contexts = mdb.contexts
-  print_freq_cocitauth_by_frags(contexts, 50)
-  print()
-  print_top_author_ngramms_by_frags(mdb, 10)
-  print()
-  print_top_author_topics_by_frags(mdb, 10)
+    contexts = mdb.contexts
+    print_freq_cocitauth_by_frags(contexts, 50)
+    print()
+    print_top_author_ngramms_by_frags(mdb, 10)
+    print()
+    print_top_author_topics_by_frags(mdb, 10)
 
 
 def print_top_author_ngramms_by_frags(

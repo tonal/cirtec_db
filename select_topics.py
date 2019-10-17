@@ -6,19 +6,21 @@ from collections import Counter, defaultdict
 
 from pymongo import MongoClient
 
+from utuls import load_config
 
-MONGO_URI = 'mongodb://localhost:27017/'
 
 AUTHOR = 'Oates'
 
 
 def main():
-  client = MongoClient(MONGO_URI, compressors='snappy')
-  mdb = client['cirtec']
+  conf = load_config()
+  conf_mongo = conf['mongodb']
+  with MongoClient(conf_mongo['uri'], compressors='snappy') as client:
+    mdb = client[conf_mongo['db']] # 'cirtec'
 
-  print_freq_topics_by_frags(mdb.topics, 100)
-  print()
-  print_author_topics_by_frags(mdb.contexts, AUTHOR)
+    print_freq_topics_by_frags(mdb.topics, 100)
+    print()
+    print_author_topics_by_frags(mdb.contexts, AUTHOR)
 
 
 def print_author_topics_by_frags(contexts, author:str):
