@@ -7,3 +7,6 @@ parsel
 pymongo[srv, snappy]
 pyyaml
 requests
+
+aiohttp[speedups]
+motor
