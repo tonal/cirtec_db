@@ -5,6 +5,7 @@
 """
 from collections import Counter
 from functools import partial
+from pathlib import Path
 import re
 from urllib.parse import urlparse, parse_qs
 
@@ -12,7 +13,7 @@ import requests
 # from lxml import etree
 from parsel import Selector
 from pymongo import MongoClient
-
+import yaml
 
 MONGO_URI = 'mongodb://localhost:27017/'
 # MONGO_URI = 'mongodb://frigate:27017/'
@@ -30,8 +31,11 @@ re_suffix = re.compile(r'Suffix:\s* (.+)', re.I | re.X | re.S)
 
 
 def main():
-  client = MongoClient(MONGO_URI, compressors='snappy')
-  mdb = client['cirtec']
+  conf = load_config()
+  conf_mongo = conf['mongodb']
+  client = MongoClient(conf_mongo['uri'], compressors='snappy')
+
+  mdb = client[conf_mongo['db']] # 'cirtec'
   mpubs = mdb['publications']
   mpubs_update = partial(mpubs.update_one, upsert=True)
   mcont = mdb['contexts']
@@ -87,6 +91,11 @@ def main():
   print(msg2)
 
 
+def load_config():
+  path = Path(__file__).resolve()
+  conf = yaml.full_load(
+    path.with_name('config.yaml').open('r', encoding='utf-8'))
+  return conf
 
 
 if __name__ == '__main__':
