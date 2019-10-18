@@ -35,6 +35,7 @@ def main():
 def print_freq_contexts(contexts):
   """Суммарное распределение цитирований по 5-ти фрагментам для всех публикаций"""
   print(
+    'А',
     'Суммарное распределение цитирований по 5-ти фрагментам для всех публикаций:',
     'freq_contexts.json')
   curs = contexts.aggregate([
@@ -52,7 +53,7 @@ def print_freq_contexts_by_pubs(mdb):
   заданного автора.
   """
   print(
-    'Распределение цитирований по 5-ти фрагментам:',
+    'А', 'Распределение цитирований по 5-ти фрагментам:',
     'freq_contexts_by_pubs.json')
   publications = mdb.publications
   pubs = {
@@ -87,7 +88,7 @@ def print_freq_contexts_by_pubs(mdb):
 def print_freq_cocitauth_by_frags(contexts, topn:int=5):
   """Кросс-распределение «5 фрагментов» - «со-цитируемые авторы»"""
   print(
-    'Кросс-распределение «5 фрагментов» - «со-цитируемые авторы»:',
+    'А', 'Кросс-распределение «5 фрагментов» - «со-цитируемые авторы»:',
     'freq_cocitauth_by_frags.json')
   topN = get_topn_cocit_authors(contexts, topn)
 
@@ -148,6 +149,7 @@ def get_topn_cocit_authors(contexts, topn, *, include_conts:bool=False):
 def print_freq_ngramm_by_frag(mdb, topn:int=10, *, nka:int=2, ltype:str='lemmas'):
   """Кросс-распределение «5 фрагментов» - «фразы из контекстов цитирований»"""
   print(
+    'А',
     'Кросс-распределение «5 фрагментов» - «фразы из контекстов цитирований»:',
     'freq_ngramm_by_frag.json')
   n_gramms = mdb.n_gramms
@@ -220,6 +222,7 @@ def get_topn(
 def print_freq_topics_by_frags(mdb, topn:int=20):
   """Кросс-распределение «5 фрагментов» - «топики контекстов цитирований»"""
   print(
+    'А',
     'Кросс-распределение «5 фрагментов» - «топики контекстов цитирований»:',
     'freq_topics_by_frags.json')
   topics = mdb.topics
@@ -266,7 +269,7 @@ def print_freq_topics_by_frags(mdb, topn:int=20):
 def print_freqs_table(mdb):
   """Объединенная таблица где для каждого из 5 фрагментов"""
   print(
-    'Объединенная таблица где для каждого из 5 фрагментов:',
+    'А', 'Объединенная таблица где для каждого из 5 фрагментов:',
     'freqs_table.json')
   contexts = mdb.contexts
   curs = contexts.aggregate([
@@ -343,17 +346,10 @@ def print_freqs_table(mdb):
     cca = cocit_auths.get(i)
     if cca:
       cnt, au = cca
-      # print(
-      #   f'  со-цитируемых авторов: ({cnt})', ', '.join(f"'{a}'" for a in au))
       out_frag.update(cocitauthors=dict(count=cnt, list=au))
-    # else:
-    #   print('  со-цитируемых авторов: нет')
-    # print(
-    #   f'  фразы: ({ngramms[i][0]})', ', '.join(f"'{n}'" for n in ngramms[i][1]))
-    out_frag.update(ngramms=dict(count=ngramms[i][0], list=ngramms[i][1]))
-    # print(
-    #   f'  топики: {topics[i][0]}', ', '.join(f"'{n}'" for n in topics[i][1]))
-    out_frag.update(topics=dict(count=topics[i][0], list=topics[i][1]))
+    out_frag.update(
+      ngramms=dict(count=ngramms[i][0], list=ngramms[i][1]),
+      topics=dict(count=topics[i][0], list=topics[i][1]))
 
     out_dict[i] = out_frag
 
