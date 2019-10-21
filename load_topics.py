@@ -11,7 +11,7 @@ from operator import itemgetter
 from pymongo import MongoClient
 from pymongo.errors import DuplicateKeyError
 
-from utuls import load_config
+from utils import load_config
 
 
 TOPICS = 'topic_output.json'

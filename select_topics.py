@@ -6,7 +6,7 @@ from collections import Counter, defaultdict
 
 from pymongo import MongoClient
 
-from utuls import load_config
+from utils import load_config
 
 
 AUTHOR = 'Oates'

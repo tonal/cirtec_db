@@ -5,14 +5,11 @@
 """
 from collections import Counter, defaultdict
 import json
-from operator import itemgetter
-from typing import Optional, Sequence, Union, Tuple
 
 from pymongo import MongoClient
 
-from select4reportA import (
-  print_freq_cocitauth_by_frags, get_topn_cocit_authors, get_topn)
-from utuls import load_config
+from select4reportA import get_topn_cocit_authors, get_topn
+from utils import load_config
 
 
 def main():

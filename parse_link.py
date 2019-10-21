@@ -13,7 +13,7 @@ import requests
 from parsel import Selector
 from pymongo import MongoClient
 
-from utuls import load_config
+from utils import load_config
 
 
 # LINKS = 'http://cirtec.ranepa.ru/cgi/spadist4bundle.cgi?code=linked_papers&c=Sergey-Sinelnikov-Murylev'

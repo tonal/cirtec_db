@@ -8,8 +8,8 @@ import json
 
 from pymongo import MongoClient
 
-from select4reportA import print_freq_topics_by_frags, get_topn
-from utuls import load_config
+from select4reportA import get_topn
+from utils import load_config
 
 
 def main():
