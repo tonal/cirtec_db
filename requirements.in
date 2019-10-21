@@ -10,3 +10,4 @@ requests
 
 aiohttp[speedups]
 motor
+uvloop

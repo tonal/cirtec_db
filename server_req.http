@@ -1,0 +1,21 @@
+GET http://localhost:7667/cirtec/frags/
+
+###
+GET http://localhost:7667/cirtec/freq_contexts_by_pubs/
+
+###
+GET http://localhost:7667/cirtec/freq_cocitauth_by_frags/5
+
+###
+GET http://localhost:7667/cirtec/freq_cocitauth_by_frags/
+
+###
+GET http://localhost:7667/cirtec/cocit_authors/5
+
+###
+GET http://localhost:7667/cirtec/cocit_authors/
+
+###
+GET http://localhost:7667/cirtec/freq_topics_by_frags/
+
+###
