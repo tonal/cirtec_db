@@ -73,6 +73,9 @@ def create_srv():
   #   Кросс-распределение «фразы» - «топики контекстов цитирований»
   add_get(r'/cirtec/frags/ngramms/topics/', _req_frags_ngramms_topics)
 
+  # Г Кросс-распределение «топики» - «со-цитирования»
+  add_get(r'/cirtec/frags/topics/cocitauthors/', _req_frags_topics_cocitauthors)
+
   # Топ N со-цитируемых авторов
   add_get(r'/cirtec/top/cocitauthors/', _req_top_cocitauthors)
   # Топ N фраз
@@ -693,6 +696,57 @@ async def _req_frags_topics(request: web.Request) -> web.StreamResponse:
       crosstopics[co] = dict(frags=cnts, sum=sum(cnts.values()))
 
   return json_response(out_dict)
+
+async def _req_frags_topics_cocitauthors(
+  request: web.Request
+) -> web.StreamResponse:
+  """Кросс-распределение «топики» - «со-цитирования»"""
+  app = request.app
+  mdb = app['db']
+
+  topn = _get_arg_topn(request)
+
+  contexts = mdb.contexts
+
+  topn_authors:int = _get_arg_int(request, 'topn_cocitauthors')
+  if topn_authors:
+    topNa = await _get_topn_cocit_authors(
+      contexts, topn_authors, include_conts=False)
+    exists = frozenset(t for t, _ in topNa)
+  else:
+    exists = ()
+
+  topics = mdb.topics
+  topN = await _get_topn(topics, topn=topn)
+
+  out_dict = {}
+  for i, (topic, cnt, conts) in enumerate(topN, 1):
+    frags = Counter()
+    congr = defaultdict(Counter)
+
+    async for doc in contexts.aggregate([
+      {'$match': {'frag_num': {'$gt': 0}, '_id': {'$in': conts}}},
+      {'$project': {'prefix': False, 'suffix': False, 'exact': False}},
+      {'$unwind': '$cocit_authors'},
+    ]):
+      ngr = doc['cocit_authors']
+      if topn_authors and ngr not in exists:
+        continue
+
+      fnum = doc['frag_num']
+      frags[fnum] += 1
+      congr[ngr][fnum] += 1
+
+    crosscocitaith = {}
+    out_dict[topic] = dict(sum=cnt, frags=frags, cocitaithors=crosscocitaith)
+
+    for j, (co, cnts) in enumerate(
+      sorted(congr.items(), key=lambda kv: (-sum(kv[1].values()), kv[0])), 1
+    ):
+      crosscocitaith[co] = dict(frags=cnts, sum=sum(cnts.values()))
+
+  return json_response(out_dict)
+
 
 
 async def _get_topn(
