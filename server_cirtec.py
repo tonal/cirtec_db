@@ -57,16 +57,21 @@ def create_srv():
   #   Распределение цитирований по 5-ти фрагментам для отдельных публикаций. #заданного автора.
   add_get(r'/cirtec/frags/publications/', _req_frags_pubs)
   #   Кросс-распределение «5 фрагментов» - «со-цитируемые авторы»
-  add_get(r'/cirtec/frags/cocitauthors/', _req_frags_cocitauth)
+  add_get(r'/cirtec/frags/cocitauthors/', _req_frags_cocitauthors)
   #   Кросс-распределение «5 фрагментов» - «фразы из контекстов цитирований»
-  add_get(r'/cirtec/frags/ngramm/', _req_frags_ngramm)
+  add_get(r'/cirtec/frags/ngramms/', _req_frags_ngramm)
   #   Кросс-распределение «5 фрагментов» - «топики контекстов цитирований»
   add_get(r'/cirtec/frags/topics/', _req_frags_topics)
 
   # Б Кросс-распределение «со-цитирования» - «фразы из контекстов цитирований»
-  add_get(r'/cirtec/frags/cocitauthors/ngramms/', _req_frags_author_ngramms)
+  add_get(r'/cirtec/frags/cocitauthors/ngramms/', _req_frags_cocitauthors_ngramms)
   #   Кросс-распределение «со-цитирования» - «топики контекстов цитирований»
-  add_get(r'/cirtec/frags/cocitauthors/topics/', _req_frags_author_topics)
+  add_get(r'/cirtec/frags/cocitauthors/topics/', _req_frags_cocitauthors_topics)
+
+  # В Кросс-распределение «фразы» - «со-цитирования»
+  add_get(r'/cirtec/frags/ngramms/cocitauthors/', _req_frags_ngramms_cocitauthors)
+  #   Кросс-распределение «фразы» - «топики контекстов цитирований»
+  add_get(r'/cirtec/frags/ngramms/topics/', _req_frags_ngramms_topics)
 
   # Топ N со-цитируемых авторов
   add_get(r'/cirtec/top/cocitauthors/', _req_top_cocitauthors)
@@ -205,7 +210,7 @@ async def _req_frags_pubs(
   return json_response(out_pubs)
 
 
-async def _req_frags_cocitauth(request: web.Request) -> web.StreamResponse:
+async def _req_frags_cocitauthors(request: web.Request) -> web.StreamResponse:
   """
   А
   Кросс-распределение «5 фрагментов» - «со-цитируемые авторы»
@@ -247,7 +252,7 @@ async def _req_frags_cocitauth(request: web.Request) -> web.StreamResponse:
   return json_response(out_dict)
 
 
-async def _req_frags_author_ngramms(request: web.Request) -> web.StreamResponse:
+async def _req_frags_cocitauthors_ngramms(request: web.Request) -> web.StreamResponse:
   """Б Кросс-распределение «со-цитирования» - «фразы из контекстов цитирований»"""
   app = request.app
   mdb = app['db']
@@ -327,7 +332,7 @@ async def _req_frags_author_ngramms(request: web.Request) -> web.StreamResponse:
   return json_response(out_dict)
 
 
-async def _req_frags_author_topics(request: web.Request) -> web.StreamResponse:
+async def _req_frags_cocitauthors_topics(request: web.Request) -> web.StreamResponse:
   """Кросс-распределение «со-цитирования» - «топики контекстов цитирований»"""
   app = request.app
   mdb = app['db']
@@ -515,6 +520,131 @@ async def _req_frags_ngramm(request: web.Request) -> web.StreamResponse:
       sorted(congr.items(), key=lambda kv: (-sum(kv[1].values()), kv[0])), 1
     ):
       crossgrams[co] = dict(frags=cnts, sum=sum(cnts.values()))
+
+  return json_response(out_dict)
+
+
+async def _req_frags_ngramms_cocitauthors(request: web.Request) -> web.StreamResponse:
+  """Кросс-распределение «фразы» - «со-цитирования»"""
+  app = request.app
+  mdb = app['db']
+
+  topn = _get_arg_topn(request)
+  if not topn:
+    topn = 10
+
+  contexts = mdb.contexts
+
+  topn_authors:int = _get_arg_int(request, 'topn_cocitauthors')
+  if topn_authors:
+    topNa = await _get_topn_cocit_authors(
+      contexts, topn_authors, include_conts=False)
+    exists = frozenset(t for t, _ in topNa)
+  else:
+    exists = ()
+
+  nka:int = _get_arg_int(request, 'nka')
+  ltype:str = _get_arg(request, 'ltype')
+  if nka or ltype:
+    preselect = [
+      {'$match': {f: v for f, v in (('nka', nka), ('type', ltype)) if v}}]
+  else:
+    preselect = None
+
+  n_gramms = mdb.n_gramms
+  top_ngramms = await _get_topn(
+    n_gramms, topn, preselect=preselect, sum_expr='$linked_papers.cnt')
+
+  out_dict = {}
+  for i, (ngramm, cnt, conts) in enumerate(top_ngramms, 1):
+    frags = Counter()
+    congr = defaultdict(Counter)
+
+    async for doc in contexts.aggregate([
+      {'$match': {'frag_num': {'$gt': 0}, '_id': {'$in': conts}}},
+      {'$project': {'prefix': False, 'suffix': False, 'exact': False}},
+      {'$unwind': '$cocit_authors'},
+    ]):
+      ngr = doc['cocit_authors']
+      if topn_authors and ngr not in exists:
+        continue
+
+      fnum = doc['frag_num']
+      frags[fnum] += 1
+      congr[ngr][fnum] += 1
+
+    crosscocitaith = {}
+    out_dict[ngramm] = dict(
+      sum=cnt, frags=frags, cocitaithors=crosscocitaith)
+
+    for j, (co, cnts) in enumerate(
+      sorted(congr.items(), key=lambda kv: (-sum(kv[1].values()), kv[0])), 1
+    ):
+      crosscocitaith[co] = dict(frags=cnts, sum=sum(cnts.values()))
+
+  return json_response(out_dict)
+
+
+async def _req_frags_ngramms_topics(request: web.Request) -> web.StreamResponse:
+  """Кросс-распределение «фразы» - «топики контекстов цитирований»"""
+  app = request.app
+  mdb = app['db']
+
+  topn = _get_arg_topn(request)
+  if not topn:
+    topn = 10
+
+  topn_topics:int = _get_arg_int(request, 'topn_topics')
+  if topn_topics:
+    topics = mdb.topics
+    topNt = await _get_topn(topics, topn=topn_topics)
+    exists = frozenset(t for t, _, _ in topNt)
+  else:
+    exists = ()
+
+  nka:int = _get_arg_int(request, 'nka')
+  ltype:str = _get_arg(request, 'ltype')
+  if nka or ltype:
+    preselect = [
+      {'$match': {f: v for f, v in (('nka', nka), ('type', ltype)) if v}}]
+  else:
+    preselect = None
+
+  n_gramms = mdb.n_gramms
+  top_ngramms = await _get_topn(
+    n_gramms, topn, preselect=preselect, sum_expr='$linked_papers.cnt')
+
+  contexts = mdb.contexts
+
+  out_dict = {}
+  for i, (ngrmm, cnt, conts) in enumerate(top_ngramms, 1):
+    frags = Counter()
+    congr = defaultdict(Counter)
+
+    async for doc in contexts.aggregate([
+      {'$match': {'frag_num': {'$gt': 0}, '_id': {'$in': conts}}},
+      {'$project': {'prefix': False, 'suffix': False, 'exact': False}},
+      {'$lookup': {
+        'from': 'topics', 'localField': '_id',
+        'foreignField': 'linked_papers.cont_id', 'as': 'cont'}},
+      {'$unwind': '$cont'},
+      {'$unwind': '$cont.linked_papers'},
+      {'$match': {'$expr': {'$eq': ["$_id", "$cont.linked_papers.cont_id"]}}},
+      {'$project': {'cont.type': False}}, # 'cont.linked_papers': False,
+    ]):
+      cont = doc['cont']
+      ngr = cont['title']
+      fnum = doc['frag_num']
+      frags[fnum] += 1
+      congr[ngr][fnum] += 1
+
+    crosstopics = {}
+    out_dict[ngrmm] = dict(sum=cnt, frags=frags, crosstopics=crosstopics)
+
+    for j, (co, cnts) in enumerate(
+      sorted(congr.items(), key=lambda kv: (-sum(kv[1].values()), kv[0])), 1
+    ):
+      crosstopics[co] = dict(frags=cnts, sum=sum(cnts.values()))
 
   return json_response(out_dict)
 

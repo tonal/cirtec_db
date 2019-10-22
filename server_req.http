@@ -28,10 +28,10 @@ GET http://localhost:7667/cirtec/top/cocitauthors/
 GET http://localhost:7667/cirtec/top/cocitauthors/?topn=5
 
 ###
-GET http://localhost:7667/cirtec/top/ngramm/
+GET http://localhost:7667/cirtec/top/ngramms/
 
 ###
-GET http://localhost:7667/cirtec/top/ngramm/?topn=5
+GET http://localhost:7667/cirtec/top/ngramms/?topn=5
 
 ###
 GET http://localhost:7667/cirtec/top/topics/
@@ -50,5 +50,17 @@ GET http://localhost:7667/cirtec/frags/cocitauthors/topics/
 
 ###
 GET http://localhost:7667/cirtec/frags/cocitauthors/topics/?topn=5
+
+###
+GET http://localhost:7667/cirtec/frags/ngramms/cocitauthors/
+
+###
+GET http://localhost:7667/cirtec/frags/ngramms/cocitauthors/?topn=5
+
+###
+GET http://localhost:7667/cirtec/frags/ngramms/topics/
+
+###
+GET http://localhost:7667/cirtec/frags/ngramms/topics/?topn=5
 
 ###

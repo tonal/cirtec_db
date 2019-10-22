@@ -123,7 +123,7 @@ async def test_frags_topics_topn(aiohttp_client, topn:int):
 
 async def test_frags_ngramm(aiohttp_client):
   client = await init_server(aiohttp_client)
-  rsp = await client.get('/cirtec/frags/ngramm/')
+  rsp = await client.get('/cirtec/frags/ngramms/')
   assert 200 == rsp.status
   jrsp = await rsp.json()
   assert type(jrsp) == dict
@@ -134,7 +134,47 @@ async def test_frags_ngramm(aiohttp_client):
 async def test_frags_ngramm_topn(aiohttp_client, topn:int):
   client = await init_server(aiohttp_client)
   rsp = await client.get(
-    '/cirtec/frags/ngramm/', params=dict(topn=str(topn)))
+    '/cirtec/frags/ngramms/', params=dict(topn=str(topn)))
+  assert 200 == rsp.status
+  jrsp = await rsp.json()
+  assert type(jrsp) == dict
+  assert len(jrsp) == 5
+
+
+async def test_frags_ngramm_cocitauthors(aiohttp_client):
+  client = await init_server(aiohttp_client)
+  rsp = await client.get('/cirtec/frags/ngramms/cocitauthors/')
+  assert 200 == rsp.status
+  jrsp = await rsp.json()
+  assert type(jrsp) == dict
+  assert len(jrsp) == 10
+
+
+@pytest.mark.parametrize('topn', [5])
+async def test_frags_ngramm_cocitauthors_topn(aiohttp_client, topn:int):
+  client = await init_server(aiohttp_client)
+  rsp = await client.get(
+    '/cirtec/frags/ngramms/cocitauthors/', params=dict(topn=str(topn)))
+  assert 200 == rsp.status
+  jrsp = await rsp.json()
+  assert type(jrsp) == dict
+  assert len(jrsp) == 5
+
+
+async def test_frags_ngramm_topics(aiohttp_client):
+  client = await init_server(aiohttp_client)
+  rsp = await client.get('/cirtec/frags/ngramms/topics/')
+  assert 200 == rsp.status
+  jrsp = await rsp.json()
+  assert type(jrsp) == dict
+  assert len(jrsp) == 10
+
+
+@pytest.mark.parametrize('topn', [5])
+async def test_frags_ngramm_topics_topn(aiohttp_client, topn:int):
+  client = await init_server(aiohttp_client)
+  rsp = await client.get(
+    '/cirtec/frags/ngramms/topics/', params=dict(topn=str(topn)))
   assert 200 == rsp.status
   jrsp = await rsp.json()
   assert type(jrsp) == dict
