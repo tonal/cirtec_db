@@ -65,6 +65,8 @@ def create_srv():
 
   # Б Кросс-распределение «со-цитирования» - «фразы из контекстов цитирований»
   add_get(r'/cirtec/frags/cocitauthors/ngramms/', _req_frags_author_ngramms)
+  #   Кросс-распределение «со-цитирования» - «топики контекстов цитирований»
+  add_get(r'/cirtec/frags/cocitauthors/topics/', _req_frags_author_topics)
 
   # Топ N со-цитируемых авторов
   add_get(r'/cirtec/top/cocitauthors/', _req_top_cocitauthors)
@@ -321,6 +323,60 @@ async def _req_frags_author_ngramms(request: web.Request) -> web.StreamResponse:
       sorted(congr.items(), key=lambda kv: (-sum(kv[1].values()), kv[0])), 1
     ):
       crossgrams[co] = dict(frags=cnts, sum=sum(cnts.values()))
+
+  return json_response(out_dict)
+
+
+async def _req_frags_author_topics(request: web.Request) -> web.StreamResponse:
+  """Кросс-распределение «со-цитирования» - «топики контекстов цитирований»"""
+  app = request.app
+  mdb = app['db']
+
+  topn:int = _get_arg_topn(request)
+  topn_topics:int = _get_arg_int(request, 'topn_topics')
+  if topn_topics:
+    topics = mdb.topics
+    top_topics = await _get_topn(topics, topn=topn)
+    exists = frozenset(t for t, _, _ in top_topics)
+  else:
+    exists = ()
+
+  contexts = mdb.contexts
+  topN = await _get_topn_cocit_authors(contexts, topn, include_conts=True)
+
+  out_dict = {}
+  for i, (cocitauthor, cnt, conts) in enumerate(topN, 1):
+    frags = Counter()
+    congr = defaultdict(Counter)
+
+    async for doc in contexts.aggregate([
+      {'$match': {'frag_num': {'$gt': 0}, '_id': {'$in': conts}}},
+      {'$project': {'prefix': False, 'suffix': False, 'exact': False}},
+      {'$lookup': {
+        'from': 'topics', 'localField': '_id',
+        'foreignField': 'linked_papers.cont_id', 'as': 'cont'}},
+      {'$unwind': '$cont'},
+      {'$unwind': '$cont.linked_papers'},
+      {'$match': {'$expr': {'$eq': ["$_id", "$cont.linked_papers.cont_id"]}}},
+      {'$project': {'cont.type': False}}, # 'cont.linked_papers': False,
+      # {'$sort': {'frag_num': 1}},
+    ]):
+      cont = doc['cont']
+      ngr = cont['title']
+      if topn_topics and ngr not in exists:
+        continue
+
+      fnum = doc['frag_num']
+      frags[fnum] += 1
+      congr[ngr][fnum] += 1
+
+    crosstopics = {}
+    out_dict[cocitauthor] = dict(sum=cnt, frags=frags, crosstopics=crosstopics)
+
+    for j, (co, cnts) in enumerate(
+      sorted(congr.items(), key=lambda kv: (-sum(kv[1].values()), kv[0])), 1
+    ):
+      crosstopics[co] = dict(frags=cnts, sum=sum(cnts.values()))
 
   return json_response(out_dict)
 
