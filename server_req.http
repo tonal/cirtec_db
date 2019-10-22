@@ -40,3 +40,9 @@ GET http://localhost:7667/cirtec/top/topics/
 GET http://localhost:7667/cirtec/top/topics/?topn=5
 
 ###
+GET http://localhost:7667/cirtec/frags/cocitauthors/ngramms/
+
+###
+GET http://localhost:7667/cirtec/frags/cocitauthors/ngramms/?topn=5
+
+###

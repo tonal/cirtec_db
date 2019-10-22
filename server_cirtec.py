@@ -63,7 +63,7 @@ def create_srv():
   add_get(r'/cirtec/frags/topics/', _req_frags_topics)
 
   # Б Кросс-распределение «со-цитирования» - «фразы из контекстов цитирований»
-  # add_get(r'/cirtec/freq_cocitauth_by_frags/', _req_frags_cocitauth)
+  add_get(r'/cirtec/frags/cocitauthors/ngramms/', _req_frags_author_ngramms)
 
   # Топ N со-цитируемых авторов
   add_get(r'/cirtec/top/cocitauthors/', _req_top_cocitauthors)
@@ -202,9 +202,7 @@ async def _req_frags_pubs(
   return json_response(out_pubs)
 
 
-async def _req_frags_cocitauth(
-  request: web.Request
-) -> web.StreamResponse:
+async def _req_frags_cocitauth(request: web.Request) -> web.StreamResponse:
   """
   А
   Кросс-распределение «5 фрагментов» - «со-цитируемые авторы»
@@ -242,6 +240,86 @@ async def _req_frags_cocitauth(
       sorted(coaut.items(), key=lambda kv: (-sum(kv[1].values()), kv[0])), 1
     ):
       out_cocitauthors[co] = dict(frags=cnts, sum=sum(cnts.values()))
+
+  return json_response(out_dict)
+
+
+async def _req_frags_author_ngramms(request: web.Request) -> web.StreamResponse:
+  """Б Кросс-распределение «со-цитирования» - «фразы из контекстов цитирований»"""
+  app = request.app
+  mdb = app['db']
+
+  topn:int = _get_arg_topn(request)
+  # if not topn:
+  #   topn = 10
+  topn_gramm:int = _get_arg_int(request, 'topn_gramm')
+  if not topn_gramm:
+    topn_gramm = 500
+  nka:int = _get_arg_int(request, 'nka')
+  ltype:str = _get_arg(request, 'ltype')
+
+  if topn_gramm:
+    n_gramms = mdb.n_gramms
+    if nka or ltype:
+      preselect = [
+        {'$match': {f: v for f, v in (('nka', nka), ('type', ltype)) if v}}]
+    else:
+      preselect = None
+    top_ngramms = await _get_topn(
+      n_gramms, topn_gramm, preselect=preselect, sum_expr='$linked_papers.cnt')
+    exists = frozenset(t for t, _, _ in top_ngramms)
+  else:
+    exists = ()
+
+  contexts = mdb.contexts
+  topN = await _get_topn_cocit_authors(contexts, topn, include_conts=True)
+
+  pipeline = [
+    # 'cocit_authors': cocitauthor}}, #
+    {'$project': {'prefix': False, 'suffix': False, 'exact': False}}, {
+      '$lookup': {
+        'from': 'n_gramms', 'localField': '_id',
+        'foreignField': 'linked_papers.cont_id', 'as': 'cont'}},
+    {'$unwind': '$cont'},
+  ]
+  if nka or ltype:
+    # {'$match': {'cont.nka': nka, 'cont.type': ltype}},
+    pipeline += [
+      {'$match': {
+        f'cont.{f}': v for f, v in (('nka', nka), ('type', ltype)) if v}},
+    ]
+  pipeline += [
+    {'$unwind': '$cont.linked_papers'},
+    {'$match': {'$expr': {'$eq': ["$_id", "$cont.linked_papers.cont_id"]}}},
+    {'$project': {'cont.type': False}},  # 'cont.linked_papers': False,
+    # {'$sort': {'frag_num': 1}},
+  ]
+  out_dict = {}
+  for i, (cocitauthor, cnt, conts) in enumerate(topN, 1):
+    frags = Counter()
+    congr = defaultdict(Counter)
+
+    work_pipeline = [
+      {'$match': {'frag_num': {'$gt': 0}, '_id': {'$in': conts}}},
+    ] +  pipeline
+
+    async for doc in contexts.aggregate(work_pipeline):
+      cont = doc['cont']
+      ngr = cont['title']
+      if topn_gramm and ngr not in exists:
+        continue
+
+      fnum = doc['frag_num']
+      frags[fnum] += 1
+      congr[ngr][fnum] += cont['linked_papers']['cnt']
+
+    crossgrams = {}
+    out_dict[cocitauthor] = dict(sum=cnt, frags=frags, crossgrams=crossgrams)
+
+    for j, (co, cnts) in enumerate(
+      sorted(congr.items(), key=lambda kv: (-sum(kv[1].values()), kv[0])), 1
+    ):
+      crossgrams[co] = dict(frags=cnts, sum=sum(cnts.values()))
 
   return json_response(out_dict)
 
@@ -322,8 +400,8 @@ async def _req_frags_ngramm(request: web.Request) -> web.StreamResponse:
   if not topn:
     topn = 10
   # nka: int = 2, ltype:str = 'lemmas'
-  nka = _get_arg_int(request, 'nka')
-  ltype = _get_arg(request, 'ltype')
+  nka:int = _get_arg_int(request, 'nka')
+  ltype:str = _get_arg(request, 'ltype')
   if nka or ltype:
     preselect = [
       {'$match': {f: v for f, v in (('nka', nka), ('type', ltype)) if v}}]

@@ -61,6 +61,26 @@ async def test_frags_cocitauthors_topn(aiohttp_client, topn:int):
   assert len(jrsp) == 5
 
 
+async def test_frags_cocitauthors_ngramm(aiohttp_client):
+  client = await init_server(aiohttp_client)
+  rsp = await client.get('/cirtec/frags/cocitauthors/ngramms/')
+  assert 200 == rsp.status
+  jrsp = await rsp.json()
+  assert type(jrsp) == dict
+  assert len(jrsp) >= 10
+
+
+@pytest.mark.parametrize('topn', [5])
+async def test_frags_cocitauthors_ngramm_topn(aiohttp_client, topn:int):
+  client = await init_server(aiohttp_client)
+  rsp = await client.get(
+    '/cirtec/frags/cocitauthors/ngramms/', params=dict(topn=str(topn)))
+  assert 200 == rsp.status
+  jrsp = await rsp.json()
+  assert type(jrsp) == dict
+  assert len(jrsp) == 5
+
+
 async def test_frags_topics(aiohttp_client):
   client = await init_server(aiohttp_client)
   rsp = await client.get('/cirtec/frags/topics/')
