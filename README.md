@@ -24,19 +24,19 @@ GET /cirtec/frags/
 
 ### А Распределение цитирований по 5-ти фрагментам для отдельных публикаций. #заданного автора.
 ```http request
-GET /cirtec/freq_contexts_by_pubs/
+GET /cirtec/frags/publications/
 ```
 
 ### А Кросс-распределение «5 фрагментов» - «со-цитируемые авторы»
 ```http request
-GET /cirtec/freq_cocitauth_by_frags/
+GET /cirtec/frags/cocitauthors/
 ```
 Параметры:
   - **topn**: число интерисующих авторов из topN. Можно не указывать
 
 ### А Кросс-распределение «5 фрагментов» - «фразы из контекстов цитирований»
 ```http request
-GET /cirtec/freq_ngramm_by_frag/
+GET /cirtec/frags/ngramm/
 ```
 Параметры:
   - **topn**: число интерисующих фраз из topN. Если не указывать topn=10.
@@ -45,7 +45,7 @@ GET /cirtec/freq_ngramm_by_frag/
 
 ### A Кросс-распределение «5 фрагментов» - «топики контекстов цитирований»
 ```http request
-GET /cirtec/freq_topics_by_frags/
+GET /cirtec/frags/topics/
 ```
 Параметры:
   - **topn**: число интерисующих топиков из topN. Можно не указывать
@@ -53,14 +53,14 @@ GET /cirtec/freq_topics_by_frags/
 
 ### Топ N Со-цитируемых авторов 
 ```http request
-GET /cirtec/top_cocit_authors/
+GET /cirtec/top/cocitauthors/
 ```
 Параметры:
   - **topn**: число интерисующих авторов из topN. Можно не указывать
 
 ### Топ N фраз 
 ```http request
-GET /cirtec/top_ngramm/
+GET /cirtec/top/ngramm/
 ```
 Параметры:
 Параметры:
@@ -70,7 +70,7 @@ GET /cirtec/top_ngramm/
 
 ### Топ N топиков 
 ```http request
-GET /cirtec/top_topics/
+GET /cirtec/top/topics/
 ```
 Параметры:
   - **topn**: число интерисующих топиков из topN. Можно не указывать

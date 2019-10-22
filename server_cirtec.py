@@ -54,20 +54,23 @@ def create_srv():
   # А Суммарное распределение цитирований по 5-ти фрагментам для всех публикаций
   add_get(r'/cirtec/frags/', _req_frags)
   #   Распределение цитирований по 5-ти фрагментам для отдельных публикаций. #заданного автора.
-  add_get(r'/cirtec/freq_contexts_by_pubs/', _req_freq_contexts_by_pubs)
+  add_get(r'/cirtec/frags/publications/', _req_frags_pubs)
   #   Кросс-распределение «5 фрагментов» - «со-цитируемые авторы»
-  add_get(r'/cirtec/freq_cocitauth_by_frags/', _req_freq_cocitauth_by_frags)
+  add_get(r'/cirtec/frags/cocitauthors/', _req_frags_cocitauth)
   #   Кросс-распределение «5 фрагментов» - «фразы из контекстов цитирований»
-  add_get(r'/cirtec/freq_ngramm_by_frag/', _req_freq_ngramm_by_frag)
+  add_get(r'/cirtec/frags/ngramm/', _req_frags_ngramm)
   #   Кросс-распределение «5 фрагментов» - «топики контекстов цитирований»
-  add_get(r'/cirtec/freq_topics_by_frags/', _req_freq_topics_by_frags)
+  add_get(r'/cirtec/frags/topics/', _req_frags_topics)
+
+  # Б Кросс-распределение «со-цитирования» - «фразы из контекстов цитирований»
+  # add_get(r'/cirtec/freq_cocitauth_by_frags/', _req_frags_cocitauth)
 
   # Топ N со-цитируемых авторов
-  add_get(r'/cirtec/top_cocit_authors/', _req_top_cocit_authors)
+  add_get(r'/cirtec/top/cocitauthors/', _req_top_cocitauthors)
   # Топ N фраз
-  add_get(r'/cirtec/top_ngramm/', _req_top_ngramm)
+  add_get(r'/cirtec/top/ngramm/', _req_top_ngramm)
   # Топ N топиков
-  add_get(r'/cirtec/top_topics/', _req_top_topics)
+  add_get(r'/cirtec/top/topics/', _req_top_topics)
 
   app['conf'] = conf
   app['tasks'] = set()
@@ -162,7 +165,7 @@ async def _req_frags(request:web.Request) -> web.StreamResponse:
   return json_response(cnts)
 
 
-async def _req_freq_contexts_by_pubs(
+async def _req_frags_pubs(
   request: web.Request
 ) -> web.StreamResponse:
   """
@@ -199,7 +202,7 @@ async def _req_freq_contexts_by_pubs(
   return json_response(out_pubs)
 
 
-async def _req_freq_cocitauth_by_frags(
+async def _req_frags_cocitauth(
   request: web.Request
 ) -> web.StreamResponse:
   """
@@ -272,7 +275,7 @@ async def _get_topn_cocit_authors(
   return tuple(top50)
 
 
-async def _req_top_cocit_authors(request: web.Request) -> web.StreamResponse:
+async def _req_top_cocitauthors(request: web.Request) -> web.StreamResponse:
   """Топ N со-цитируемых авторов"""
   app = request.app
   mdb = app['db']
@@ -310,7 +313,7 @@ def _get_arg_topn(request: web.Request) -> Optional[int]:
   return topn
 
 
-async def _req_freq_ngramm_by_frag(request: web.Request) -> web.StreamResponse:
+async def _req_frags_ngramm(request: web.Request) -> web.StreamResponse:
   """Кросс-распределение «5 фрагментов» - «фразы из контекстов цитирований»"""
   app = request.app
   mdb = app['db']
@@ -381,7 +384,7 @@ async def _req_freq_ngramm_by_frag(request: web.Request) -> web.StreamResponse:
   return json_response(out_dict)
 
 
-async def _req_freq_topics_by_frags(request: web.Request) -> web.StreamResponse:
+async def _req_frags_topics(request: web.Request) -> web.StreamResponse:
   app = request.app
   mdb = app['db']
 

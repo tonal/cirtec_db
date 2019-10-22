@@ -1,0 +1,4 @@
+# -*- coding: utf-8 -*-
+-r requirements.in
+
+pytest-aiohttp
