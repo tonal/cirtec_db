@@ -36,8 +36,8 @@ def main():
 
 def _init_logging():
   self_path = Path(__file__)
-  conf_log_path = self_path.parent / 'logging.yaml'
-  conf_log = yaml.full_load(conf_log_path.open())
+  conf_log_path = self_path.with_name('logging.yaml')
+  conf_log = yaml.full_load(conf_log_path.open(encoding='utf-8'))
   logging.config.dictConfig(conf_log['logging'])
   # dsn = conf_log.get('sentry', {}).get('dsn')
   # if dsn:
@@ -54,22 +54,20 @@ def create_srv():
   # А Суммарное распределение цитирований по 5-ти фрагментам для всех публикаций
   add_get(r'/cirtec/frags/', _req_frags)
   #   Распределение цитирований по 5-ти фрагментам для отдельных публикаций. #заданного автора.
-  add_get(
-    r'/cirtec/freq_contexts_by_pubs/', _req_freq_contexts_by_pubs)
+  add_get(r'/cirtec/freq_contexts_by_pubs/', _req_freq_contexts_by_pubs)
   #   Кросс-распределение «5 фрагментов» - «со-цитируемые авторы»
-  add_get(
-    r'/cirtec/freq_cocitauth_by_frags/{topn:(\d+)?}',
-    _req_freq_cocitauth_by_frags)
+  add_get(r'/cirtec/freq_cocitauth_by_frags/', _req_freq_cocitauth_by_frags)
+  #   Кросс-распределение «5 фрагментов» - «фразы из контекстов цитирований»
+  add_get(r'/cirtec/freq_ngramm_by_frag/', _req_freq_ngramm_by_frag)
   #   Кросс-распределение «5 фрагментов» - «топики контекстов цитирований»
-  add_get(
-    r'/cirtec/freq_topics_by_frags/{topn:(\d+)?}',
-    _req_freq_topics_by_frags)
+  add_get(r'/cirtec/freq_topics_by_frags/', _req_freq_topics_by_frags)
+
   # Топ N со-цитируемых авторов
-  add_get(r'/cirtec/cocit_authors/{topn:(\d+)?}', _req_cocit_authors)
-  # router.add_get(
-  #   r'/remains_click/provider/{idprovider:\d+}'
-  #   r'/{start:(\d{4}-\d\d-\d\d)?}/{stop:(\d{4}-\d\d-\d\d)?}',
-  #   _get_prov_rems, allow_head=False)
+  add_get(r'/cirtec/top_cocit_authors/', _req_top_cocit_authors)
+  # Топ N фраз
+  add_get(r'/cirtec/top_ngramm/', _req_top_ngramm)
+  # Топ N топиков
+  add_get(r'/cirtec/top_topics/', _req_top_topics)
 
   app['conf'] = conf
   app['tasks'] = set()
@@ -274,7 +272,8 @@ async def _get_topn_cocit_authors(
   return tuple(top50)
 
 
-async def _req_cocit_authors(request: web.Request) -> web.StreamResponse:
+async def _req_top_cocit_authors(request: web.Request) -> web.StreamResponse:
+  """Топ N со-цитируемых авторов"""
   app = request.app
   mdb = app['db']
 
@@ -287,11 +286,99 @@ async def _req_cocit_authors(request: web.Request) -> web.StreamResponse:
   return json_response(out)
 
 
+def _get_arg(request:web.Request, argname:str) -> Optional[str]:
+  arg = request.query.get(argname)
+  if arg:
+    arg = arg.strip()
+    return arg
+
+
+def _get_arg_int(request:web.Request, argname:str) -> Optional[int]:
+  arg = _get_arg(request, argname)
+  if arg:
+    try:
+      arg = int(arg)
+      return arg
+    except ValueError as ex:
+      _logger.error(
+        'Неожиданное значение параметра topn "%s" при переводе в число: %s',
+        arg, ex)
+
+
 def _get_arg_topn(request: web.Request) -> Optional[int]:
-  topn = request.match_info.get('topn')
-  if topn:
-    topn = int(topn)
+  topn = _get_arg_int(request, 'topn')
   return topn
+
+
+async def _req_freq_ngramm_by_frag(request: web.Request) -> web.StreamResponse:
+  """Кросс-распределение «5 фрагментов» - «фразы из контекстов цитирований»"""
+  app = request.app
+  mdb = app['db']
+
+  topn = _get_arg_topn(request)
+  if not topn:
+    topn = 10
+  # nka: int = 2, ltype:str = 'lemmas'
+  nka = _get_arg_int(request, 'nka')
+  ltype = _get_arg(request, 'ltype')
+  if nka or ltype:
+    preselect = [
+      {'$match': {f: v for f, v in (('nka', nka), ('type', ltype)) if v}}]
+    postmath = [
+      {'$match': {
+        f: v for f, v in (('cont.nka', nka), ('cont.type', ltype)) if v}}]
+  else:
+    preselect = None
+    postmath = None
+
+  n_gramms = mdb.n_gramms
+  topN = await _get_topn(
+    n_gramms, topn, preselect=preselect, sum_expr='$linked_papers.cnt')
+  exists = frozenset(t for t, _, _ in topN)
+  out_dict = {}
+  contexts = mdb.contexts
+
+  pipeline = [
+    {'$project': {'prefix': False, 'suffix': False, 'exact': False}},
+    {
+      '$lookup': {
+        'from': 'n_gramms', 'localField': '_id',
+        'foreignField': 'linked_papers.cont_id', 'as': 'cont'}},
+    {'$unwind': '$cont'},
+  ]
+  if postmath:
+    pipeline += postmath
+  pipeline += [
+    {'$unwind': '$cont.linked_papers'},
+    {'$match': {'$expr': {'$eq': ["$_id", "$cont.linked_papers.cont_id"]}}},
+    {'$project': {'cont.type': False}},  # 'cont.linked_papers': False,
+    # {'$sort': {'frag_num': 1}},
+  ]
+  for i, (ngrmm, cnt, conts) in enumerate(topN, 1):
+    congr = defaultdict(Counter)
+
+    work_pipeline = [
+      {'$match': {'frag_num': {'$gt': 0}, '_id': {'$in': conts}}}
+    ] + pipeline
+
+    async for doc in contexts.aggregate(work_pipeline):
+      cont = doc['cont']
+      ngr = cont['title']
+      if ngr not in exists:
+        continue
+      fnum = doc['frag_num']
+      congr[ngr][fnum] += cont['linked_papers']['cnt']
+
+    frags = congr.pop(ngrmm)
+    crossgrams = {}
+    out_dict[ngrmm] = dict(sum=cnt, frags=frags, crossgrams=crossgrams)
+
+    for j, (co, cnts) in enumerate(
+      sorted(congr.items(), key=lambda kv: (-sum(kv[1].values()), kv[0])), 1
+    ):
+      crossgrams[co] = dict(frags=cnts, sum=sum(cnts.values()))
+
+  return json_response(out_dict)
 
 
 async def _req_freq_topics_by_frags(request: web.Request) -> web.StreamResponse:
@@ -362,6 +449,43 @@ async def _get_topn(
   topN = tuple([get_as_tuple(doc) async for doc in colls.aggregate(pipeline)])
 
   return topN
+
+
+async def _req_top_ngramm(request: web.Request) -> web.StreamResponse:
+  """Топ N фраз"""
+  app = request.app
+  mdb = app['db']
+
+  topn = _get_arg_topn(request)
+
+  nka = _get_arg_int(request, 'nka')
+  ltype = _get_arg(request, 'ltype')
+  if nka or ltype:
+    preselect = [
+      {'$match': {f: v for f, v in (('nka', nka), ('type', ltype)) if v}}]
+  else:
+    preselect = None
+
+  n_gramms = mdb.n_gramms
+  topN = await _get_topn(
+    n_gramms, topn, preselect=preselect, sum_expr='$linked_papers.cnt')
+
+  out = tuple(dict(title=n, contects=conts) for n, _, conts in topN)
+  return json_response(out)
+
+
+async def _req_top_topics(request: web.Request) -> web.StreamResponse:
+  """Топ N топиков"""
+  app = request.app
+  mdb = app['db']
+
+  topn = _get_arg_topn(request)
+
+  topics = mdb.topics
+  topN = await _get_topn(topics, topn=topn)
+
+  out = tuple(dict(title=n, contects=conts) for n, _, conts in topN)
+  return json_response(out)
 
 
 if __name__ == '__main__':

@@ -4,18 +4,39 @@ GET http://localhost:7667/cirtec/frags/
 GET http://localhost:7667/cirtec/freq_contexts_by_pubs/
 
 ###
-GET http://localhost:7667/cirtec/freq_cocitauth_by_frags/5
-
-###
 GET http://localhost:7667/cirtec/freq_cocitauth_by_frags/
 
 ###
-GET http://localhost:7667/cirtec/cocit_authors/5
-
-###
-GET http://localhost:7667/cirtec/cocit_authors/
+GET http://localhost:7667/cirtec/freq_cocitauth_by_frags/?topn=5
 
 ###
 GET http://localhost:7667/cirtec/freq_topics_by_frags/
+
+###
+GET http://localhost:7667/cirtec/freq_topics_by_frags/?topn=5
+
+###
+GET http://localhost:7667/cirtec/freq_ngramm_by_frag/
+
+###
+GET http://localhost:7667/cirtec/freq_ngramm_by_frag/?topn=5
+
+###
+GET http://localhost:7667/cirtec/top_cocit_authors/
+
+###
+GET http://localhost:7667/cirtec/top_cocit_authors/?topn=5
+
+###
+GET http://localhost:7667/cirtec/top_ngramm/
+
+###
+GET http://localhost:7667/cirtec/top_ngramm/?topn=5
+
+###
+GET http://localhost:7667/cirtec/top_topics/
+
+###
+GET http://localhost:7667/cirtec/top_topics/?topn=5
 
 ###
