@@ -41,219 +41,197 @@ async def test_frags_publications(aiohttp_client):
   assert len(jrsp) >= 24
 
 
-async def test_frags_cocitauthors(aiohttp_client):
+@pytest.mark.parametrize('topn', [None, 5])
+async def test_frags_cocitauthors(aiohttp_client, topn:int):
   client = await init_server(aiohttp_client)
-  rsp = await client.get('/cirtec/frags/cocitauthors/')
+  if topn:
+    kwd = dict(params=dict(topn=str(topn)))
+  else:
+    kwd = {}
+  rsp = await client.get('/cirtec/frags/cocitauthors/', **kwd)
   assert 200 == rsp.status
   jrsp = await rsp.json()
   assert type(jrsp) == dict
-  assert len(jrsp) >= 24
+  if topn:
+    assert len(jrsp) == topn
 
 
-@pytest.mark.parametrize('topn', [5])
-async def test_frags_cocitauthors_topn(aiohttp_client, topn:int):
+@pytest.mark.parametrize('topn', [None, 5])
+async def test_frags_cocitauthors_ngramm(aiohttp_client, topn:int):
+  client = await init_server(aiohttp_client)
+  if topn:
+    kwd = dict(params=dict(topn=str(topn)))
+  else:
+    kwd = {}
+  rsp = await client.get('/cirtec/frags/cocitauthors/ngramms/', **kwd)
+  assert 200 == rsp.status
+  jrsp = await rsp.json()
+  assert type(jrsp) == dict
+  if topn:
+    assert len(jrsp) == topn
+
+
+@pytest.mark.parametrize('topn', [None, 5])
+async def test_frags_cocitauthors_topics(aiohttp_client, topn:int):
+  client = await init_server(aiohttp_client)
+  if topn:
+    kwd = dict(params=dict(topn=str(topn)))
+  else:
+    kwd = {}
+  rsp = await client.get('/cirtec/frags/cocitauthors/topics/', **kwd)
+  assert 200 == rsp.status
+  jrsp = await rsp.json()
+  assert type(jrsp) == dict
+  if topn:
+    assert len(jrsp) == topn
+
+
+@pytest.mark.parametrize('topn', [None, 5])
+async def test_frags_topics(aiohttp_client, topn:int):
+  client = await init_server(aiohttp_client)
+  if topn:
+    kwd = dict(params=dict(topn=str(topn)))
+  else:
+    kwd = {}
+  rsp = await client.get('/cirtec/frags/topics/', **kwd)
+  assert 200 == rsp.status
+  jrsp = await rsp.json()
+  assert type(jrsp) == dict
+  if topn:
+    assert len(jrsp) == topn
+
+
+@pytest.mark.parametrize('topn', [None, 5])
+async def test_frags_topics_cocitauthors(aiohttp_client, topn:int):
+  client = await init_server(aiohttp_client)
+  if topn:
+    kwd = dict(params=dict(topn=str(topn)))
+  else:
+    kwd = {}
+  rsp = await client.get('/cirtec/frags/topics/cocitauthors/', **kwd)
+  assert 200 == rsp.status
+  jrsp = await rsp.json()
+  assert type(jrsp) == dict
+  if topn:
+    assert len(jrsp) == topn
+
+
+@pytest.mark.parametrize('topn', [None, 5])
+async def test_frags_topics_ngramms_topn(aiohttp_client, topn:int):
+  client = await init_server(aiohttp_client)
+  if topn:
+    kwd = dict(params=dict(topn=str(topn)))
+  else:
+    kwd = {}
+  rsp = await client.get('/cirtec/frags/topics/ngramms/', **kwd)
+  assert 200 == rsp.status
+  jrsp = await rsp.json()
+  assert type(jrsp) == dict
+  if topn:
+    assert len(jrsp) == topn
+
+
+@pytest.mark.parametrize('topn,crossn', [(5, 10)])
+async def test_frags_topics_ngramms_topn_crossn(
+  aiohttp_client, topn:int, crossn:int
+):
   client = await init_server(aiohttp_client)
   rsp = await client.get(
-    '/cirtec/frags/cocitauthors/', params=dict(topn=str(topn)))
+    '/cirtec/frags/topics/ngramms/',
+    params=dict(topn=str(topn), topn_crpssgramm=str(crossn)))
   assert 200 == rsp.status
   jrsp = await rsp.json()
   assert type(jrsp) == dict
-  assert len(jrsp) == 5
+  assert len(jrsp) == topn
+  for v in jrsp.values():
+    assert 0 < len(v['crossgrams']) <= crossn
 
 
-async def test_frags_cocitauthors_ngramm(aiohttp_client):
-  client = await init_server(aiohttp_client)
-  rsp = await client.get('/cirtec/frags/cocitauthors/ngramms/')
-  assert 200 == rsp.status
-  jrsp = await rsp.json()
-  assert type(jrsp) == dict
-  assert len(jrsp) >= 10
-
-
-@pytest.mark.parametrize('topn', [5])
-async def test_frags_cocitauthors_ngramm_topn(aiohttp_client, topn:int):
-  client = await init_server(aiohttp_client)
-  rsp = await client.get(
-    '/cirtec/frags/cocitauthors/ngramms/', params=dict(topn=str(topn)))
-  assert 200 == rsp.status
-  jrsp = await rsp.json()
-  assert type(jrsp) == dict
-  assert len(jrsp) == 5
-
-
-async def test_frags_cocitauthors_topics(aiohttp_client):
-  client = await init_server(aiohttp_client)
-  rsp = await client.get('/cirtec/frags/cocitauthors/topics/')
-  assert 200 == rsp.status
-  jrsp = await rsp.json()
-  assert type(jrsp) == dict
-  assert len(jrsp) >= 10
-
-
-@pytest.mark.parametrize('topn', [5])
-async def test_frags_cocitauthors_topics_topn(aiohttp_client, topn:int):
-  client = await init_server(aiohttp_client)
-  rsp = await client.get(
-    '/cirtec/frags/cocitauthors/topics/', params=dict(topn=str(topn)))
-  assert 200 == rsp.status
-  jrsp = await rsp.json()
-  assert type(jrsp) == dict
-  assert len(jrsp) == 5
-
-
-async def test_frags_topics(aiohttp_client):
-  client = await init_server(aiohttp_client)
-  rsp = await client.get('/cirtec/frags/topics/')
-  assert 200 == rsp.status
-  jrsp = await rsp.json()
-  assert type(jrsp) == dict
-  assert len(jrsp) >= 20
-
-
-@pytest.mark.parametrize('topn', [5])
-async def test_frags_topics_topn(aiohttp_client, topn:int):
-  client = await init_server(aiohttp_client)
-  rsp = await client.get(
-    '/cirtec/frags/topics/', params=dict(topn=str(topn)))
-  assert 200 == rsp.status
-  jrsp = await rsp.json()
-  assert type(jrsp) == dict
-  assert len(jrsp) == 5
-
-
-async def test_frags_topics_cocitauthors(aiohttp_client):
-  client = await init_server(aiohttp_client)
-  rsp = await client.get('/cirtec/frags/topics/cocitauthors/')
-  assert 200 == rsp.status
-  jrsp = await rsp.json()
-  assert type(jrsp) == dict
-  assert len(jrsp) >= 20
-
-
-@pytest.mark.parametrize('topn', [5])
-async def test_frags_topics_cocitauthors_topn(aiohttp_client, topn:int):
-  client = await init_server(aiohttp_client)
-  rsp = await client.get(
-    '/cirtec/frags/topics/cocitauthors/', params=dict(topn=str(topn)))
-  assert 200 == rsp.status
-  jrsp = await rsp.json()
-  assert type(jrsp) == dict
-  assert len(jrsp) == 5
-
-
-async def test_frags_ngramm(aiohttp_client):
-  client = await init_server(aiohttp_client)
-  rsp = await client.get('/cirtec/frags/ngramms/')
-  assert 200 == rsp.status
-  jrsp = await rsp.json()
-  assert type(jrsp) == dict
-  assert len(jrsp) == 10
-
-
-@pytest.mark.parametrize('topn', [5])
+@pytest.mark.parametrize('topn', [None, 5])
 async def test_frags_ngramm_topn(aiohttp_client, topn:int):
   client = await init_server(aiohttp_client)
-  rsp = await client.get(
-    '/cirtec/frags/ngramms/', params=dict(topn=str(topn)))
+  if topn:
+    kwd = dict(params=dict(topn=str(topn)))
+  else:
+    kwd = {}
+  rsp = await client.get('/cirtec/frags/ngramms/', **kwd)
   assert 200 == rsp.status
   jrsp = await rsp.json()
   assert type(jrsp) == dict
-  assert len(jrsp) == 5
+  if topn:
+    assert len(jrsp) == topn
 
 
-async def test_frags_ngramm_cocitauthors(aiohttp_client):
-  client = await init_server(aiohttp_client)
-  rsp = await client.get('/cirtec/frags/ngramms/cocitauthors/')
-  assert 200 == rsp.status
-  jrsp = await rsp.json()
-  assert type(jrsp) == dict
-  assert len(jrsp) == 10
-
-
-@pytest.mark.parametrize('topn', [5])
+@pytest.mark.parametrize('topn', [None, 5])
 async def test_frags_ngramm_cocitauthors_topn(aiohttp_client, topn:int):
   client = await init_server(aiohttp_client)
-  rsp = await client.get(
-    '/cirtec/frags/ngramms/cocitauthors/', params=dict(topn=str(topn)))
+  if topn:
+    kwd = dict(params=dict(topn=str(topn)))
+  else:
+    kwd = {}
+  rsp = await client.get('/cirtec/frags/ngramms/cocitauthors/', **kwd)
   assert 200 == rsp.status
   jrsp = await rsp.json()
   assert type(jrsp) == dict
-  assert len(jrsp) == 5
+  if topn:
+    assert len(jrsp) == topn
 
 
-async def test_frags_ngramm_topics(aiohttp_client):
-  client = await init_server(aiohttp_client)
-  rsp = await client.get('/cirtec/frags/ngramms/topics/')
-  assert 200 == rsp.status
-  jrsp = await rsp.json()
-  assert type(jrsp) == dict
-  assert len(jrsp) == 10
-
-
-@pytest.mark.parametrize('topn', [5])
+@pytest.mark.parametrize('topn', [None, 5])
 async def test_frags_ngramm_topics_topn(aiohttp_client, topn:int):
   client = await init_server(aiohttp_client)
-  rsp = await client.get(
-    '/cirtec/frags/ngramms/topics/', params=dict(topn=str(topn)))
+  if topn:
+    kwd = dict(params=dict(topn=str(topn)))
+  else:
+    kwd = {}
+  rsp = await client.get('/cirtec/frags/ngramms/topics/', **kwd)
   assert 200 == rsp.status
   jrsp = await rsp.json()
   assert type(jrsp) == dict
-  assert len(jrsp) == 5
+  if topn:
+    assert len(jrsp) == topn
 
 
-async def test_top_cocitauthors(aiohttp_client):
-  client = await init_server(aiohttp_client)
-  rsp = await client.get('/cirtec/top/cocitauthors/')
-  assert 200 == rsp.status
-  jrsp = await rsp.json()
-  assert type(jrsp) == list
-  assert len(jrsp) >= 24
-
-
-@pytest.mark.parametrize('topn', [5])
+@pytest.mark.parametrize('topn', [None, 5])
 async def test_top_cocitauthors_topn(aiohttp_client, topn:int):
   client = await init_server(aiohttp_client)
-  rsp = await client.get(
-    '/cirtec/top/cocitauthors/', params=dict(topn=str(topn)))
+  if topn:
+    kwd = dict(params=dict(topn=str(topn)))
+  else:
+    kwd = {}
+  rsp = await client.get('/cirtec/top/cocitauthors/', **kwd)
   assert 200 == rsp.status
   jrsp = await rsp.json()
   assert type(jrsp) == list
-  assert len(jrsp) == 5
+  if topn:
+    assert len(jrsp) == topn
 
 
-async def test_top_ngramm(aiohttp_client):
-  client = await init_server(aiohttp_client)
-  rsp = await client.get('/cirtec/top/ngramm/')
-  assert 200 == rsp.status
-  jrsp = await rsp.json()
-  assert type(jrsp) == list
-  assert len(jrsp) >= 10
-
-
-@pytest.mark.parametrize('topn', [5])
+@pytest.mark.parametrize('topn', [None, 5])
 async def test_top_ngramm_topn(aiohttp_client, topn:int):
   client = await init_server(aiohttp_client)
-  rsp = await client.get('/cirtec/top/ngramm/', params=dict(topn=str(topn)))
+  if topn:
+    kwd = dict(params=dict(topn=str(topn)))
+  else:
+    kwd = {}
+  rsp = await client.get('/cirtec/top/ngramm/', **kwd)
   assert 200 == rsp.status
   jrsp = await rsp.json()
   assert type(jrsp) == list
-  assert len(jrsp) == 5
+  if topn:
+    assert len(jrsp) == topn
 
 
-async def test_top_topics(aiohttp_client):
-  client = await init_server(aiohttp_client)
-  rsp = await client.get('/cirtec/top/topics/')
-  assert 200 == rsp.status
-  jrsp = await rsp.json()
-  assert type(jrsp) == list
-  assert len(jrsp) >= 10
-
-
-@pytest.mark.parametrize('topn', [5])
+@pytest.mark.parametrize('topn', [None, 5])
 async def test_top_topics_topn(aiohttp_client, topn:int):
   client = await init_server(aiohttp_client)
-  rsp = await client.get('/cirtec/top/topics/', params=dict(topn=str(topn)))
+  if topn:
+    kwd = dict(params=dict(topn=str(topn)))
+  else:
+    kwd = {}
+  rsp = await client.get('/cirtec/top/topics/', **kwd)
   assert 200 == rsp.status
   jrsp = await rsp.json()
   assert type(jrsp) == list
-  assert len(jrsp) == 5
+  if topn:
+    assert len(jrsp) == topn

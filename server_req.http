@@ -70,3 +70,9 @@ GET http://localhost:7667/cirtec/frags/topics/cocitauthors/
 GET http://localhost:7667/cirtec/frags/topics/cocitauthors/?topn=5
 
 ###
+GET http://localhost:7667/cirtec/frags/topics/ngramms/
+
+###
+GET http://localhost:7667/cirtec/frags/topics/ngramms/?topn=5
+
+###

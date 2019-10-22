@@ -75,6 +75,8 @@ def create_srv():
 
   # Г Кросс-распределение «топики» - «со-цитирования»
   add_get(r'/cirtec/frags/topics/cocitauthors/', _req_frags_topics_cocitauthors)
+  #   Кросс-распределение «топики» - «фразы»
+  add_get(r'/cirtec/frags/topics/ngramms/', _req_frags_topics_ngramms)
 
   # Топ N со-цитируемых авторов
   add_get(r'/cirtec/top/cocitauthors/', _req_top_cocitauthors)
@@ -747,6 +749,84 @@ async def _req_frags_topics_cocitauthors(
 
   return json_response(out_dict)
 
+
+async def _req_frags_topics_ngramms(request: web.Request) -> web.StreamResponse:
+  """Кросс-распределение «топики» - «фразы»"""
+  app = request.app
+  mdb = app['db']
+
+  topn = _get_arg_topn(request)
+
+  topn_crpssgramm: int = _get_arg_int(request, 'topn_crpssgramm')
+  topn_gramm: int = _get_arg_int(request, 'topn_gramm')
+  if not topn_gramm:
+    topn_gramm = 500
+
+  nka = _get_arg_int(request, 'nka')
+  ltype = _get_arg(request, 'ltype')
+
+  if topn_gramm:
+    n_gramms = mdb.n_gramms
+    if nka or ltype:
+      preselect = [
+        {'$match': {f: v for f, v in (('nka', nka), ('type', ltype)) if v}}]
+    else:
+      preselect = None
+    top_ngramms = await _get_topn(
+      n_gramms, topn_gramm, preselect=preselect, sum_expr='$linked_papers.cnt')
+    exists = frozenset(t for t, _, _ in top_ngramms)
+  else:
+    exists = ()
+
+  pipeline = [
+    {'$project': {'prefix': False, 'suffix': False, 'exact': False}}, {
+      '$lookup': {
+        'from': 'n_gramms', 'localField': '_id',
+        'foreignField': 'linked_papers.cont_id', 'as': 'cont'}},
+    {'$unwind': '$cont'},
+  ]
+  if nka or ltype:
+    pipeline += [
+      {'$match': {
+        f'cont.{f}' : v for f, v in (('nka', nka), ('type', ltype)) if v}}]
+  pipeline += [
+    {'$project': {'cont.type': False}},  # 'cont.linked_papers': False,
+    {'$sort': {'cont.count_in_linked_papers': -1, 'cont.count_all': -1}},
+    # {'$limit': topn_gramms}
+  ]
+
+  top_topics = await _get_topn(mdb.topics, topn)
+  contexts = mdb.contexts
+  out_dict = {}
+  for i, (topic, cnt, conts) in enumerate(top_topics, 1):
+    frags = Counter()
+    congr = defaultdict(Counter)
+
+    work_pipeline = [
+      {'$match': {'frag_num': {'$gt': 0}, '_id': {'$in': conts}}},
+    ] + pipeline
+
+    async for doc in contexts.aggregate(work_pipeline):
+      cont = doc['cont']
+      ngr = cont['title']
+      if exists and ngr not in exists:
+        continue
+
+      fnum = doc['frag_num']
+      frags[fnum] += 1
+      congr[ngr][fnum] += 1 # cont['linked_papers']['cnt']
+      if topn_crpssgramm and len(congr) == topn_crpssgramm:
+        break
+
+    crossgrams = {}
+    out_dict[topic] = dict(sum=cnt, frags=frags, crossgrams=crossgrams)
+
+    for j, (co, cnts) in enumerate(
+      sorted(congr.items(), key=lambda kv: (-sum(kv[1].values()), kv[0])), 1
+    ):
+      crossgrams[co] = dict(frags=cnts, sum=sum(cnts.values()))
+
+  return json_response(out_dict)
 
 
 async def _get_topn(
