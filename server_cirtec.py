@@ -1,3 +1,4 @@
+#! /usr/bin/env python3
 # -*- codong: utf-8 -*-
 import asyncio
 from collections import Counter, defaultdict
