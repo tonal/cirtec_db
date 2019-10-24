@@ -69,7 +69,7 @@ def create_srv():
   #   Кросс-распределение «5 фрагментов» - «топики контекстов цитирований»
   add_get(r'/cirtec/frags/topics/', _req_frags_topics)
   #   Кросс-распределение «5 фрагментов» - «топики контекстов цитирований»
-  add_get(r'/cirtec/frags/topics/topics/', _req_frags_topics)
+  add_get(r'/cirtec/frags/topics/topics/', _req_frags_topics_topics)
 
   # Б Кросс-распределение «со-цитирования» - «фразы из контекстов цитирований»
   add_get(r'/cirtec/frags/cocitauthors/ngramms/', _req_frags_cocitauthors_ngramms)
@@ -777,6 +777,40 @@ async def _req_frags_topics(request: web.Request) -> web.StreamResponse:
   topn = _get_arg_topn(request)
 
   topics = mdb.topics
+  pipeline = [
+    {'$unwind': '$linked_papers'}, {
+    '$lookup': {
+      'from': 'contexts', 'localField': 'linked_papers.cont_id',
+      'foreignField': '_id', 'as': 'cont'}},
+    {'$project': {
+      'cont.prefix': False, 'cont.suffix': False, 'cont.exact': False}},
+    {'$unwind': '$cont'},
+    {'$match': {'cont.frag_num': {'$gt': 0}}},
+    {'$group': {
+      '_id': '$title', 'count': {'$sum': 1},
+      'frags': {'$push': '$cont.frag_num'}}},
+    {'$sort': {'count': -1, '_id': 1}},
+  ]
+  if topn:
+    pipeline += [{'$limit': topn}]
+
+  out_dict = {}
+  async for doc in topics.aggregate(pipeline):
+    cnt = doc['count']
+    title = doc['_id']
+    frags = Counter(doc['frags'])
+    out_dict[title] = dict(sum=cnt, frags=frags)
+
+  return json_response(out_dict)
+
+
+async def _req_frags_topics_topics(request: web.Request) -> web.StreamResponse:
+  app = request.app
+  mdb = app['db']
+
+  topn = _get_arg_topn(request)
+
+  topics = mdb.topics
   topN = await _get_topn(topics, topn=topn)
 
   contexts = mdb.contexts
@@ -814,6 +848,7 @@ async def _req_frags_topics(request: web.Request) -> web.StreamResponse:
       crosstopics[co] = dict(frags=cnts, sum=sum(cnts.values()))
 
   return json_response(out_dict)
+
 
 async def _req_frags_topics_cocitauthors(
   request: web.Request
