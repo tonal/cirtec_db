@@ -244,7 +244,7 @@ async def test_top_ngramm_topn(aiohttp_client, topn:int):
     kwd = dict(params=dict(topn=str(topn)))
   else:
     kwd = {}
-  rsp = await client.get('/cirtec/top/ngramm/', **kwd)
+  rsp = await client.get('/cirtec/top/ngramms/', **kwd)
   assert 200 == rsp.status
   jrsp = await rsp.json()
   assert type(jrsp) == list

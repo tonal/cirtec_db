@@ -89,7 +89,7 @@ def create_srv():
   # Топ N со-цитируемых авторов
   add_get(r'/cirtec/top/cocitauthors/', _req_top_cocitauthors)
   # Топ N фраз
-  add_get(r'/cirtec/top/ngramm/', _req_top_ngramm)
+  add_get(r'/cirtec/top/ngramms/', _req_top_ngramm)
   # Топ N топиков
   add_get(r'/cirtec/top/topics/', _req_top_topics)
 

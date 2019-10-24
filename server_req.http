@@ -43,7 +43,7 @@ GET http://localhost:7667/cirtec/top/cocitauthors/?topn=5
 GET http://localhost:7667/cirtec/top/ngramms/
 
 ###
-GET http://localhost:7667/cirtec/top/ngramms/?topn=5
+GET http://localhost:7667/cirtec/top/ngramms/?topn=30
 
 ###
 GET http://localhost:7667/cirtec/top/topics/
