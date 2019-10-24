@@ -219,7 +219,7 @@ async def test_frags_ngramm_cocitauthors_topn(aiohttp_client, topn:int):
   jrsp = await rsp.json()
   assert type(jrsp) == dict
   if topn:
-    assert len(jrsp) == topn
+    assert len(jrsp) <= topn
 
 
 @pytest.mark.parametrize('topn', [None, 5])
