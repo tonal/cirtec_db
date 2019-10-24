@@ -56,12 +56,20 @@ def create_srv():
   add_get(r'/cirtec/frags/', _req_frags)
   #   Распределение цитирований по 5-ти фрагментам для отдельных публикаций. #заданного автора.
   add_get(r'/cirtec/frags/publications/', _req_frags_pubs)
-  #   Кросс-распределение «5 фрагментов» - «со-цитируемые авторы»
+  #   Распределение «со-цитируемые авторы» по 5-ти фрагментам
   add_get(r'/cirtec/frags/cocitauthors/', _req_frags_cocitauthors)
+  #   Кросс-распределение «5 фрагментов» - «со-цитируемые авторы»
+  add_get(
+    r'/cirtec/frags/cocitauthors/cocitauthors/',
+    _req_frags_cocitauthors_cocitauthors)
   #   Кросс-распределение «5 фрагментов» - «фразы из контекстов цитирований»
   add_get(r'/cirtec/frags/ngramms/', _req_frags_ngramm)
+  #   Кросс-распределение «5 фрагментов» - «фразы из контекстов цитирований»
+  add_get(r'/cirtec/frags/ngramms/ngramms/', _req_frags_ngramm)
   #   Кросс-распределение «5 фрагментов» - «топики контекстов цитирований»
   add_get(r'/cirtec/frags/topics/', _req_frags_topics)
+  #   Кросс-распределение «5 фрагментов» - «топики контекстов цитирований»
+  add_get(r'/cirtec/frags/topics/topics/', _req_frags_topics)
 
   # Б Кросс-распределение «со-цитирования» - «фразы из контекстов цитирований»
   add_get(r'/cirtec/frags/cocitauthors/ngramms/', _req_frags_cocitauthors_ngramms)
@@ -218,7 +226,7 @@ async def _req_frags_pubs(
 async def _req_frags_cocitauthors(request: web.Request) -> web.StreamResponse:
   """
   А
-  Кросс-распределение «5 фрагментов» - «со-цитируемые авторы»
+  Распределение «со-цитируемые авторы» по 5-ти фрагментам
   """
   app = request.app
   mdb = app['db']
@@ -226,24 +234,77 @@ async def _req_frags_cocitauthors(request: web.Request) -> web.StreamResponse:
   topn = _get_arg_topn(request)
 
   contexts = mdb.contexts
+
+  pipeline = [
+    {'$match': {'frag_num': {'$gt': 0}, 'cocit_authors': {'$exists': True}}},
+    {'$project': {'prefix': False, 'suffix': False, 'exact': False}},
+    {'$unwind': '$cocit_authors'},
+    {'$group': {
+        '_id': '$cocit_authors', 'count': {'$sum': 1},
+        'frags': {'$push': '$frag_num'}}},
+    {'$sort': {'count': -1, '_id': 1}},
+  ]
+  if topn:
+    pipeline += [{'$limit': topn},]
+  out_dict = {}
+  async for doc in contexts.aggregate(pipeline):
+    frags = Counter()
+    for fnum in doc['frags']:
+      frags[fnum] += 1
+
+    out_dict[doc['_id']] = dict(sum=doc['count'], frags=frags)
+
+  return json_response(out_dict)
+
+
+async def _req_frags_cocitauthors_cocitauthors(
+  request: web.Request
+) -> web.StreamResponse:
+  """
+  А
+  Кросс-распределение «5 фрагментов» - «со-цитируемые авторы»
+  """
+  app = request.app
+  mdb = app['db']
+
+  topn = _get_arg_topn(request)
+  topn_cocitauthors: int = _get_arg_int(request, 'topn_cocitauthors')
+
+  contexts = mdb.contexts
   topN = await _get_topn_cocit_authors(contexts, topn)
+
+  exists = ()
+  if topn_cocitauthors:
+    if not topn or topn >= topn_cocitauthors:
+      exists = frozenset(map(itemgetter(0), topN[:topn_cocitauthors]))
+    else:
+      topNa = await _get_topn_cocit_authors(contexts, topn_cocitauthors)
+      exists = frozenset(map(itemgetter(0), topNa))
 
   out_dict = {}
   for i, (cocitauthor, cnt) in enumerate(topN, 1):
     frags = Counter()
     coaut = defaultdict(Counter)
-
     async for doc in contexts.find(
       {'cocit_authors': cocitauthor, 'frag_num': {'$gt': 0}},
       projection=['frag_num', 'cocit_authors']
     ).sort('frag_num'):
       # print(i, doc)
+      if exists:
+        coauthors = frozenset(
+          c for c in doc['cocit_authors'] if c != cocitauthor and c in exists)
+      else:
+        coauthors = frozenset(
+          c for c in doc['cocit_authors'] if c != cocitauthor)
+      if not coauthors:
+        continue
       fnum = doc['frag_num']
-      coauthors = frozenset(
-        c for c in doc['cocit_authors'] if c != cocitauthor)
       frags[fnum] += 1
       for ca in coauthors:
         coaut[ca][fnum] += 1
+
+    if not coaut:
+      continue
 
     out_cocitauthors = {}
     out_dict[cocitauthor] = dict(
@@ -564,6 +625,7 @@ async def _req_frags_ngramms_cocitauthors(request: web.Request) -> web.StreamRes
   for i, (ngramm, cnt, conts) in enumerate(top_ngramms, 1):
     frags = Counter()
     congr = defaultdict(Counter)
+    cnt = 0
 
     async for doc in contexts.aggregate([
       {'$match': {'frag_num': {'$gt': 0}, '_id': {'$in': conts}}},
@@ -574,18 +636,20 @@ async def _req_frags_ngramms_cocitauthors(request: web.Request) -> web.StreamRes
       if topn_authors and ngr not in exists:
         continue
 
+      cnt += 1
       fnum = doc['frag_num']
       frags[fnum] += 1
       congr[ngr][fnum] += 1
 
-    crosscocitaith = {}
-    out_dict[ngramm] = dict(
-      sum=cnt, frags=frags, cocitaithors=crosscocitaith)
+    if cnt:
+      crosscocitaith = {}
+      out_dict[ngramm] = dict(
+        sum=cnt, frags=frags, cocitaithors=crosscocitaith)
 
-    for j, (co, cnts) in enumerate(
-      sorted(congr.items(), key=lambda kv: (-sum(kv[1].values()), kv[0])), 1
-    ):
-      crosscocitaith[co] = dict(frags=cnts, sum=sum(cnts.values()))
+      for j, (co, cnts) in enumerate(
+        sorted(congr.items(), key=lambda kv: (-sum(kv[1].values()), kv[0])), 1
+      ):
+        crosscocitaith[co] = dict(frags=cnts, sum=sum(cnts.values()))
 
   return json_response(out_dict)
 

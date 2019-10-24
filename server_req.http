@@ -10,6 +10,12 @@ GET http://localhost:7667/cirtec/frags/cocitauthors/
 GET http://localhost:7667/cirtec/frags/cocitauthors/?topn=5
 
 ###
+GET http://localhost:7667/cirtec/frags/cocitauthors/cocitauthors/
+
+###
+GET http://localhost:7667/cirtec/frags/cocitauthors/cocitauthors/?topn_cocitauthors=5
+
+###
 GET http://localhost:7667/cirtec/frags/topics/
 
 ###
@@ -58,6 +64,9 @@ GET http://localhost:7667/cirtec/frags/ngramms/cocitauthors/
 GET http://localhost:7667/cirtec/frags/ngramms/cocitauthors/?topn=5
 
 ###
+GET http://localhost:7667/cirtec/frags/ngramms/cocitauthors/?topn=10&topn_cocitauthors=10&nka=2&ltype=lemmas
+
+###
 GET http://localhost:7667/cirtec/frags/ngramms/topics/
 
 ###
@@ -74,5 +83,8 @@ GET http://localhost:7667/cirtec/frags/topics/ngramms/
 
 ###
 GET http://localhost:7667/cirtec/frags/topics/ngramms/?topn=5
+
+###
+GET http://cirtec.ranepa.ru/cirtec/frags/ngramms/cocitauthors/?topn=10&topn_cocitauthors=10&nka=2&ltype=lemmas
 
 ###
