@@ -46,16 +46,34 @@ GET http://localhost:7667/cirtec/top/cocitauthors/
 GET http://localhost:7667/cirtec/top/cocitauthors/?topn=5
 
 ###
+GET http://localhost:7667/cirtec/top/cocitauthors/publications/
+
+###
+GET http://localhost:7667/cirtec/top/cocitauthors/publications/?topn=5
+
+###
 GET http://localhost:7667/cirtec/top/ngramms/
 
 ###
 GET http://localhost:7667/cirtec/top/ngramms/?topn=30
 
 ###
+GET http://localhost:7667/cirtec/top/ngramms/publications/
+
+###
+GET http://localhost:7667/cirtec/top/ngramms/publications/?topn=30
+
+###
 GET http://localhost:7667/cirtec/top/topics/
 
 ###
 GET http://localhost:7667/cirtec/top/topics/?topn=5
+
+###
+GET http://localhost:7667/cirtec/top/topics/publications/
+
+###
+GET http://localhost:7667/cirtec/top/topics/publications/?topn=5
 
 ###
 GET http://localhost:7667/cirtec/frags/cocitauthors/ngramms/

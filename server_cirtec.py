@@ -88,10 +88,16 @@ def create_srv():
 
   # Топ N со-цитируемых авторов
   add_get(r'/cirtec/top/cocitauthors/', _req_top_cocitauthors)
+  # Топ N со-цитируемых авторов по публикациям
+  add_get(r'/cirtec/top/cocitauthors/publications/', _req_top_cocitauthors_pubs)
   # Топ N фраз
   add_get(r'/cirtec/top/ngramms/', _req_top_ngramm)
+  # Топ N фраз по публикациям
+  add_get(r'/cirtec/top/ngramms/publications/', _req_top_ngramm_pubs)
   # Топ N топиков
   add_get(r'/cirtec/top/topics/', _req_top_topics)
+  # Топ N топиков публикациям
+  add_get(r'/cirtec/top/topics/publications/', _req_top_topics_pubs)
 
   app['conf'] = conf
   app['tasks'] = set()
@@ -488,6 +494,22 @@ async def _req_top_cocitauthors(request: web.Request) -> web.StreamResponse:
   contexts = mdb.contexts
   topN = await _get_topn_cocit_authors(contexts, topn, include_conts=True)
   out = tuple(dict(title=n, contects=conts) for n, _, conts in topN)
+
+  return json_response(out)
+
+
+async def _req_top_cocitauthors_pubs(request: web.Request) -> web.StreamResponse:
+  """Топ N со-цитируемых авторов по публикациям"""
+  app = request.app
+  mdb = app['db']
+
+  topn = _get_arg_topn(request)
+
+  contexts = mdb.contexts
+  topN = await _get_topn_cocit_authors(contexts, topn, include_conts=True)
+  out = {
+    n: dict(all=cnt, pubs=Counter(c.rsplit('@', 1)[0] for c in conts))
+    for n, cnt, conts in topN}
 
   return json_response(out)
 
@@ -1027,6 +1049,48 @@ async def _req_top_ngramm(request: web.Request) -> web.StreamResponse:
   return json_response(out)
 
 
+async def _req_top_ngramm_pubs(request: web.Request) -> web.StreamResponse:
+  """Топ N фраз по публикациям"""
+  app = request.app
+  mdb = app['db']
+
+  topn = _get_arg_topn(request)
+
+  nka = _get_arg_int(request, 'nka')
+  ltype = _get_arg(request, 'ltype')
+  if nka or ltype:
+    pipeline = [
+      {'$match': {f: v for f, v in (('nka', nka), ('type', ltype)) if v}}]
+  else:
+    pipeline = []
+
+  pipeline += [
+    {'$unwind': '$linked_papers'},
+    {'$group': {
+      '_id': '$title', 'count': {'$sum': '$linked_papers.cnt'}, 'conts': {
+        '$addToSet': {
+          'cont_id': '$linked_papers.cont_id', 'cnt': '$linked_papers.cnt'}}}},
+    {'$sort': {'count': -1, '_id': 1}},
+  ]
+  if topn:
+    pipeline += [{'$limit': topn}]
+
+  n_gramms = mdb.n_gramms
+  get_as_tuple = itemgetter('_id', 'count', 'conts')
+  topN = [get_as_tuple(obj) async for obj in n_gramms.aggregate(pipeline)]
+
+  get_pubs = itemgetter('cont_id', 'cnt')
+  out = {
+    name: dict(
+      all=cnt, contects=Counter(
+        p for p, n in (
+          (c.rsplit('@', 1)[0], n) for c, n in (get_pubs(co) for co in conts))
+        for _ in range(n)
+      ))
+    for name, cnt, conts in topN}
+  return json_response(out)
+
+
 async def _req_top_topics(request: web.Request) -> web.StreamResponse:
   """Топ N топиков"""
   app = request.app
@@ -1038,6 +1102,23 @@ async def _req_top_topics(request: web.Request) -> web.StreamResponse:
   topN = await _get_topn(topics, topn=topn)
 
   out = tuple(dict(title=n, contects=conts) for n, _, conts in topN)
+  return json_response(out)
+
+
+async def _req_top_topics_pubs(request: web.Request) -> web.StreamResponse:
+  """Топ N топиков"""
+  app = request.app
+  mdb = app['db']
+
+  topn = _get_arg_topn(request)
+
+  topics = mdb.topics
+  topN = await _get_topn(topics, topn=topn)
+
+  # out = tuple(dict(title=n, contects=conts) for n, _, conts in topN)
+  out = {
+    n: dict(all=cnt, pubs=Counter(c.rsplit('@', 1)[0] for c in conts))
+    for n, cnt, conts in topN}
   return json_response(out)
 
 
