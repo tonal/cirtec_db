@@ -62,10 +62,10 @@ def create_srv():
   add_get(
     r'/cirtec/frags/cocitauthors/cocitauthors/',
     _req_frags_cocitauthors_cocitauthors)
-  #   Кросс-распределение «5 фрагментов» - «фразы из контекстов цитирований»
+  #   Распределение «5 фрагментов» - «фразы из контекстов цитирований»
   add_get(r'/cirtec/frags/ngramms/', _req_frags_ngramm)
   #   Кросс-распределение «5 фрагментов» - «фразы из контекстов цитирований»
-  add_get(r'/cirtec/frags/ngramms/ngramms/', _req_frags_ngramm)
+  add_get(r'/cirtec/frags/ngramms/ngramms/', _req_frags_ngramm_ngramm)
   #   Кросс-распределение «5 фрагментов» - «топики контекстов цитирований»
   add_get(r'/cirtec/frags/topics/', _req_frags_topics)
   #   Кросс-распределение «5 фрагментов» - «топики контекстов цитирований»
@@ -248,10 +248,7 @@ async def _req_frags_cocitauthors(request: web.Request) -> web.StreamResponse:
     pipeline += [{'$limit': topn},]
   out_dict = {}
   async for doc in contexts.aggregate(pipeline):
-    frags = Counter()
-    for fnum in doc['frags']:
-      frags[fnum] += 1
-
+    frags = Counter(doc['frags'])
     out_dict[doc['_id']] = dict(sum=doc['count'], frags=frags)
 
   return json_response(out_dict)
@@ -520,6 +517,61 @@ def _get_arg_topn(request: web.Request) -> Optional[int]:
 
 
 async def _req_frags_ngramm(request: web.Request) -> web.StreamResponse:
+  """Распределение «5 фрагментов» - «фразы из контекстов цитирований»"""
+  app = request.app
+  mdb = app['db']
+
+  topn = _get_arg_topn(request)
+  if not topn:
+    topn = 10
+  # nka: int = 2, ltype:str = 'lemmas'
+  nka:int = _get_arg_int(request, 'nka')
+  ltype:str = _get_arg(request, 'ltype')
+
+  if nka or ltype:
+    pipeline = [
+      {'$match': {f: v for f, v in (('nka', nka), ('type', ltype)) if v}}]
+  else:
+    pipeline = []
+
+  pipeline += [
+    {'$unwind': '$linked_papers'},
+    {'$lookup': {
+      'from': 'contexts', 'localField': 'linked_papers.cont_id',
+      'foreignField': '_id', 'as': 'cont'}},
+    {'$project': {
+      'cont.prefix': False, 'cont.suffix': False, 'cont.exact': False}},
+    {'$unwind': '$cont'},
+    {'$match': {'cont.frag_num': {'$gt': 0}}},
+    {'$group': {
+      '_id': {'nka': '$nka', 'title': '$title', 'type': '$type'},
+      'count': {'$sum': '$linked_papers.cnt'},
+      'frags': {'$push': '$cont.frag_num'}}},
+    {'$sort': {'count': -1, '_id': 1}},
+  ]
+  if topn:
+    pipeline += [{'$limit': topn}]
+
+  n_gramms = mdb.n_gramms
+  out_dict = {}
+
+  async for doc in n_gramms.aggregate(pipeline):
+    did = doc['_id']
+    title = did['title']
+    cnt = doc['count']
+    frags = Counter(doc['frags'])
+    dtype = did['type']
+    out = dict(sum=cnt, frags=frags, nka=did['nka'], type=dtype)
+    if ltype:
+      out_dict[title] = out
+    else:
+      out['title'] = title
+      out_dict[f'{dtype}_{title}'] = out
+
+  return json_response(out_dict)
+
+
+async def _req_frags_ngramm_ngramm(request: web.Request) -> web.StreamResponse:
   """Кросс-распределение «5 фрагментов» - «фразы из контекстов цитирований»"""
   app = request.app
   mdb = app['db']

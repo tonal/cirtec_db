@@ -22,10 +22,16 @@ GET http://localhost:7667/cirtec/frags/topics/
 GET http://localhost:7667/cirtec/frags/topics/?topn=5
 
 ###
-GET http://localhost:7667/cirtec/frags/ngramm/
+GET http://localhost:7667/cirtec/frags/ngramms/
 
 ###
-GET http://localhost:7667/cirtec/frags/ngramm/?topn=5
+GET http://localhost:7667/cirtec/frags/ngramms/?topn=10
+
+###
+GET http://localhost:7667/cirtec/frags/ngramms/ngramms/
+
+###
+GET http://localhost:7667/cirtec/frags/ngramms/ngramms/?topn=5
 
 ###
 GET http://localhost:7667/cirtec/top/cocitauthors/
