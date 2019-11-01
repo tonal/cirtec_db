@@ -56,12 +56,17 @@ def create_srv():
   add_get(r'/cirtec/frags/', _req_frags)
   #   Распределение цитирований по 5-ти фрагментам для отдельных публикаций. #заданного автора.
   add_get(r'/cirtec/frags/publications/', _req_frags_pubs)
-  #   Распределение «со-цитируемые авторы» по 5-ти фрагментам
-  add_get(r'/cirtec/frags/cocitauthors/', _req_frags_cocitauthors)
-  #   Распределение «со-цитируемые авторы» по публикациям
+  #   Кросс-распределение «со-цитируемые авторы» по публикациям
   add_get(
     r'/cirtec/publ/publications/cocitauthors/',
     _req_publ_publications_cocitauthors)
+  #   Кросс-распределение «фразы из контекстов цитирований» по публикациям
+  add_get(r'/cirtec/publ/publications/ngramms/', _req_publ_publications_ngramms)
+  #   Кросс-распределение «топики контекстов цитирований» по публикациям
+  add_get(r'/cirtec/publ/publications/topics/', _req_publ_publications_topics)
+
+  #   Распределение «со-цитируемые авторы» по 5-ти фрагментам
+  add_get(r'/cirtec/frags/cocitauthors/', _req_frags_cocitauthors)
   #   Кросс-распределение «5 фрагментов» - «со-цитируемые авторы»
   add_get(
     r'/cirtec/frags/cocitauthors/cocitauthors/',
@@ -277,7 +282,7 @@ async def _req_publ_publications_cocitauthors(
 ) -> web.StreamResponse:
   """
   А
-  Распределение «со-цитируемые авторы» по публикациям
+  Кросс-распределение «со-цитируемые авторы» по публикациям
   """
   app = request.app
   mdb = app['db']
@@ -338,6 +343,162 @@ async def _req_publ_publications_cocitauthors(
           for a, v in occa.items()})
 
   return json_response(out_dict)
+
+
+async def _req_publ_publications_ngramms(
+  request: web.Request
+) -> web.StreamResponse:
+  app = request.app
+  mdb = app['db']
+
+  publications = mdb.publications
+  pubs = {
+    pdoc['_id']: pdoc['name']
+    async for pdoc in publications.find({'name': {'$exists': True}})
+  }
+
+  topn = _get_arg_topn(request)
+  if not topn:
+    topn = 10
+  # nka: int = 2, ltype:str = 'lemmas'
+  nka:int = _get_arg_int(request, 'nka')
+  ltype:str = _get_arg(request, 'ltype')
+  if nka or ltype:
+    preselect = [
+      {'$match': {f: v for f, v in (('nka', nka), ('type', ltype)) if v}}]
+    postmath = [
+      {'$match': {
+        f: v for f, v in (('cont.nka', nka), ('cont.type', ltype)) if v}}]
+  else:
+    preselect = []
+    postmath = None
+
+  pipeline = [
+    {'$project': {'prefix': False, 'suffix': False, 'exact': False}},
+    {'$lookup': {
+      'from': 'n_gramms', 'localField': '_id',
+      'foreignField': 'linked_papers.cont_id', 'as': 'cont'}},
+    {'$unwind': '$cont'},
+  ]
+  if postmath:
+    pipeline += postmath
+  pipeline += [
+    {'$unwind': '$cont.linked_papers'},
+    {'$match': {'$expr': {'$eq': ["$_id", "$cont.linked_papers.cont_id"]}}},
+    {'$project': {'cont.type': False}},  # 'cont.linked_papers': False,
+    # {'$sort': {'frag_num': 1}},
+  ]
+
+  contexts = mdb.contexts
+  n_gramms = mdb.n_gramms
+
+  out_pub_dict = {}
+
+  for pub_id, pub_desc in pubs.items():
+    topN = await _get_topn(
+      n_gramms, topn,
+      preselect=preselect + [
+        {'$match': {'linked_papers.cont_id': {'$regex': f'^{pub_id}@'}}}],
+      sum_expr='$linked_papers.cnt')
+    exists = frozenset(t for t, _, _ in topN)
+    out_dict = {}
+    oconts = set()
+
+    for i, (ngrmm, cnt, conts) in enumerate(topN, 1):
+      congr = defaultdict(set)
+
+      work_pipeline = [
+                        {'$match': {'_id': {'$in': conts}, 'pub_id': pub_id}}
+                      ] + pipeline
+
+      async for doc in contexts.aggregate(work_pipeline):
+        cont = doc['cont']
+        ngr = cont['title']
+        if ngr not in exists:
+          continue
+        cid = cont['linked_papers']['cont_id']
+        oconts.add(cid)
+        congr[ngr].add(cid)
+
+      pubs = congr.pop(ngrmm)
+      crossgrams = {}
+      out_dict[ngrmm] = dict(pubs=tuple(sorted(pubs)), crossgrams=crossgrams)
+
+      for j, (co, vals) in enumerate(
+        sorted(congr.items(), key=lambda kv: (-len(kv[1]), kv[0])), 1
+      ):
+        crossgrams[co] = tuple(sorted(vals))
+
+    out_pub_dict[pub_id] = dict(
+      descr=pub_desc, ngrams=out_dict, conts=tuple(sorted(oconts)))
+
+  return json_response(out_pub_dict)
+
+
+async def _req_publ_publications_topics(request: web.Request) -> web.StreamResponse:
+  """Кросс-распределение «топики контекстов цитирований» по публикациям"""
+  app = request.app
+  mdb = app['db']
+
+  topn = _get_arg_topn(request)
+
+  publications = mdb.publications
+  pubs = {
+    pdoc['_id']: pdoc['name']
+    async for pdoc in publications.find({'name': {'$exists': True}})
+  }
+
+
+  topics = mdb.topics
+  contexts = mdb.contexts
+
+  out_pub_dict = {}
+
+  for pub_id, pub_desc in pubs.items():
+    topN = await _get_topn(
+      topics,
+      preselect=[
+        {'$match': {'linked_papers.cont_id': {'$regex': f'^{pub_id}@'}}}],
+      topn=topn)
+
+    out_dict = {}
+    oconts = set()
+
+    for i, (topic, cnt, conts) in enumerate(topN, 1):
+      congr = defaultdict(set)
+
+      async for doc in contexts.aggregate([
+        {'$match': {'_id': {'$in': conts}, 'pub_id': pub_id}},
+        {'$project': {'prefix': False, 'suffix': False, 'exact': False}},
+        {'$lookup': {
+          'from': 'topics', 'localField': '_id',
+          'foreignField': 'linked_papers.cont_id', 'as': 'cont'}},
+        {'$unwind': '$cont'},
+        {'$unwind': '$cont.linked_papers'},
+        {'$match': {'$expr': {'$eq': ["$_id", "$cont.linked_papers.cont_id"]}}},
+        {'$project': {'cont.type': False}}, # 'cont.linked_papers': False,
+        # {'$sort': {'frag_num': 1}},
+      ]):
+        cont = doc['cont']
+        ngr = cont['title']
+        cid = cont['linked_papers']['cont_id']
+        oconts.add(cid)
+        congr[ngr].add(cid)
+
+      pubs = congr.pop(topic)
+      crosstopics = {}
+      out_dict[topic] = dict(pubs=tuple(sorted(pubs)), crosstopics=crosstopics)
+
+
+      for j, (co, vals) in enumerate(
+        sorted(congr.items(), key=lambda kv: (-len(kv[1]), kv[0])), 1
+      ):
+        crosstopics[co] = tuple(sorted(vals))
+
+    out_pub_dict[pub_id] = dict(
+      descr=pub_desc, topics=out_dict, conts=tuple(sorted(oconts)))
+
+  return json_response(out_pub_dict)
 
 
 async def _req_frags_cocitauthors_cocitauthors(

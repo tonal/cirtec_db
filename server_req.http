@@ -7,6 +7,12 @@ GET http://localhost:7667/cirtec/frags/publications/
 GET http://localhost:7667/cirtec/publ/publications/cocitauthors/
 
 ###
+GET http://localhost:7667/cirtec/publ/publications/ngramms/
+
+###
+GET http://localhost:7667/cirtec/publ/publications/topics/
+
+###
 GET http://localhost:7667/cirtec/frags/cocitauthors/
 
 ###
