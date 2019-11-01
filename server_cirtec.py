@@ -326,7 +326,8 @@ async def _req_publ_publications_cocitauthors(
         conts2aut[c].add(a)
 
     if conts2aut:
-      od.update(conts=tuple(sorted(conts2aut.keys())))
+      od.update(
+        conts=tuple(sorted(conts2aut.keys())), conts_len=len(conts2aut))
     if cocitauthors:
       # od.update(cocitauthors=cocitauthors)
       occa = {}
@@ -340,7 +341,8 @@ async def _req_publ_publications_cocitauthors(
       od.update(
         cocitauthors={
           a: {a2: tuple(sorted(cc)) for a2, cc in v.items()}
-          for a, v in occa.items()})
+          for a, v in occa.items()},
+        cocitauthors_len=len(occa))
 
   return json_response(out_dict)
 
@@ -422,15 +424,19 @@ async def _req_publ_publications_ngramms(
 
       pubs = congr.pop(ngrmm)
       crossgrams = {}
-      out_dict[ngrmm] = dict(pubs=tuple(sorted(pubs)), crossgrams=crossgrams)
 
       for j, (co, vals) in enumerate(
         sorted(congr.items(), key=lambda kv: (-len(kv[1]), kv[0])), 1
       ):
         crossgrams[co] = tuple(sorted(vals))
 
+      out_dict[ngrmm] = dict(
+        pubs=tuple(sorted(pubs)), pubs_len=len(pubs),
+        crossgrams=crossgrams, crossgrams_len=len(crossgrams))
+
     out_pub_dict[pub_id] = dict(
-      descr=pub_desc, ngrams=out_dict, conts=tuple(sorted(oconts)))
+      descr=pub_desc, ngrams=out_dict, ngrams_len=len(out_dict),
+      conts=tuple(sorted(oconts)), conts_len=len(conts))
 
   return json_response(out_pub_dict)
 
@@ -447,7 +453,6 @@ async def _req_publ_publications_topics(request: web.Request) -> web.StreamRespo
     pdoc['_id']: pdoc['name']
     async for pdoc in publications.find({'name': {'$exists': True}})
   }
-
 
   topics = mdb.topics
   contexts = mdb.contexts
@@ -487,16 +492,20 @@ async def _req_publ_publications_topics(request: web.Request) -> web.StreamRespo
 
       pubs = congr.pop(topic)
       crosstopics = {}
-      out_dict[topic] = dict(pubs=tuple(sorted(pubs)), crosstopics=crosstopics)
-
 
       for j, (co, vals) in enumerate(
         sorted(congr.items(), key=lambda kv: (-len(kv[1]), kv[0])), 1
       ):
-        crosstopics[co] = tuple(sorted(vals))
+        crosstopics[co] = dict(cnt=len(vals), topics=tuple(sorted(vals)))
+
+      out_dict[topic] = dict(
+        conts=tuple(sorted(pubs)), conts_len=len(pubs),
+        crosstopics=crosstopics, crosstopics_len=len(crosstopics))
 
     out_pub_dict[pub_id] = dict(
-      descr=pub_desc, topics=out_dict, conts=tuple(sorted(oconts)))
+      descr=pub_desc, topics_len=len(out_dict), topics=out_dict,
+      conts_len=len(oconts), conts=tuple(sorted(oconts)),
+      )
 
   return json_response(out_pub_dict)
 
