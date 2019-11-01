@@ -58,6 +58,10 @@ def create_srv():
   add_get(r'/cirtec/frags/publications/', _req_frags_pubs)
   #   Распределение «со-цитируемые авторы» по 5-ти фрагментам
   add_get(r'/cirtec/frags/cocitauthors/', _req_frags_cocitauthors)
+  #   Распределение «со-цитируемые авторы» по публикациям
+  add_get(
+    r'/cirtec/publ/publications/cocitauthors/',
+    _req_publ_publications_cocitauthors)
   #   Кросс-распределение «5 фрагментов» - «со-цитируемые авторы»
   add_get(
     r'/cirtec/frags/cocitauthors/cocitauthors/',
@@ -264,6 +268,53 @@ async def _req_frags_cocitauthors(request: web.Request) -> web.StreamResponse:
   async for doc in contexts.aggregate(pipeline):
     frags = Counter(doc['frags'])
     out_dict[doc['_id']] = dict(sum=doc['count'], frags=frags)
+
+  return json_response(out_dict)
+
+
+async def _req_publ_publications_cocitauthors(
+  request: web.Request
+) -> web.StreamResponse:
+  """
+  А
+  Распределение «со-цитируемые авторы» по публикациям
+  """
+  app = request.app
+  mdb = app['db']
+
+  topn = _get_arg_topn(request)
+
+  publications = mdb.publications
+  pubs = {
+    pdoc['_id']: pdoc['name']
+    async for pdoc in publications.find({'name': {'$exists': True}})
+  }
+
+  pipeline = [
+    #{'$match': {'pub_id': pub_id, 'cocit_authors': {'$exists': True}}},
+    {'$project': {'prefix': False, 'suffix': False, 'exact': False}},
+    {'$unwind': '$cocit_authors'},
+    {'$group': {
+      '_id': '$cocit_authors', 'count': {'$sum': 1},
+      'conts': {'$addToSet': '$_id'}}},
+    {'$sort': {'count': -1, '_id': 1}},
+  ]
+  if topn:
+    pipeline += [{'$limit': topn}, ]
+
+  out_dict = {}
+
+  contexts = mdb.contexts
+  for pub_id, pub_desc in pubs.items():
+    cocitauthors = {}
+    out_dict[pub_id] = dict(
+      descr=pub_desc, cocitauthors=cocitauthors)
+    pipeline_work = [{
+      '$match': {'pub_id': pub_id, 'cocit_authors': {'$exists': True}}},
+    ] + pipeline
+
+    async for doc in contexts.aggregate(pipeline_work):
+      cocitauthors[doc['_id']] = tuple(sorted(doc['conts']))
 
   return json_response(out_dict)
 

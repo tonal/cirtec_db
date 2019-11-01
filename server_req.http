@@ -4,10 +4,16 @@ GET http://localhost:7667/cirtec/frags/
 GET http://localhost:7667/cirtec/frags/publications/
 
 ###
+GET http://localhost:7667/cirtec/publ/publications/cocitauthors/
+
+###
 GET http://localhost:7667/cirtec/frags/cocitauthors/
 
 ###
 GET http://localhost:7667/cirtec/frags/cocitauthors/?topn=5
+
+###
+GET http://localhost:7667/cirtec/publ/cocitauthors/
 
 ###
 GET http://localhost:7667/cirtec/frags/cocitauthors/cocitauthors/
