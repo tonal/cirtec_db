@@ -70,6 +70,8 @@ def create_srv():
   add_get(r'/cirtec/frags/ngramms/', _req_frags_ngramm)
   #   Кросс-распределение «5 фрагментов» - «фразы из контекстов цитирований»
   add_get(r'/cirtec/frags/ngramms/ngramms/', _req_frags_ngramm_ngramm)
+  #   Кросс-распределение «публикации» - «фразы из контекстов цитирований»
+  add_get(r'/cirtec/publ/ngramms/ngramms/', _req_publ_ngramm_ngramm)
   #   Кросс-распределение «5 фрагментов» - «топики контекстов цитирований»
   add_get(r'/cirtec/frags/topics/', _req_frags_topics)
   #   Кросс-распределение «5 фрагментов» - «топики контекстов цитирований»
@@ -729,6 +731,77 @@ async def _req_frags_ngramm_ngramm(request: web.Request) -> web.StreamResponse:
       sorted(congr.items(), key=lambda kv: (-sum(kv[1].values()), kv[0])), 1
     ):
       crossgrams[co] = dict(frags=cnts, sum=sum(cnts.values()))
+
+  return json_response(out_dict)
+
+
+async def _req_publ_ngramm_ngramm(request: web.Request) -> web.StreamResponse:
+  """Кросс-распределение «публикации» - «фразы из контекстов цитирований»"""
+  app = request.app
+  mdb = app['db']
+
+  topn = _get_arg_topn(request)
+  if not topn:
+    topn = 10
+  # nka: int = 2, ltype:str = 'lemmas'
+  nka:int = _get_arg_int(request, 'nka')
+  ltype:str = _get_arg(request, 'ltype')
+  if nka or ltype:
+    preselect = [
+      {'$match': {f: v for f, v in (('nka', nka), ('type', ltype)) if v}}]
+    postmath = [
+      {'$match': {
+        f: v for f, v in (('cont.nka', nka), ('cont.type', ltype)) if v}}]
+  else:
+    preselect = None
+    postmath = None
+
+  n_gramms = mdb.n_gramms
+  topN = await _get_topn(
+    n_gramms, topn, preselect=preselect, sum_expr='$linked_papers.cnt')
+  exists = frozenset(t for t, _, _ in topN)
+  out_dict = {}
+  contexts = mdb.contexts
+
+  pipeline = [
+    {'$project': {'prefix': False, 'suffix': False, 'exact': False}},
+    {
+      '$lookup': {
+        'from': 'n_gramms', 'localField': '_id',
+        'foreignField': 'linked_papers.cont_id', 'as': 'cont'}},
+    {'$unwind': '$cont'},
+  ]
+  if postmath:
+    pipeline += postmath
+  pipeline += [
+    {'$unwind': '$cont.linked_papers'},
+    {'$match': {'$expr': {'$eq': ["$_id", "$cont.linked_papers.cont_id"]}}},
+    {'$project': {'cont.type': False}},  # 'cont.linked_papers': False,
+    # {'$sort': {'frag_num': 1}},
+  ]
+  for i, (ngrmm, cnt, conts) in enumerate(topN, 1):
+    congr = defaultdict(set)
+
+    work_pipeline = [
+      {'$match': {'frag_num': {'$gt': 0}, '_id': {'$in': conts}}}
+    ] + pipeline
+
+    async for doc in contexts.aggregate(work_pipeline):
+      cont = doc['cont']
+      ngr = cont['title']
+      if ngr not in exists:
+        continue
+      pub_id = doc['pub_id']
+      congr[ngr].add(pub_id)
+
+    pubs = congr.pop(ngrmm)
+    crossgrams = {}
+    out_dict[ngrmm] = dict(pubs=tuple(sorted(pubs)), crossgrams=crossgrams)
+
+    for j, (co, vals) in enumerate(
+      sorted(congr.items(), key=lambda kv: (-len(kv[1]), kv[0])), 1
+    ):
+      crossgrams[co] = tuple(sorted(vals))
 
   return json_response(out_dict)
 
