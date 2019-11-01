@@ -307,14 +307,35 @@ async def _req_publ_publications_cocitauthors(
   contexts = mdb.contexts
   for pub_id, pub_desc in pubs.items():
     cocitauthors = {}
-    out_dict[pub_id] = dict(
-      descr=pub_desc, cocitauthors=cocitauthors)
+    out_dict[pub_id] = od = dict(descr=pub_desc)
     pipeline_work = [{
       '$match': {'pub_id': pub_id, 'cocit_authors': {'$exists': True}}},
     ] + pipeline
 
+    conts2aut = defaultdict(set)
     async for doc in contexts.aggregate(pipeline_work):
-      cocitauthors[doc['_id']] = tuple(sorted(doc['conts']))
+      a = doc['_id']
+      conts = doc['conts']
+      cocitauthors[a] = tuple(sorted(conts))
+      for c in conts:
+        conts2aut[c].add(a)
+
+    if conts2aut:
+      od.update(conts=tuple(sorted(conts2aut.keys())))
+    if cocitauthors:
+      # od.update(cocitauthors=cocitauthors)
+      occa = {}
+      for a, cs in cocitauthors.items():
+        occa[a] = ac = defaultdict(set)
+        for c in cs:
+          for a2 in conts2aut[c]:
+            if a2 == a:
+              continue
+            ac[a2].add(c)
+      od.update(
+        cocitauthors={
+          a: {a2: tuple(sorted(cc)) for a2, cc in v.items()}
+          for a, v in occa.items()})
 
   return json_response(out_dict)
 
