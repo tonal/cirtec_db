@@ -11,7 +11,7 @@ attrs==19.3.0
 brotlipy==0.7.0           # via aiohttp
 cchardet==2.1.4           # via aiohttp
 certifi==2019.9.11        # via requests
-cffi==1.13.0              # via brotlipy, pycares
+cffi==1.13.1              # via brotlipy, pycares
 chardet==3.0.4            # via aiohttp, requests
 click==7.0
 cssselect==1.1.0          # via parsel

@@ -33,7 +33,7 @@ pycparser==2.19           # via cffi
 pymongo[snappy,srv]==3.9.0
 pyparsing==2.4.2          # via packaging
 pytest-aiohttp==0.3.0
-pytest==5.2.1             # via pytest-aiohttp
+pytest==5.2.2             # via pytest-aiohttp
 python-snappy==0.5.4      # via pymongo
 pyyaml==5.1.2
 requests==2.22.0

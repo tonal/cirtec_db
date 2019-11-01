@@ -16,6 +16,9 @@ GET http://localhost:7667/cirtec/frags/cocitauthors/cocitauthors/
 GET http://localhost:7667/cirtec/frags/cocitauthors/cocitauthors/?topn_cocitauthors=5
 
 ###
+GET http://localhost:7667/cirtec/publ/cocitauthors/cocitauthors/
+
+###
 GET http://localhost:7667/cirtec/frags/topics/
 
 ###
@@ -26,6 +29,9 @@ GET http://localhost:7667/cirtec/frags/topics/topics/
 
 ###
 GET http://localhost:7667/cirtec/frags/topics/topics/?topn=5
+
+###
+GET http://localhost:7667/cirtec/publ/topics/topics/
 
 ###
 GET http://localhost:7667/cirtec/frags/ngramms/
