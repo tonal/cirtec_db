@@ -12,6 +12,7 @@ from typing import Union, Optional, Sequence, Tuple
 
 from aiohttp import web
 import motor.motor_asyncio as aiomotor
+from pymongo.collection import Collection
 import uvloop
 import yaml
 
@@ -115,6 +116,8 @@ def create_srv():
   add_get(r'/cirtec/top/topics/', _req_top_topics)
   # Топ N топиков публикациям
   add_get(r'/cirtec/top/topics/publications/', _req_top_topics_pubs)
+
+  add_get(r'/cirtec/cnt/publications/ngramms/', _reg_cnt_pubs_ngramm)
 
   app['conf'] = conf
   app['tasks'] = set()
@@ -1551,6 +1554,54 @@ async def _req_top_topics_pubs(request: web.Request) -> web.StreamResponse:
   out = {
     n: dict(all=cnt, pubs=Counter(c.rsplit('@', 1)[0] for c in conts))
     for n, cnt, conts in topN}
+  return json_response(out)
+
+
+async def _reg_cnt_pubs_ngramm(request: web.Request) -> web.StreamResponse:
+  app = request.app
+  mdb = app['db']
+
+  topn = _get_arg_topn(request)
+
+  nka = _get_arg_int(request, 'nka')
+  ltype = _get_arg(request, 'ltype')
+  if nka or ltype:
+    pipeline = [
+      {'$match': {f: v for f, v in (('nka', nka), ('type', ltype)) if v}}]
+  else:
+    pipeline = []
+
+  n_gramms = mdb.n_gramms
+  publications:Collection = mdb.publications
+  out = {}
+  get_as_tuple = itemgetter('title', 'type', 'linked_papers')
+
+  async for pobj in publications.find({'name': {'$exists': True}}):
+    pub_id = pobj['_id']
+    pipeline_work = [
+      {'$match': {'linked_papers.cont_id': {'$regex': f'^{pub_id}@'}}}
+    ] + pipeline
+    out_ngrs = []
+
+    cont_starts = pub_id + '@'
+    async for obj in n_gramms.aggregate(pipeline_work):
+      title, lt, conts = get_as_tuple(obj)
+      res = dict(title=title) if ltype else dict(title=title, type=lt)
+      cnt_all = cnt_cont = 0
+      for cid, cnt in (c.values() for c in conts):
+        if cid.startswith(cont_starts):
+          cnt_cont += 1
+          cnt_all += cnt
+      res.update(count=cnt_all, count_conts=cnt_cont,
+        # conts=conts
+      )
+      out_ngrs.append(res)
+
+    out_ngrs = sorted(out_ngrs, key=itemgetter('count'), reverse=True)
+    if topn:
+      out_ngrs = out_ngrs[:topn]
+    out[pub_id] = out_ngrs
+
   return json_response(out)
 
 

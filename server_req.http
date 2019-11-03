@@ -139,3 +139,9 @@ GET http://localhost:7667/cirtec/frags/topics/ngramms/?topn=5
 GET http://cirtec.ranepa.ru/cirtec/frags/ngramms/cocitauthors/?topn=10&topn_cocitauthors=10&nka=2&ltype=lemmas
 
 ###
+GET http://localhost:7667/cirtec/publ/publications/ngramms/?topn=5ltype=lemmas
+
+###
+GET http://localhost:7667/cirtec/cnt/publications/ngramms/
+
+###
