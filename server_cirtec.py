@@ -117,6 +117,7 @@ def create_srv():
   # Топ N топиков публикациям
   add_get(r'/cirtec/top/topics/publications/', _req_top_topics_pubs)
 
+  add_get(r'/cirtec/cnt/ngramms/', _reg_cnt_ngramm)
   add_get(r'/cirtec/cnt/publications/ngramms/', _reg_cnt_pubs_ngramm)
 
   app['conf'] = conf
@@ -1554,6 +1555,44 @@ async def _req_top_topics_pubs(request: web.Request) -> web.StreamResponse:
   out = {
     n: dict(all=cnt, pubs=Counter(c.rsplit('@', 1)[0] for c in conts))
     for n, cnt, conts in topN}
+  return json_response(out)
+
+
+async def _reg_cnt_ngramm(request: web.Request) -> web.StreamResponse:
+  app = request.app
+  mdb = app['db']
+
+  topn = _get_arg_topn(request)
+
+  nka = _get_arg_int(request, 'nka')
+  ltype = _get_arg(request, 'ltype')
+  if nka or ltype:
+    pipeline = [
+      {'$match': {f: v for f, v in (('nka', nka), ('type', ltype)) if v}}]
+  else:
+    pipeline = []
+
+  pipeline += [{'$sort': {'count_all': -1, 'title': 1, 'type': 1}}]
+  if topn:
+    pipeline += [{'$limit': topn}]
+
+  out = []
+  get_as_tuple = itemgetter('title', 'type', 'linked_papers')
+  n_gramms = mdb.n_gramms
+  async for doc in n_gramms.aggregate(pipeline):
+    title, lt, conts = get_as_tuple(doc)
+    res = dict(title=title) if ltype else dict(title=title, type=lt)
+    cnt_all = cnt_cont = 0
+    pubs = set()
+    for cid, cnt in (c.values() for c in conts):
+      cnt_cont += 1
+      cnt_all += cnt
+      pubs.add(cid.rsplit('@', 1)[0])
+    res.update(
+      count=cnt_all, count_conts=cnt_cont, conts_pubs=len(pubs)
+    )
+    out.append(res)
+
   return json_response(out)
 
 

@@ -145,3 +145,6 @@ GET http://localhost:7667/cirtec/publ/publications/ngramms/?topn=5ltype=lemmas
 GET http://localhost:7667/cirtec/cnt/publications/ngramms/
 
 ###
+GET http://localhost:7667/cirtec/cnt/ngramms/
+
+###
