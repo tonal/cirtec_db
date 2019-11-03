@@ -1589,8 +1589,8 @@ async def _reg_cnt_ngramm(request: web.Request) -> web.StreamResponse:
       cnt_all += cnt
       pubs.add(cid.rsplit('@', 1)[0])
     res.update(
-      count=cnt_all, count_conts=cnt_cont, conts_pubs=len(pubs)
-    )
+      count_all=doc['count_all'], count=cnt_all, count_conts=cnt_cont,
+      conts_pubs=len(pubs))
     out.append(res)
 
   return json_response(out)
@@ -1626,6 +1626,7 @@ async def _reg_cnt_pubs_ngramm(request: web.Request) -> web.StreamResponse:
     async for obj in n_gramms.aggregate(pipeline_work):
       title, lt, conts = get_as_tuple(obj)
       res = dict(title=title) if ltype else dict(title=title, type=lt)
+      res.update(count_all=obj['count_all'])
       cnt_all = cnt_cont = 0
       for cid, cnt in (c.values() for c in conts):
         if cid.startswith(cont_starts):
