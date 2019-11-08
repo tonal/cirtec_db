@@ -17,7 +17,7 @@ COCITS = 'linked_papers_cocits_aunas.json'
 
 def main():
   conf = load_config()
-  conf_mongo = conf['mongodb']
+  conf_mongo = conf['mongodb_dev']
   with MongoClient(conf_mongo['uri'], compressors='snappy') as client:
     mdb = client[conf_mongo['db']] # 'cirtec'
 

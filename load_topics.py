@@ -19,7 +19,7 @@ TOPICS = 'topic_output.json'
 
 def main():
   conf = load_config()
-  conf_mongo = conf['mongodb']
+  conf_mongo = conf['mongodb_dev']
 
   with MongoClient(conf_mongo['uri'], compressors='snappy') as client:
     mdb = client[conf_mongo['db']] # 'cirtec'
@@ -54,10 +54,13 @@ def main():
       ref_key, topic, probab = get_as_tuple(cont)
       pub_id, num, start = ref_key.rsplit('_', 2)
       cont_id = f'{pub_id}@{start}'
-      mcont_update(dict(_id=cont_id), {'$set': {'ref_num': int(num)}})
-      mtops_update(dict(_id=topic),
-        {'$addToSet': {
-          'linked_papers': {'cont_id': cont_id, 'probability': float(probab)}}})
+      mcont_update(
+        dict(_id=cont_id),
+        {
+          '$set': {'ref_num': int(num)},
+          '$addToSet': {
+            'linked_papers_topics': {
+              '_id': topic, 'probability': float(probab)}}})
 
     print(i, len(cnts))
 

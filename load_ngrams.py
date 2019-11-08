@@ -21,7 +21,7 @@ NGRAM_DIR = 'l'
 
 def main():
   conf = load_config()
-  conf_mongo = conf['mongodb']
+  conf_mongo = conf['mongodb_dev']
 
   with MongoClient(conf_mongo['uri'], compressors='snappy') as client:
     mdb = client[conf_mongo['db']] # 'cirtec'
@@ -29,10 +29,13 @@ def main():
     mdb.drop_collection('n_gramms')
     col_gramms = mdb['n_gramms']
     insert = col_gramms.insert_one
+    mcont = mdb['contexts']
+    mcont_update = partial(mcont.update_one, upsert=True)
     obj_type = 'lemmas'
 
     cnt = 0
-    PREF_LEN = len('linked_papers_')
+    PREF = 'linked_papers_'
+    PREF_LEN = len(PREF)
     for fngram in Path(NGRAM_DIR).glob(NGRAM_TEMPL):
       nka = int(fngram.stem.split('-', 1)[0])
       # col_name = f'gramm_{nka}_{NGRAM_DIR}'
@@ -42,22 +45,27 @@ def main():
       for title, doc in ngrams.items():
         all_cnt = doc['count']
         # print(' ', title, all_cnt)
-        linked_papers = []
         lp_cnt = 0
+
+        ngr_id = f'{obj_type}_{title}'
         for k, cdoc in enumerate(doc['ids'], 1):
           g_pub_id, gcnt = cdoc.popitem()
-          if not g_pub_id.startswith('linked_papers_'):
+          if not g_pub_id.startswith(PREF):
             continue
           pub_id, ref_num, start = g_pub_id[PREF_LEN:].rsplit('_', 2)
           # print('  ', k, pub_id, ref_num, start, gcnt)
-          linked_papers.append(dict(cont_id=f'{pub_id}@{start}', cnt=gcnt))
+          cont_id = f'{pub_id}@{start}'
+          mcont_update(
+            dict(_id=cont_id),
+            {
+              '$addToSet': {
+                'linked_papers_ngrams': {'_id': ngr_id, 'cnt': gcnt}}})
           lp_cnt += gcnt
-        if not linked_papers:
+        if not lp_cnt:
           continue
         ngram_doc = dict(
-          _id=f'{obj_type}_{nka}_{title}', title=title, nka=nka, type=obj_type,
-          count_all=all_cnt, count_in_linked_papers=lp_cnt,
-          linked_papers=linked_papers)
+          _id=ngr_id, title=title, nka=nka, type=obj_type, count_all=all_cnt,
+          count_in_linked_papers=lp_cnt,)
         insert(ngram_doc)
         cnt += 1
         if cnt % 1000 == 0:
