@@ -26,7 +26,7 @@ def main():
   with MongoClient(conf_mongo['uri'], compressors='snappy') as client:
     mdb = client[conf_mongo['db']] # 'cirtec'
 
-    mdb.drop_collection('n_gramms')
+    # mdb.drop_collection('n_gramms')
     col_gramms = mdb['n_gramms']
     insert = col_gramms.insert_one
     mcont = mdb['contexts']
