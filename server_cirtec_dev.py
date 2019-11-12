@@ -245,7 +245,9 @@ async def _req_top_refauthors(request: web.Request) -> web.StreamResponse:
     {'$group': {
       '_id': '$bun.authors', 'cits': {'$addToSet': '$_id'},
       'pubs': {'$addToSet': '$pub_id'}}},
-    {'$project': {'cits': {'$size': '$cits'}, 'pubs': {'$size': '$pubs'}}},
+    {'$project': {
+      '_id': False, 'author': '$_id', 'cits': {'$size': '$cits'},
+      'pubs': {'$size': '$pubs'}}},
     {'$sort': {'cits': -1, 'pubs': -1, '_id': 1}},
   ]
   if topn:
