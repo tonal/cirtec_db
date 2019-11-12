@@ -19,7 +19,7 @@ BUNDLES = 'linked_papers_base.json'
 
 def main():
   conf = load_config()
-  conf_mongo = conf['mongodb_dev']
+  conf_mongo = conf['dev']['mongodb']
 
   with MongoClient(conf_mongo['uri'], compressors='snappy') as client:
     mdb = client[conf_mongo['db']] # 'cirtec'
@@ -66,14 +66,22 @@ def main():
         assert j == fast_int(num)
         bib = ref_cont['bib']
         bundle = ref_cont.get('bundle')
+        total_cits = ref_cont.get('total cits')
+        total_pubs = ref_cont.get('total pubs')
         all_intext_ref = ref_cont.get('all_intext_ref')
         intext_ref = ref_cont.get('intext_ref')
         bib_bib = bib2bib(**bib)
         ref_doc = dict(num=j, **bib_bib)
         if bundle:
           ref_doc.update(bundle=bundle)
+          bundle_doc = dict(**bib_bib)
+          if total_cits:
+            bundle_doc.update(total_cits=total_cits)
+          if total_pubs:
+            bundle_doc.update(total_pubs=total_pubs)
           mbnds_update(
-            dict(_id=bundle), {'$set': bib_bib, '$addToSet': {'bibs': bib_bib}})
+            dict(_id=bundle),
+            {'$set': bundle_doc, '$addToSet': {'bibs': bib_bib}})
         doc_refs.append(ref_doc)
 
         for iref in all_intext_ref or ():
@@ -89,7 +97,7 @@ def main():
           elif bundle:
             mcont_update(
               dict(_id=iref), {
-                '$set': {'start': fast_int(rstart)},
+                '$set': {'pub_id': rpub_id, 'start': fast_int(rstart)},
                 '$addToSet': {'bundles': bundle}})
           cache_conts.add(iref)
 

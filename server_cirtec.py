@@ -16,6 +16,7 @@ from pymongo.collection import Collection
 import uvloop
 import yaml
 
+from server_utils import getreqarg, getreqarg_int, getreqarg_topn
 from utils import load_config
 
 _logger = logging.getLogger('cirtec')
@@ -258,7 +259,7 @@ async def _req_frags_cocitauthors(request: web.Request) -> web.StreamResponse:
   app = request.app
   mdb = app['db']
 
-  topn = _get_arg_topn(request)
+  topn = getreqarg_topn(request)
 
   contexts = mdb.contexts
 
@@ -291,7 +292,7 @@ async def _req_publ_publications_cocitauthors(
   app = request.app
   mdb = app['db']
 
-  topn = _get_arg_topn(request)
+  topn = getreqarg_topn(request)
 
   publications = mdb.publications
   pubs = {
@@ -363,12 +364,12 @@ async def _req_publ_publications_ngramms(
     async for pdoc in publications.find({'name': {'$exists': True}})
   }
 
-  topn = _get_arg_topn(request)
+  topn = getreqarg_topn(request)
   if not topn:
     topn = 10
   # nka: int = 2, ltype:str = 'lemmas'
-  nka:int = _get_arg_int(request, 'nka')
-  ltype:str = _get_arg(request, 'ltype')
+  nka:int = getreqarg_int(request, 'nka')
+  ltype:str = getreqarg(request, 'ltype')
   if nka or ltype:
     preselect = [
       {'$match': {f: v for f, v in (('nka', nka), ('type', ltype)) if v}}]
@@ -450,7 +451,7 @@ async def _req_publ_publications_topics(request: web.Request) -> web.StreamRespo
   app = request.app
   mdb = app['db']
 
-  topn = _get_arg_topn(request)
+  topn = getreqarg_topn(request)
 
   publications = mdb.publications
   pubs = {
@@ -524,8 +525,8 @@ async def _req_frags_cocitauthors_cocitauthors(
   app = request.app
   mdb = app['db']
 
-  topn = _get_arg_topn(request)
-  topn_cocitauthors: int = _get_arg_int(request, 'topn_cocitauthors')
+  topn = getreqarg_topn(request)
+  topn_cocitauthors: int = getreqarg_int(request, 'topn_cocitauthors')
 
   contexts = mdb.contexts
   topN = await _get_topn_cocit_authors(contexts, topn)
@@ -585,8 +586,8 @@ async def _req_publ_cocitauthors_cocitauthors(
   app = request.app
   mdb = app['db']
 
-  topn = _get_arg_topn(request)
-  topn_cocitauthors: int = _get_arg_int(request, 'topn_cocitauthors')
+  topn = getreqarg_topn(request)
+  topn_cocitauthors: int = getreqarg_int(request, 'topn_cocitauthors')
 
   contexts = mdb.contexts
   topN = await _get_topn_cocit_authors(contexts, topn)
@@ -643,14 +644,14 @@ async def _req_frags_cocitauthors_ngramms(request: web.Request) -> web.StreamRes
   app = request.app
   mdb = app['db']
 
-  topn:int = _get_arg_topn(request)
+  topn:int = getreqarg_topn(request)
   # if not topn:
   #   topn = 10
-  topn_gramm:int = _get_arg_int(request, 'topn_gramm')
+  topn_gramm:int = getreqarg_int(request, 'topn_gramm')
   if not topn_gramm:
     topn_gramm = 500
-  nka:int = _get_arg_int(request, 'nka')
-  ltype:str = _get_arg(request, 'ltype')
+  nka:int = getreqarg_int(request, 'nka')
+  ltype:str = getreqarg(request, 'ltype')
 
   if topn_gramm:
     n_gramms = mdb.n_gramms
@@ -723,8 +724,8 @@ async def _req_frags_cocitauthors_topics(request: web.Request) -> web.StreamResp
   app = request.app
   mdb = app['db']
 
-  topn:int = _get_arg_topn(request)
-  topn_topics:int = _get_arg_int(request, 'topn_topics')
+  topn:int = getreqarg_topn(request)
+  topn_topics:int = getreqarg_int(request, 'topn_topics')
   if topn_topics:
     topics = mdb.topics
     top_topics = await _get_topn(topics, topn=topn)
@@ -806,7 +807,7 @@ async def _req_top_cocitauthors(request: web.Request) -> web.StreamResponse:
   app = request.app
   mdb = app['db']
 
-  topn = _get_arg_topn(request)
+  topn = getreqarg_topn(request)
 
   contexts = mdb.contexts
   topN = await _get_topn_cocit_authors(contexts, topn, include_conts=True)
@@ -820,7 +821,7 @@ async def _req_top_cocitauthors_pubs(request: web.Request) -> web.StreamResponse
   app = request.app
   mdb = app['db']
 
-  topn = _get_arg_topn(request)
+  topn = getreqarg_topn(request)
 
   contexts = mdb.contexts
   topN = await _get_topn_cocit_authors(contexts, topn, include_conts=True)
@@ -831,41 +832,17 @@ async def _req_top_cocitauthors_pubs(request: web.Request) -> web.StreamResponse
   return json_response(out)
 
 
-def _get_arg(request:web.Request, argname:str) -> Optional[str]:
-  arg = request.query.get(argname)
-  if arg:
-    arg = arg.strip()
-    return arg
-
-
-def _get_arg_int(request:web.Request, argname:str) -> Optional[int]:
-  arg = _get_arg(request, argname)
-  if arg:
-    try:
-      arg = int(arg)
-      return arg
-    except ValueError as ex:
-      _logger.error(
-        'Неожиданное значение параметра topn "%s" при переводе в число: %s',
-        arg, ex)
-
-
-def _get_arg_topn(request: web.Request) -> Optional[int]:
-  topn = _get_arg_int(request, 'topn')
-  return topn
-
-
 async def _req_frags_ngramm(request: web.Request) -> web.StreamResponse:
   """Распределение «5 фрагментов» - «фразы из контекстов цитирований»"""
   app = request.app
   mdb = app['db']
 
-  topn = _get_arg_topn(request)
+  topn = getreqarg_topn(request)
   if not topn:
     topn = 10
   # nka: int = 2, ltype:str = 'lemmas'
-  nka:int = _get_arg_int(request, 'nka')
-  ltype:str = _get_arg(request, 'ltype')
+  nka:int = getreqarg_int(request, 'nka')
+  ltype:str = getreqarg(request, 'ltype')
 
   if nka or ltype:
     pipeline = [
@@ -915,12 +892,12 @@ async def _req_frags_ngramm_ngramm(request: web.Request) -> web.StreamResponse:
   app = request.app
   mdb = app['db']
 
-  topn = _get_arg_topn(request)
+  topn = getreqarg_topn(request)
   if not topn:
     topn = 10
   # nka: int = 2, ltype:str = 'lemmas'
-  nka:int = _get_arg_int(request, 'nka')
-  ltype:str = _get_arg(request, 'ltype')
+  nka:int = getreqarg_int(request, 'nka')
+  ltype:str = getreqarg(request, 'ltype')
   if nka or ltype:
     preselect = [
       {'$match': {f: v for f, v in (('nka', nka), ('type', ltype)) if v}}]
@@ -986,12 +963,12 @@ async def _req_publ_ngramm_ngramm(request: web.Request) -> web.StreamResponse:
   app = request.app
   mdb = app['db']
 
-  topn = _get_arg_topn(request)
+  topn = getreqarg_topn(request)
   if not topn:
     topn = 10
   # nka: int = 2, ltype:str = 'lemmas'
-  nka:int = _get_arg_int(request, 'nka')
-  ltype:str = _get_arg(request, 'ltype')
+  nka:int = getreqarg_int(request, 'nka')
+  ltype:str = getreqarg(request, 'ltype')
   if nka or ltype:
     preselect = [
       {'$match': {f: v for f, v in (('nka', nka), ('type', ltype)) if v}}]
@@ -1057,13 +1034,13 @@ async def _req_frags_ngramms_cocitauthors(request: web.Request) -> web.StreamRes
   app = request.app
   mdb = app['db']
 
-  topn = _get_arg_topn(request)
+  topn = getreqarg_topn(request)
   if not topn:
     topn = 10
 
   contexts = mdb.contexts
 
-  topn_authors:int = _get_arg_int(request, 'topn_cocitauthors')
+  topn_authors:int = getreqarg_int(request, 'topn_cocitauthors')
   if topn_authors:
     topNa = await _get_topn_cocit_authors(
       contexts, topn_authors, include_conts=False)
@@ -1071,8 +1048,8 @@ async def _req_frags_ngramms_cocitauthors(request: web.Request) -> web.StreamRes
   else:
     exists = ()
 
-  nka:int = _get_arg_int(request, 'nka')
-  ltype:str = _get_arg(request, 'ltype')
+  nka:int = getreqarg_int(request, 'nka')
+  ltype:str = getreqarg(request, 'ltype')
   if nka or ltype:
     preselect = [
       {'$match': {f: v for f, v in (('nka', nka), ('type', ltype)) if v}}]
@@ -1121,11 +1098,11 @@ async def _req_frags_ngramms_topics(request: web.Request) -> web.StreamResponse:
   app = request.app
   mdb = app['db']
 
-  topn = _get_arg_topn(request)
+  topn = getreqarg_topn(request)
   if not topn:
     topn = 10
 
-  topn_topics:int = _get_arg_int(request, 'topn_topics')
+  topn_topics:int = getreqarg_int(request, 'topn_topics')
   if topn_topics:
     topics = mdb.topics
     topNt = await _get_topn(topics, topn=topn_topics)
@@ -1133,8 +1110,8 @@ async def _req_frags_ngramms_topics(request: web.Request) -> web.StreamResponse:
   else:
     exists = ()
 
-  nka:int = _get_arg_int(request, 'nka')
-  ltype:str = _get_arg(request, 'ltype')
+  nka:int = getreqarg_int(request, 'nka')
+  ltype:str = getreqarg(request, 'ltype')
   if nka or ltype:
     preselect = [
       {'$match': {f: v for f, v in (('nka', nka), ('type', ltype)) if v}}]
@@ -1184,7 +1161,7 @@ async def _req_frags_topics(request: web.Request) -> web.StreamResponse:
   app = request.app
   mdb = app['db']
 
-  topn = _get_arg_topn(request)
+  topn = getreqarg_topn(request)
 
   topics = mdb.topics
   pipeline = [
@@ -1219,7 +1196,7 @@ async def _req_frags_topics_topics(request: web.Request) -> web.StreamResponse:
   app = request.app
   mdb = app['db']
 
-  topn = _get_arg_topn(request)
+  topn = getreqarg_topn(request)
 
   topics = mdb.topics
   topN = await _get_topn(topics, topn=topn)
@@ -1266,7 +1243,7 @@ async def _req_publ_topics_topics(request: web.Request) -> web.StreamResponse:
   app = request.app
   mdb = app['db']
 
-  topn = _get_arg_topn(request)
+  topn = getreqarg_topn(request)
 
   topics = mdb.topics
   topN = await _get_topn(topics, topn=topn)
@@ -1315,11 +1292,11 @@ async def _req_frags_topics_cocitauthors(
   app = request.app
   mdb = app['db']
 
-  topn = _get_arg_topn(request)
+  topn = getreqarg_topn(request)
 
   contexts = mdb.contexts
 
-  topn_authors:int = _get_arg_int(request, 'topn_cocitauthors')
+  topn_authors:int = getreqarg_int(request, 'topn_cocitauthors')
   if topn_authors:
     topNa = await _get_topn_cocit_authors(
       contexts, topn_authors, include_conts=False)
@@ -1364,15 +1341,15 @@ async def _req_frags_topics_ngramms(request: web.Request) -> web.StreamResponse:
   app = request.app
   mdb = app['db']
 
-  topn = _get_arg_topn(request)
+  topn = getreqarg_topn(request)
 
-  topn_crpssgramm: int = _get_arg_int(request, 'topn_crpssgramm')
-  topn_gramm: int = _get_arg_int(request, 'topn_gramm')
+  topn_crpssgramm: int = getreqarg_int(request, 'topn_crpssgramm')
+  topn_gramm: int = getreqarg_int(request, 'topn_gramm')
   if not topn_gramm:
     topn_gramm = 500
 
-  nka = _get_arg_int(request, 'nka')
-  ltype = _get_arg(request, 'ltype')
+  nka = getreqarg_int(request, 'nka')
+  ltype = getreqarg(request, 'ltype')
 
   if topn_gramm:
     n_gramms = mdb.n_gramms
@@ -1467,10 +1444,10 @@ async def _req_top_ngramm(request: web.Request) -> web.StreamResponse:
   app = request.app
   mdb = app['db']
 
-  topn = _get_arg_topn(request)
+  topn = getreqarg_topn(request)
 
-  nka = _get_arg_int(request, 'nka')
-  ltype = _get_arg(request, 'ltype')
+  nka = getreqarg_int(request, 'nka')
+  ltype = getreqarg(request, 'ltype')
   if nka or ltype:
     preselect = [
       {'$match': {f: v for f, v in (('nka', nka), ('type', ltype)) if v}}]
@@ -1490,10 +1467,10 @@ async def _req_top_ngramm_pubs(request: web.Request) -> web.StreamResponse:
   app = request.app
   mdb = app['db']
 
-  topn = _get_arg_topn(request)
+  topn = getreqarg_topn(request)
 
-  nka = _get_arg_int(request, 'nka')
-  ltype = _get_arg(request, 'ltype')
+  nka = getreqarg_int(request, 'nka')
+  ltype = getreqarg(request, 'ltype')
   if nka or ltype:
     pipeline = [
       {'$match': {f: v for f, v in (('nka', nka), ('type', ltype)) if v}}]
@@ -1532,7 +1509,7 @@ async def _req_top_topics(request: web.Request) -> web.StreamResponse:
   app = request.app
   mdb = app['db']
 
-  topn = _get_arg_topn(request)
+  topn = getreqarg_topn(request)
 
   topics = mdb.topics
   topN = await _get_topn(topics, topn=topn)
@@ -1546,7 +1523,7 @@ async def _req_top_topics_pubs(request: web.Request) -> web.StreamResponse:
   app = request.app
   mdb = app['db']
 
-  topn = _get_arg_topn(request)
+  topn = getreqarg_topn(request)
 
   topics = mdb.topics
   topN = await _get_topn(topics, topn=topn)
@@ -1562,10 +1539,10 @@ async def _reg_cnt_ngramm(request: web.Request) -> web.StreamResponse:
   app = request.app
   mdb = app['db']
 
-  topn = _get_arg_topn(request)
+  topn = getreqarg_topn(request)
 
-  nka = _get_arg_int(request, 'nka')
-  ltype = _get_arg(request, 'ltype')
+  nka = getreqarg_int(request, 'nka')
+  ltype = getreqarg(request, 'ltype')
   if nka or ltype:
     pipeline = [
       {'$match': {f: v for f, v in (('nka', nka), ('type', ltype)) if v}}]
@@ -1600,10 +1577,10 @@ async def _reg_cnt_pubs_ngramm(request: web.Request) -> web.StreamResponse:
   app = request.app
   mdb = app['db']
 
-  topn = _get_arg_topn(request)
+  topn = getreqarg_topn(request)
 
-  nka = _get_arg_int(request, 'nka')
-  ltype = _get_arg(request, 'ltype')
+  nka = getreqarg_int(request, 'nka')
+  ltype = getreqarg(request, 'ltype')
   if nka or ltype:
     pipeline = [
       {'$match': {f: v for f, v in (('nka', nka), ('type', ltype)) if v}}]

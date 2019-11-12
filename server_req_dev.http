@@ -1,0 +1,6 @@
+GET http://localhost:8668/cirtec/top/ref_bindles/?topn=5
+
+###
+GET http://localhost:8668/cirtec/top/ref_authors/
+
+###
