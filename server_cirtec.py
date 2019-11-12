@@ -3,11 +3,8 @@
 import asyncio
 from collections import Counter, defaultdict
 from functools import partial
-import json
 import logging
-import logging.config
 from operator import itemgetter
-from pathlib import Path
 from typing import Union, Optional, Sequence, Tuple
 
 from aiohttp import web
@@ -16,14 +13,12 @@ from pymongo.collection import Collection
 import uvloop
 import yaml
 
-from server_utils import getreqarg, getreqarg_int, getreqarg_topn
+from server_utils import (
+  _init_logging, getreqarg, getreqarg_int, getreqarg_topn, json_response,)
 from utils import load_config
 
+
 _logger = logging.getLogger('cirtec')
-
-
-_dump = partial(json.dumps, ensure_ascii=False, check_circular=False)
-json_response = partial(web.json_response, dumps=_dump)
 
 
 def main():
@@ -35,16 +30,6 @@ def main():
 
   srv_run_args = conf['srv_run_args']
   web.run_app(app, **srv_run_args)
-
-
-def _init_logging():
-  self_path = Path(__file__)
-  conf_log_path = self_path.with_name('logging.yaml')
-  conf_log = yaml.full_load(conf_log_path.open(encoding='utf-8'))
-  logging.config.dictConfig(conf_log['logging'])
-  # dsn = conf_log.get('sentry', {}).get('dsn')
-  # if dsn:
-  #   sentry_sdk.init(dsn=dsn, integrations=[AioHttpIntegration()])
 
 
 def create_srv():

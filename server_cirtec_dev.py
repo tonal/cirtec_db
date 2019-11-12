@@ -1,20 +1,14 @@
 #! /usr/bin/env python3
 # -*- codong: utf-8 -*-
 import asyncio
-from collections import Counter, defaultdict
 from functools import partial
-import json
 import logging
-import logging.config
-from operator import itemgetter
-from pathlib import Path
-from typing import Union, Optional, Sequence, Tuple
+from typing import Union
 
 from aiohttp import web
 import motor.motor_asyncio as aiomotor
 from pymongo.collection import Collection
 import uvloop
-import yaml
 
 from server_cirtec import (
   _req_frags, _req_frags_pubs, _req_publ_publications_cocitauthors,
@@ -28,14 +22,11 @@ from server_cirtec import (
   _req_frags_topics_ngramms, _req_top_cocitauthors, _req_top_cocitauthors_pubs,
   _req_top_ngramm, _req_top_ngramm_pubs, _req_top_topics, _req_top_topics_pubs,
   _reg_cnt_ngramm, _reg_cnt_pubs_ngramm)
-from server_utils import getreqarg_topn
+from server_utils import getreqarg_topn, json_response, _init_logging
 from utils import load_config
 
-_logger = logging.getLogger('cirtec')
 
-
-_dump = partial(json.dumps, ensure_ascii=False, check_circular=False)
-json_response = partial(web.json_response, dumps=_dump)
+_logger = logging.getLogger('cirtec_dev')
 
 
 def main():
@@ -47,16 +38,6 @@ def main():
 
   srv_run_args = conf['srv_run_args']
   web.run_app(app, **srv_run_args)
-
-
-def _init_logging():
-  self_path = Path(__file__)
-  conf_log_path = self_path.with_name('logging.yaml')
-  conf_log = yaml.full_load(conf_log_path.open(encoding='utf-8'))
-  logging.config.dictConfig(conf_log['logging'])
-  # dsn = conf_log.get('sentry', {}).get('dsn')
-  # if dsn:
-  #   sentry_sdk.init(dsn=dsn, integrations=[AioHttpIntegration()])
 
 
 def create_srv():

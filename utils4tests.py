@@ -7,12 +7,12 @@ def test_conf(conf):
   assert conf['srv_run_args']['port']
 
 
-async def req_tipn(client, url, topn):
+async def req_tipn(client, url:str, topn:int):
   if topn:
     kwd = dict(params=dict(topn=str(topn)))
   else:
     kwd = {}
-  rsp = await client.get('/cirtec/top/refs/', **kwd)
+  rsp = await client.get(url, **kwd)
   assert 200 == rsp.status
   jrsp = await rsp.json()
   if topn:
