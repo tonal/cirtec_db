@@ -49,8 +49,8 @@ def create_srv():
 
   _add_old_reqs(add_get)
 
-  add_get(r'/cirtec/top/ref_bindles/', _req_top_refbindles)
-  add_get(r'/cirtec/top/ref_authors/', _req_top_refauthors)
+  add_get(r'/cirtec_dev/top/ref_bindles/', _req_top_refbindles)
+  add_get(r'/cirtec_dev/top/ref_authors/', _req_top_refauthors)
 
   app['conf'] = conf
   app['tasks'] = set()
@@ -62,64 +62,64 @@ def create_srv():
 
 def _add_old_reqs(add_get):
   # А Суммарное распределение цитирований по 5-ти фрагментам для всех публикаций
-  add_get(r'/cirtec/frags/', _req_frags)
+  add_get(r'/cirtec_dev/frags/', _req_frags)
   #   Распределение цитирований по 5-ти фрагментам для отдельных публикаций. #заданного автора.
-  add_get(r'/cirtec/frags/publications/', _req_frags_pubs)
+  add_get(r'/cirtec_dev/frags/publications/', _req_frags_pubs)
   #   Кросс-распределение «со-цитируемые авторы» по публикациям
-  add_get(r'/cirtec/publ/publications/cocitauthors/',
+  add_get(r'/cirtec_dev/publ/publications/cocitauthors/',
     _req_publ_publications_cocitauthors)
   #   Кросс-распределение «фразы из контекстов цитирований» по публикациям
-  add_get(r'/cirtec/publ/publications/ngramms/', _req_publ_publications_ngramms)
+  add_get(r'/cirtec_dev/publ/publications/ngramms/', _req_publ_publications_ngramms)
   #   Кросс-распределение «топики контекстов цитирований» по публикациям
-  add_get(r'/cirtec/publ/publications/topics/', _req_publ_publications_topics)
+  add_get(r'/cirtec_dev/publ/publications/topics/', _req_publ_publications_topics)
   #   Распределение «со-цитируемые авторы» по 5-ти фрагментам
-  add_get(r'/cirtec/frags/cocitauthors/', _req_frags_cocitauthors)
+  add_get(r'/cirtec_dev/frags/cocitauthors/', _req_frags_cocitauthors)
   #   Кросс-распределение «5 фрагментов» - «со-цитируемые авторы»
-  add_get(r'/cirtec/frags/cocitauthors/cocitauthors/',
+  add_get(r'/cirtec_dev/frags/cocitauthors/cocitauthors/',
     _req_frags_cocitauthors_cocitauthors)
   #   Кросс-распределение «публикации» - «со-цитируемые авторы»
-  add_get(r'/cirtec/publ/cocitauthors/cocitauthors/',
+  add_get(r'/cirtec_dev/publ/cocitauthors/cocitauthors/',
     _req_publ_cocitauthors_cocitauthors)
   #   Распределение «5 фрагментов» - «фразы из контекстов цитирований»
-  add_get(r'/cirtec/frags/ngramms/', _req_frags_ngramm)
+  add_get(r'/cirtec_dev/frags/ngramms/', _req_frags_ngramm)
   #   Кросс-распределение «5 фрагментов» - «фразы из контекстов цитирований»
-  add_get(r'/cirtec/frags/ngramms/ngramms/', _req_frags_ngramm_ngramm)
+  add_get(r'/cirtec_dev/frags/ngramms/ngramms/', _req_frags_ngramm_ngramm)
   #   Кросс-распределение «публикации» - «фразы из контекстов цитирований»
-  add_get(r'/cirtec/publ/ngramms/ngramms/', _req_publ_ngramm_ngramm)
+  add_get(r'/cirtec_dev/publ/ngramms/ngramms/', _req_publ_ngramm_ngramm)
   #   Кросс-распределение «5 фрагментов» - «топики контекстов цитирований»
-  add_get(r'/cirtec/frags/topics/', _req_frags_topics)
+  add_get(r'/cirtec_dev/frags/topics/', _req_frags_topics)
   #   Кросс-распределение «5 фрагментов» - «топики контекстов цитирований»
-  add_get(r'/cirtec/frags/topics/topics/', _req_frags_topics_topics)
+  add_get(r'/cirtec_dev/frags/topics/topics/', _req_frags_topics_topics)
   #   Кросс-распределение «публикации» - «топики контекстов цитирований»
-  add_get(r'/cirtec/publ/topics/topics/', _req_publ_topics_topics)
+  add_get(r'/cirtec_dev/publ/topics/topics/', _req_publ_topics_topics)
   # Б Кросс-распределение «со-цитирования» - «фразы из контекстов цитирований»
-  add_get(r'/cirtec/frags/cocitauthors/ngramms/',
+  add_get(r'/cirtec_dev/frags/cocitauthors/ngramms/',
     _req_frags_cocitauthors_ngramms)
   #   Кросс-распределение «со-цитирования» - «топики контекстов цитирований»
-  add_get(r'/cirtec/frags/cocitauthors/topics/', _req_frags_cocitauthors_topics)
+  add_get(r'/cirtec_dev/frags/cocitauthors/topics/', _req_frags_cocitauthors_topics)
   # В Кросс-распределение «фразы» - «со-цитирования»
-  add_get(r'/cirtec/frags/ngramms/cocitauthors/',
+  add_get(r'/cirtec_dev/frags/ngramms/cocitauthors/',
     _req_frags_ngramms_cocitauthors)
   #   Кросс-распределение «фразы» - «топики контекстов цитирований»
-  add_get(r'/cirtec/frags/ngramms/topics/', _req_frags_ngramms_topics)
+  add_get(r'/cirtec_dev/frags/ngramms/topics/', _req_frags_ngramms_topics)
   # Г Кросс-распределение «топики» - «со-цитирования»
-  add_get(r'/cirtec/frags/topics/cocitauthors/', _req_frags_topics_cocitauthors)
+  add_get(r'/cirtec_dev/frags/topics/cocitauthors/', _req_frags_topics_cocitauthors)
   #   Кросс-распределение «топики» - «фразы»
-  add_get(r'/cirtec/frags/topics/ngramms/', _req_frags_topics_ngramms)
+  add_get(r'/cirtec_dev/frags/topics/ngramms/', _req_frags_topics_ngramms)
   # Топ N со-цитируемых авторов
-  add_get(r'/cirtec/top/cocitauthors/', _req_top_cocitauthors)
+  add_get(r'/cirtec_dev/top/cocitauthors/', _req_top_cocitauthors)
   # Топ N со-цитируемых авторов по публикациям
-  add_get(r'/cirtec/top/cocitauthors/publications/', _req_top_cocitauthors_pubs)
+  add_get(r'/cirtec_dev/top/cocitauthors/publications/', _req_top_cocitauthors_pubs)
   # Топ N фраз
-  add_get(r'/cirtec/top/ngramms/', _req_top_ngramm)
+  add_get(r'/cirtec_dev/top/ngramms/', _req_top_ngramm)
   # Топ N фраз по публикациям
-  add_get(r'/cirtec/top/ngramms/publications/', _req_top_ngramm_pubs)
+  add_get(r'/cirtec_dev/top/ngramms/publications/', _req_top_ngramm_pubs)
   # Топ N топиков
-  add_get(r'/cirtec/top/topics/', _req_top_topics)
+  add_get(r'/cirtec_dev/top/topics/', _req_top_topics)
   # Топ N топиков публикациям
-  add_get(r'/cirtec/top/topics/publications/', _req_top_topics_pubs)
-  add_get(r'/cirtec/cnt/ngramms/', _reg_cnt_ngramm)
-  add_get(r'/cirtec/cnt/publications/ngramms/', _reg_cnt_pubs_ngramm)
+  add_get(r'/cirtec_dev/top/topics/publications/', _req_top_topics_pubs)
+  add_get(r'/cirtec_dev/cnt/ngramms/', _reg_cnt_ngramm)
+  add_get(r'/cirtec_dev/cnt/publications/ngramms/', _reg_cnt_pubs_ngramm)
 
 
 def _load_conf() -> dict:
@@ -244,10 +244,14 @@ async def _req_top_refauthors(request: web.Request) -> web.StreamResponse:
     {'$unwind': '$bun.authors'},
     {'$group': {
       '_id': '$bun.authors', 'cits': {'$addToSet': '$_id'},
-      'pubs': {'$addToSet': '$pub_id'}}},
+      'pubs': {'$addToSet': '$pub_id'},
+      'binds': {'$addToSet': {
+        '_id': '$bun._id', 'total_cits': '$bun.total_cits',
+        'total_pubs': '$bun.total_pubs'}}}},
     {'$project': {
       '_id': False, 'author': '$_id', 'cits': {'$size': '$cits'},
-      'pubs': {'$size': '$pubs'}}},
+      'pubs': {'$size': '$pubs'}, 'total_cits': {'$sum': '$binds.total_cits'},
+      'total_pubs': {'$sum': '$binds.total_pubs'},}},
     {'$sort': {'cits': -1, 'pubs': -1, '_id': 1}},
   ]
   if topn:

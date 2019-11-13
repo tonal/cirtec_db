@@ -26,92 +26,92 @@ async def init_server(aiohttp_client):
 @pytest.mark.parametrize('topn', [None, 5])
 async def test_top_refsbindles(aiohttp_client, topn):
   client = await init_server(aiohttp_client)
-  jrsp = await utils4tests.req_tipn(client, '/cirtec/top/ref_bindles/', topn)
+  jrsp = await utils4tests.req_tipn(client, '/cirtec_dev/top/ref_bindles/', topn)
 
 
 @pytest.mark.parametrize('topn', [None, 5])
 async def test_top_refauthors(aiohttp_client, topn):
   client = await init_server(aiohttp_client)
-  jrsp = await utils4tests.req_tipn(client, '/cirtec/top/ref_authors/', topn)
+  jrsp = await utils4tests.req_tipn(client, '/cirtec_dev/top/ref_authors/', topn)
 
 
 @pytest.mark.parametrize('topn', [None, 5])
 async def test_frags(aiohttp_client, topn):
   client = await init_server(aiohttp_client)
-  jrsp = await utils4tests.req_tipn(client, '/cirtec/frags/', topn)
+  jrsp = await utils4tests.req_tipn(client, '/cirtec_dev/frags/', topn)
 
 
 async def test_frags_publications(aiohttp_client):
   client = await init_server(aiohttp_client)
-  jrsp = await utils4tests.req_tipn(client, '/cirtec/frags/publications/', None)
+  jrsp = await utils4tests.req_tipn(client, '/cirtec_dev/frags/publications/', None)
   assert len(jrsp) >= 24
 
 
 @pytest.mark.parametrize('topn', [None, 5])
 async def test_frags_cocitauthors(aiohttp_client, topn:int):
   client = await init_server(aiohttp_client)
-  jrsp = await utils4tests.req_tipn(client, '/cirtec/frags/cocitauthors/', topn)
+  jrsp = await utils4tests.req_tipn(client, '/cirtec_dev/frags/cocitauthors/', topn)
 
 
 @pytest.mark.parametrize('topn', [None, 5])
 async def test_frags_cocitauthors_cocitauthors(aiohttp_client, topn:int):
   client = await init_server(aiohttp_client)
   jrsp = await utils4tests.req_tipn(
-    client, '/cirtec/frags/cocitauthors/cocitauthors/', topn)
+    client, '/cirtec_dev/frags/cocitauthors/cocitauthors/', topn)
 
 
 @pytest.mark.parametrize('topn', [None, 5])
 async def test_publ_cocitauthors_cocitauthors(aiohttp_client, topn:int):
   client = await init_server(aiohttp_client)
   jrsp = await utils4tests.req_tipn(
-    client, '/cirtec/publ/cocitauthors/cocitauthors/', topn)
+    client, '/cirtec_dev/publ/cocitauthors/cocitauthors/', topn)
 
 
 @pytest.mark.parametrize('topn', [None, 5])
 async def test_frags_cocitauthors_ngramm(aiohttp_client, topn:int):
   client = await init_server(aiohttp_client)
   jrsp = await utils4tests.req_tipn(
-    client, '/cirtec/frags/cocitauthors/ngramms/', topn)
+    client, '/cirtec_dev/frags/cocitauthors/ngramms/', topn)
 
 
 @pytest.mark.parametrize('topn', [None, 5])
 async def test_frags_cocitauthors_topics(aiohttp_client, topn:int):
   client = await init_server(aiohttp_client)
   jrsp = await utils4tests.req_tipn(
-    client, '/cirtec/frags/cocitauthors/topics/', topn)
+    client, '/cirtec_dev/frags/cocitauthors/topics/', topn)
 
 
 @pytest.mark.parametrize('topn', [None, 5])
 async def test_frags_topics(aiohttp_client, topn:int):
   client = await init_server(aiohttp_client)
-  jrsp = await utils4tests.req_tipn(client, '/cirtec/frags/topics/', topn)
+  jrsp = await utils4tests.req_tipn(client, '/cirtec_dev/frags/topics/', topn)
 
 
 @pytest.mark.parametrize('topn', [None, 5])
 async def test_frags_topics_topics(aiohttp_client, topn:int):
   client = await init_server(aiohttp_client)
   jrsp = await utils4tests.req_tipn(
-    client, '/cirtec/frags/topics/topics/', topn)
+    client, '/cirtec_dev/frags/topics/topics/', topn)
 
 
 @pytest.mark.parametrize('topn', [None, 5])
 async def test_publ_topics_topics(aiohttp_client, topn:int):
   client = await init_server(aiohttp_client)
-  jrsp = await utils4tests.req_tipn(client, '/cirtec/publ/topics/topics/', topn)
+  jrsp = await utils4tests.req_tipn(client, '/cirtec_dev/publ/topics/topics/', topn)
 
 
 @pytest.mark.parametrize('topn', [None, 5])
 async def test_frags_topics_cocitauthors(aiohttp_client, topn:int):
   client = await init_server(aiohttp_client)
   jrsp = await utils4tests.req_tipn(
-    client, '/cirtec/frags/topics/cocitauthors/', topn)
+    client, '/cirtec_dev/frags/topics/cocitauthors/', topn)
 
 
 @pytest.mark.parametrize('topn', [None, 5])
 async def test_frags_topics_ngramms_topn(aiohttp_client, topn:int):
   client = await init_server(aiohttp_client)
   jrsp = await utils4tests.req_tipn(
-    client, '/cirtec/frags/topics/ngramms/', topn)
+    client, '/cirtec_dev/frags/topics/ngramms/', topn)
 
 
 @pytest.mark.parametrize('topn,crossn', [(5, 10)])
@@ -120,7 +120,7 @@ async def test_frags_topics_ngramms_topn_crossn(
 ):
   client = await init_server(aiohttp_client)
   rsp = await client.get(
-    '/cirtec/frags/topics/ngramms/',
+    '/cirtec_dev/frags/topics/ngramms/',
     params=dict(topn=str(topn), topn_crpssgramm=str(crossn)))
   assert 200 == rsp.status
   jrsp = await rsp.json()
@@ -133,50 +133,50 @@ async def test_frags_topics_ngramms_topn_crossn(
 @pytest.mark.parametrize('topn', [None, 5])
 async def test_frags_ngramm_topn(aiohttp_client, topn:int):
   client = await init_server(aiohttp_client)
-  jrsp = await utils4tests.req_tipn(client, '/cirtec/frags/ngramms/', topn)
+  jrsp = await utils4tests.req_tipn(client, '/cirtec_dev/frags/ngramms/', topn)
 
 
 @pytest.mark.parametrize('topn', [None, 5])
 async def test_frags_ngramm_topn(aiohttp_client, topn:int):
   client = await init_server(aiohttp_client)
   jrsp = await utils4tests.req_tipn(
-    client, '/cirtec/frags/ngramms/ngramms/', topn)
+    client, '/cirtec_dev/frags/ngramms/ngramms/', topn)
 
 
 @pytest.mark.parametrize('topn', [None, 5])
 async def test_publ_ngramm_ngramm_topn(aiohttp_client, topn:int):
   client = await init_server(aiohttp_client)
   jrsp = await utils4tests.req_tipn(
-    client, '/cirtec/publ/ngramms/ngramms/', topn)
+    client, '/cirtec_dev/publ/ngramms/ngramms/', topn)
 
 
 @pytest.mark.parametrize('topn', [None, 5])
 async def test_frags_ngramm_cocitauthors_topn(aiohttp_client, topn:int):
   client = await init_server(aiohttp_client)
   jrsp = await utils4tests.req_tipn(
-    client, '/cirtec/frags/ngramms/cocitauthors/', topn)
+    client, '/cirtec_dev/frags/ngramms/cocitauthors/', topn)
 
 
 @pytest.mark.parametrize('topn', [None, 5])
 async def test_frags_ngramm_topics_topn(aiohttp_client, topn:int):
   client = await init_server(aiohttp_client)
   jrsp = await utils4tests.req_tipn(
-    client, '/cirtec/frags/ngramms/topics/', topn)
+    client, '/cirtec_dev/frags/ngramms/topics/', topn)
 
 
 @pytest.mark.parametrize('topn', [None, 5])
 async def test_top_cocitauthors_topn(aiohttp_client, topn:int):
   client = await init_server(aiohttp_client)
-  jrsp = await utils4tests.req_tipn(client, '/cirtec/top/cocitauthors/', topn)
+  jrsp = await utils4tests.req_tipn(client, '/cirtec_dev/top/cocitauthors/', topn)
 
 
 @pytest.mark.parametrize('topn', [None, 5])
 async def test_top_ngramm_topn(aiohttp_client, topn:int):
   client = await init_server(aiohttp_client)
-  jrsp = await utils4tests.req_tipn(client, '/cirtec/top/ngramms/', topn)
+  jrsp = await utils4tests.req_tipn(client, '/cirtec_dev/top/ngramms/', topn)
 
 
 @pytest.mark.parametrize('topn', [None, 5])
 async def test_top_topics_topn(aiohttp_client, topn:int):
   client = await init_server(aiohttp_client)
-  jrsp = await utils4tests.req_tipn(client, '/cirtec/top/topics/', topn)
+  jrsp = await utils4tests.req_tipn(client, '/cirtec_dev/top/topics/', topn)
