@@ -295,7 +295,7 @@ async def _req_pubs_refauthors(request: web.Request) -> web.StreamResponse:
     projection={'_id': True, 'name': True}, sort=[('_id', ASCENDING)]
   ):
     pid = pub['_id']
-    pub_pipeline = [{'$match': {'exact': {'$exists': True}}}] + pipeline
+    pub_pipeline = [{'$match': {'pub_id': pid}}] + pipeline
     ref_authors = [row async for row in contexts.aggregate(pub_pipeline)]
     pub_out = dict(pub_id=pid, name=pub['name'], ref_authors=ref_authors)
     out.append(pub_out)
