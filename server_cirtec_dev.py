@@ -7,6 +7,7 @@ from typing import Union
 
 from aiohttp import web
 import motor.motor_asyncio as aiomotor
+from pymongo import ASCENDING
 from pymongo.collection import Collection
 import uvloop
 
@@ -51,6 +52,7 @@ def create_srv():
 
   add_get(r'/cirtec_dev/top/ref_bindles/', _req_top_refbindles)
   add_get(r'/cirtec_dev/top/ref_authors/', _req_top_refauthors)
+  add_get(r'/cirtec_dev/pubs/ref_authors/', _req_pubs_refauthors)
 
   app['conf'] = conf
   app['tasks'] = set()
@@ -230,6 +232,15 @@ async def _req_top_refauthors(request: web.Request) -> web.StreamResponse:
 
   topn = getreqarg_topn(request)
 
+  pipeline = _get_refauthors_pipeline(topn)
+
+  contexts:Collection = mdb.contexts
+  out = [row async for row in contexts.aggregate(pipeline)]
+
+  return json_response(out)
+
+
+def _get_refauthors_pipeline(topn):
   pipeline = [
     {'$match': {'exact': {'$exists': True}}},
     {'$project': {
@@ -245,21 +256,40 @@ async def _req_top_refauthors(request: web.Request) -> web.StreamResponse:
     {'$group': {
       '_id': '$bun.authors', 'cits': {'$addToSet': '$_id'},
       'pubs': {'$addToSet': '$pub_id'},
-      'binds': {'$addToSet': {
-        '_id': '$bun._id', 'total_cits': '$bun.total_cits',
-        'total_pubs': '$bun.total_pubs'}}}},
+      'binds': {
+          '$addToSet': {
+            '_id': '$bun._id', 'total_cits': '$bun.total_cits',
+            'total_pubs': '$bun.total_pubs'}}}},
     {'$project': {
       '_id': False, 'author': '$_id', 'cits': {'$size': '$cits'},
       'pubs': {'$size': '$pubs'}, 'total_cits': {'$sum': '$binds.total_cits'},
-      'total_pubs': {'$sum': '$binds.total_pubs'},}},
+      'total_pubs': {'$sum': '$binds.total_pubs'}, }},
     {'$sort': {'cits': -1, 'pubs': -1, '_id': 1}},
   ]
   if topn:
     pipeline += [{'$limit': topn}]
+  return pipeline
 
+
+async def _req_pubs_refauthors(request: web.Request) -> web.StreamResponse:
+  app = request.app
+  mdb = app['db']
+
+  publications:Collection = mdb.publications
   contexts:Collection = mdb.contexts
-  out = [row async for row in contexts.aggregate(pipeline)]
 
+  pipeline = _get_refauthors_pipeline(3)
+
+  out = []
+  async for pub in publications.find(
+    {'uni_authors': 'Sergey-Sinelnikov-Murylev'},
+    projection={'_id': True, 'name': True}, sort=[('_id', ASCENDING)]
+  ):
+    pid = pub['_id']
+    pub_pipeline = [{'$match': {'exact': {'$exists': True}}}] + pipeline
+    ref_authors = [row async for row in contexts.aggregate(pub_pipeline)]
+    pub_out = dict(pub_id=pid, name=pub['name'], ref_authors=ref_authors)
+    out.append(pub_out)
   return json_response(out)
 
 
