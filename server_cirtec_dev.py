@@ -353,10 +353,12 @@ async def _ref_auth_bund4ngramm_tops(request: web.Request) -> web.StreamResponse
         (
           dict(ngramm=n, type=t, cnt=c)
           for (t, n), c in (
-            (ngr['_id'].split('_'), ngr['cnt']) for ngr in ngramms)),
+            (ngr['_id'].split('_'), ngr['cnt']) for ngr in ngramms)
+          if t == 'lemmas' and len(n.split()) == 2
+        ),
         key=lambda o: (-o['cnt'], o['type'], o['ngramm'])
       )
-      oauth.update(ngramms=ongs)
+      oauth.update(ngramms=ongs[:5])
     out_acont.append(oauth)
 
   out.update(ref_auth_conts=out_acont)
@@ -382,21 +384,31 @@ async def _ref_auth_bund4ngramm_tops(request: web.Request) -> web.StreamResponse
     {'$project': {
       'cont.prefix': False, 'cont.suffix': False, 'cont.exact': False, }},
     {'$unwind': '$cont'},
+    {'$lookup': {
+      'from': 'bundles', 'localField': 'cont.bundles', 'foreignField': '_id',
+      'as': 'bund'}},
   ]):
     icont = cont['cont']
     ngramms = icont.get('linked_papers_ngrams')
+    bundles = [
+      dict(
+        bundle=b['_id'], year=b['year'], title=b['title'],
+        authors=b.get('authors'))
+      for b in cont['bund']]
     oauth = dict(
-      cont_id=cont['_id'], bundles=icont['bundles'],
+      cont_id=cont['_id'], bundles=bundles,
       topics=icont['linked_papers_topics'])
     if ngramms:
       ongs = sorted(
         (
           dict(ngramm=n, type=t, cnt=c)
           for (t, n), c in (
-            (ngr['_id'].split('_'), ngr['cnt']) for ngr in ngramms)),
+            (ngr['_id'].split('_'), ngr['cnt']) for ngr in ngramms)
+          if t == 'lemmas' and len(n.split()) == 2
+        ),
         key=lambda o: (-o['cnt'], o['type'], o['ngramm'])
       )
-      oauth.update(ngramms=ongs)
+      oauth.update(ngramms=ongs[:5])
     out_bund.append(oauth)
 
   out.update(ref_bundles=out_bund)
@@ -431,21 +443,31 @@ async def _ref_bund4ngramm_tops(request: web.Request) -> web.StreamResponse:
     {'$project': {
       'cont.prefix': False, 'cont.suffix': False, 'cont.exact': False, }},
     {'$unwind': '$cont'},
+    {'$lookup': {
+      'from': 'bundles', 'localField': 'cont.bundles', 'foreignField': '_id',
+      'as': 'bund'}},
   ]):
     icont = cont['cont']
     ngramms = icont.get('linked_papers_ngrams')
+    bundles = [
+      dict(
+        bundle=b['_id'], year=b['year'], title=b['title'],
+        authors=b.get('authors'))
+      for b in cont['bund']]
     oauth = dict(
-      cont_id=cont['_id'], bundles=icont['bundles'],
+      cont_id=cont['_id'], bundles=bundles,
       topics=icont['linked_papers_topics'])
     if ngramms:
       ongs = sorted(
         (
           dict(ngramm=n, type=t, cnt=c)
           for (t, n), c in (
-            (ngr['_id'].split('_'), ngr['cnt']) for ngr in ngramms)),
+            (ngr['_id'].split('_'), ngr['cnt']) for ngr in ngramms)
+          if t == 'lemmas' and len(n.split()) == 2
+        ),
         key=lambda o: (-o['cnt'], o['type'], o['ngramm'])
       )
-      oauth.update(ngramms=ongs)
+      oauth.update(ngramms=ongs[:5])
     out_bund.append(oauth)
 
   out = out_bund
@@ -499,10 +521,12 @@ async def _ref_auth4ngramm_tops(request: web.Request) -> web.StreamResponse:
         (
           dict(ngramm=n, type=t, cnt=c)
           for (t, n), c in (
-            (ngr['_id'].split('_'), ngr['cnt']) for ngr in ngramms)),
+            (ngr['_id'].split('_'), ngr['cnt']) for ngr in ngramms)
+          if t == 'lemmas' and len(n.split()) == 2
+        ),
         key=lambda o: (-o['cnt'], o['type'], o['ngramm'])
       )
-      oauth.update(ngramms=ongs)
+      oauth.update(ngramms=ongs[:5])
     out_acont.append(oauth)
 
   out = out_acont
