@@ -51,11 +51,15 @@ def create_srv():
 
   _add_old_reqs(add_get)
 
-  add_get('/cirtec_dev/top/ref_bindles/', _req_top_refbindles)
+  add_get('/cirtec_dev/top/ref_bundles/', _req_top_refbundles)
   add_get('/cirtec_dev/top/ref_authors/', _req_top_refauthors)
   add_get('/cirtec_dev/pubs/ref_authors/', _req_pubs_refauthors)
   add_get(
-    '/cirtec_dev/ref_auth_bind4ngramm_tops/', _ref_ref_auth_bind4ngramm_tops)
+    '/cirtec_dev/ref_auth_bund4ngramm_tops/', _ref_auth_bund4ngramm_tops)
+  add_get(
+    '/cirtec_dev/ref_bund4ngramm_tops/', _ref_bund4ngramm_tops)
+  add_get(
+    '/cirtec_dev/ref_auth4ngramm_tops/', _ref_auth4ngramm_tops)
 
   app['conf'] = conf
   app['tasks'] = set()
@@ -190,7 +194,7 @@ async def _clean_tasks(app):
     await asyncio.wait(canceled, return_when='ALL_COMPLETED')
 
 
-async def _req_top_refbindles(request: web.Request) -> web.StreamResponse:
+async def _req_top_refbundles(request: web.Request) -> web.StreamResponse:
   app = request.app
   mdb = app['db']
 
@@ -302,7 +306,7 @@ async def _req_pubs_refauthors(request: web.Request) -> web.StreamResponse:
   return json_response(out)
 
 
-async def _ref_ref_auth_bind4ngramm_tops(request: web.Request) -> web.StreamResponse:
+async def _ref_auth_bund4ngramm_tops(request: web.Request) -> web.StreamResponse:
   app = request.app
   mdb = app['db']
 
@@ -396,6 +400,112 @@ async def _ref_ref_auth_bind4ngramm_tops(request: web.Request) -> web.StreamResp
     out_bund.append(oauth)
 
   out.update(ref_bundles=out_bund)
+
+  return json_response(out)
+
+
+async def _ref_bund4ngramm_tops(request: web.Request) -> web.StreamResponse:
+  app = request.app
+  mdb = app['db']
+
+  contexts:Collection = mdb.contexts
+
+  b_pipeline = _get_refbindles_pipeline()
+  b_pipeline += [{'$match': {'cits': 5}}]
+  out_bund = []
+  ref_bund = frozenset([
+    o['_id'] async for o in contexts.aggregate(b_pipeline)])
+  async for cont in contexts.aggregate([
+    {'$match': {'exact': {'$exists': True}}},
+    {'$project': {
+      'prefix': False, 'suffix': False, 'exact': False,
+      'linked_papers_topics': False, 'linked_papers_ngrams': False}},
+    {'$unwind': '$bundles'},
+    {'$match': {'bundles': {'$ne': 'nUSJrP'}}},
+    {'$match': {'bundles': {'$in': list(ref_bund)}}},
+    {'$group': {'_id': '$_id', 'cnt': {'$sum': 1}}},
+    {'$sort': {'cnt': -1, '_id': 1}},
+    {'$lookup': {
+      'from': 'contexts', 'localField': '_id', 'foreignField': '_id',
+      'as': 'cont'}},
+    {'$project': {
+      'cont.prefix': False, 'cont.suffix': False, 'cont.exact': False, }},
+    {'$unwind': '$cont'},
+  ]):
+    icont = cont['cont']
+    ngramms = icont.get('linked_papers_ngrams')
+    oauth = dict(
+      cont_id=cont['_id'], bundles=icont['bundles'],
+      topics=icont['linked_papers_topics'])
+    if ngramms:
+      ongs = sorted(
+        (
+          dict(ngramm=n, type=t, cnt=c)
+          for (t, n), c in (
+            (ngr['_id'].split('_'), ngr['cnt']) for ngr in ngramms)),
+        key=lambda o: (-o['cnt'], o['type'], o['ngramm'])
+      )
+      oauth.update(ngramms=ongs)
+    out_bund.append(oauth)
+
+  out = out_bund
+
+  return json_response(out)
+
+
+async def _ref_auth4ngramm_tops(request: web.Request) -> web.StreamResponse:
+  app = request.app
+  mdb = app['db']
+
+  contexts:Collection = mdb.contexts
+
+  a_pipeline = _get_refauthors_pipeline()
+  a_pipeline += [{'$match': {'cits': 5}}]
+
+  out_acont = []
+  ref_authors = frozenset(
+    [o['author'] async for o in contexts.aggregate(a_pipeline)])
+  async for cont in contexts.aggregate([
+    {'$match': {'exact': {'$exists': True}}},
+    {'$project': {
+      'prefix': False, 'suffix': False, 'exact': False,
+      'linked_papers_topics': False, 'linked_papers_ngrams': False}},
+    {'$unwind': '$bundles'},
+    {'$match': {'bundles': {'$ne': 'nUSJrP'}}},
+    {'$lookup': {
+      'from': 'bundles', 'localField': 'bundles', 'foreignField': '_id',
+      'as': 'bun'}},
+    {'$unwind': '$bun'},
+    {'$unwind': '$bun.authors'},
+    {'$match': {'bun.authors': {'$in': list(ref_authors)}}},
+    {'$group': {
+      '_id': '$_id', 'cnt': {'$sum': 1},
+      'authors': {'$addToSet': '$bun.authors'}}},
+    {'$sort': {'cnt': -1, '_id': 1}},
+    {'$lookup': {
+      'from': 'contexts', 'localField': '_id', 'foreignField': '_id',
+      'as': 'cont'}},
+    {'$project': {
+      'cont.prefix': False, 'cont.suffix': False, 'cont.exact': False, }},
+    {'$unwind': '$cont'},
+  ]):
+    icont = cont['cont']
+    ngramms = icont.get('linked_papers_ngrams')
+    oauth = dict(
+      cont_id=cont['_id'], ref_authors=cont['authors'],
+      topics=icont['linked_papers_topics'])
+    if ngramms:
+      ongs = sorted(
+        (
+          dict(ngramm=n, type=t, cnt=c)
+          for (t, n), c in (
+            (ngr['_id'].split('_'), ngr['cnt']) for ngr in ngramms)),
+        key=lambda o: (-o['cnt'], o['type'], o['ngramm'])
+      )
+      oauth.update(ngramms=ongs)
+    out_acont.append(oauth)
+
+  out = out_acont
 
   return json_response(out)
 
