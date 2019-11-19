@@ -12,3 +12,11 @@ fastnumbers
 aiohttp[speedups]
 motor
 uvloop
+
+pymorphy2
+pymorphy2-dicts-ru
+more_itertools
+pandas
+sklearn
+joblib
+xlrd
