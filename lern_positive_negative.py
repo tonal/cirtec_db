@@ -9,8 +9,7 @@ from sklearn.model_selection import train_test_split
 
 from util_text import re_drop_no_wrd
 
-DOC1 = 'text_rating_final.xlsx'   # 2015
-# DOC2 = 'doc_comment_summary.xlsx' # 2016
+DOC1 = 'text_rating_final.xlsx'   # 2015 размеченная выборка ~32000 фраз из проекта http://linis-crowd.org/
 
 
 def main():
