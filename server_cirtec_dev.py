@@ -55,11 +55,13 @@ def create_srv():
   add_get('/cirtec_dev/top/ref_authors/', _req_top_refauthors)
   add_get('/cirtec_dev/pubs/ref_authors/', _req_pubs_refauthors)
   add_get(
-    '/cirtec_dev/ref_auth_bund4ngramm_tops/', _ref_auth_bund4ngramm_tops)
+    '/cirtec_dev/ref_auth_bund4ngramm_tops/', _req_auth_bund4ngramm_tops)
   add_get(
-    '/cirtec_dev/ref_bund4ngramm_tops/', _ref_bund4ngramm_tops)
+    '/cirtec_dev/ref_bund4ngramm_tops/', _req_bund4ngramm_tops)
   add_get(
     '/cirtec_dev/ref_auth4ngramm_tops/', _ref_auth4ngramm_tops)
+  add_get(
+    '/cirtec_dev/pos_neg/pubs/', _req_pos_neg_pubs)
 
   app['conf'] = conf
   app['tasks'] = set()
@@ -306,7 +308,7 @@ async def _req_pubs_refauthors(request: web.Request) -> web.StreamResponse:
   return json_response(out)
 
 
-async def _ref_auth_bund4ngramm_tops(request: web.Request) -> web.StreamResponse:
+async def _req_auth_bund4ngramm_tops(request: web.Request) -> web.StreamResponse:
   app = request.app
   mdb = app['db']
 
@@ -416,7 +418,7 @@ async def _ref_auth_bund4ngramm_tops(request: web.Request) -> web.StreamResponse
   return json_response(out)
 
 
-async def _ref_bund4ngramm_tops(request: web.Request) -> web.StreamResponse:
+async def _req_bund4ngramm_tops(request: web.Request) -> web.StreamResponse:
   app = request.app
   mdb = app['db']
 
@@ -530,6 +532,41 @@ async def _ref_auth4ngramm_tops(request: web.Request) -> web.StreamResponse:
     out_acont.append(oauth)
 
   out = out_acont
+
+  return json_response(out)
+
+
+async def _req_pos_neg_pubs(request: web.Request) -> web.StreamResponse:
+  app = request.app
+  mdb = app['db']
+
+  contexts: Collection = mdb.contexts
+  out = []
+  async for doc in contexts.aggregate([
+    {'$match': {'positive_negative': {'$exists': True}}, },
+    {'$group': {
+      '_id': {'pid': '$pub_id', 'pos_neg': '$positive_negative.val'},
+      'cnt': {'$sum': 1}}},
+    {'$group': {
+      '_id': '$_id.pid',
+      'pos_neg': {'$push': {'val': '$_id.pos_neg', 'cnt': '$cnt'}}}},
+    {'$sort': {'_id': 1}},
+    {'$lookup': {
+      'from': 'publications', 'localField': '_id', 'foreignField': '_id',
+      'as': 'pub'}},
+    {'$unwind': '$pub'},
+    {'$project': {'pos_neg': True, 'pub.name': True}}
+  ]):
+    pid:str = doc['_id']
+    name:str = doc['pub']['name']
+    classif = doc['pos_neg']
+    neutral = sum(v['cnt'] for v in classif if v['val'] == 0)
+    positive = sum(v['cnt'] for v in classif if v['val'] > 0)
+    negative = sum(v['cnt'] for v in classif if v['val'] < 0)
+    out.append(
+      dict(
+        pub=pid, name=name, neutral=int(neutral), positive=int(positive),
+        negative=int(negative)))
 
   return json_response(out)
 
