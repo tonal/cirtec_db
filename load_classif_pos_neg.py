@@ -51,14 +51,11 @@ def main():
       label = int(row.labels)
       cl = {
         -2: 'very negative',
-        -1: 'negative', 0: 'neutral', 1: 'positive',
-        2: 'very positive'}
-      if label < 0:
-        cl = 'negative'
-      elif label > 0:
-        cl = 'positive'
-      else:
-        cl = 'neutral'
+        -1: 'negative',
+        0: 'neutral',
+        1: 'positive',
+        2: 'very positive'
+      }[label]
       pos_neg = {'val': label, 'class': cl}
       mcont_update(dict(_id=row.cid), {'$set': {'positive_negative': pos_neg}})
     return
