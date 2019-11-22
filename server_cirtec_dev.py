@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 # -*- codong: utf-8 -*-
 import asyncio
+from collections import Counter
 from functools import partial
 import logging
 from operator import itemgetter
@@ -54,18 +55,15 @@ def create_srv():
   add_get('/cirtec_dev/top/ref_bundles/', _req_top_refbundles)
   add_get('/cirtec_dev/top/ref_authors/', _req_top_refauthors)
   add_get('/cirtec_dev/pubs/ref_authors/', _req_pubs_refauthors)
-  add_get(
-    '/cirtec_dev/ref_auth_bund4ngramm_tops/', _req_auth_bund4ngramm_tops)
-  add_get(
-    '/cirtec_dev/ref_bund4ngramm_tops/', _req_bund4ngramm_tops)
-  add_get(
-    '/cirtec_dev/ref_auth4ngramm_tops/', _ref_auth4ngramm_tops)
-  add_get(
-    '/cirtec_dev/pos_neg/pubs/', _req_pos_neg_pubs)
-  add_get(
-    '/cirtec_dev/pos_neg/ref_bundles/', _req_pos_neg_refbundles)
-  add_get(
-    '/cirtec_dev/pos_neg/ref_authors/', _req_pos_neg_refauthors)
+  add_get('/cirtec_dev/ref_auth_bund4ngramm_tops/', _req_auth_bund4ngramm_tops)
+  add_get('/cirtec_dev/ref_bund4ngramm_tops/', _req_bund4ngramm_tops)
+  add_get('/cirtec_dev/ref_auth4ngramm_tops/', _ref_auth4ngramm_tops)
+  add_get('/cirtec_dev/pos_neg/pubs/', _req_pos_neg_pubs)
+  add_get('/cirtec_dev/pos_neg/ref_bundles/', _req_pos_neg_refbundles)
+  add_get('/cirtec_dev/pos_neg/ref_authors/', _req_pos_neg_refauthors)
+  add_get('/cirtec_dev/frags/ref_bundles/', _req_frags_refbundles)
+  add_get('/cirtec_dev/frags/ref_authors/', _req_frags_neg_refauthors)
+
 
   app['conf'] = conf
   app['tasks'] = set()
@@ -211,7 +209,8 @@ async def _req_top_refbundles(request: web.Request) -> web.StreamResponse:
   contexts:Collection = mdb.contexts
   out = []
   async for doc in contexts.aggregate(pipeline):
-    classify = doc.pop('pos_neg', ())
+    doc.pop('pos_neg', None)
+    doc.pop('frags', None)
     out.append(doc)
 
   return json_response(out)
@@ -227,12 +226,13 @@ def _get_refbindles_pipeline(topn:int=None):
     {'$match': {'bundles': {'$ne': 'nUSJrP'}}},  ##
     {'$group': {
       '_id': '$bundles', 'cits': {'$sum': 1}, 'pubs': {'$addToSet': '$pub_id'},
-      'pos_neg': {'$push': '$positive_negative'}}},
+      'pos_neg': {'$push': '$positive_negative'},
+      'frags': {'$push': '$frag_num'}, }},
     {'$unwind': '$pubs'},
     {'$group': {
       '_id': '$_id', 'cits': {'$first': '$cits'}, 'pubs': {'$sum': 1},
-      'pos_neg': {'$first': '$pos_neg'}, }},
-    # 'pubs_ids': {'$addToSet': '$pubs'}}},
+      'pos_neg': {'$first': '$pos_neg'}, 'frags': {'$first': '$frags'}, }},
+    # 'pubs_ids': {'$addToSet': '$pubs'}, }},
     {'$lookup': {
       'from': 'bundles', 'localField': '_id', 'foreignField': '_id',
       'as': 'bundle'}},
@@ -241,7 +241,7 @@ def _get_refbindles_pipeline(topn:int=None):
       'cits': True, 'pubs': True, 'pubs_ids': True,
       'total_cits': '$bundle.total_cits', 'total_pubs': '$bundle.total_pubs',
       'year': '$bundle.year', 'authors': '$bundle.authors',
-      'title': '$bundle.title', 'pos_neg': True, }},
+      'title': '$bundle.title', 'pos_neg': True, 'frags': True, }},
     {'$sort': {'cits': -1, 'pubs': -1, 'title': 1}}, # {$count: 'cnt'}
   ]
   if topn:
@@ -261,6 +261,7 @@ async def _req_top_refauthors(request: web.Request) -> web.StreamResponse:
   out = []
   async for row in contexts.aggregate(pipeline):
     row.pop('pos_neg', None)
+    row.pop('frags', None)
     out.append(row)
 
   return json_response(out)
@@ -286,11 +287,13 @@ def _get_refauthors_pipeline(topn:int=None):
           '$addToSet': {
             '_id': '$bun._id', 'total_cits': '$bun.total_cits',
             'total_pubs': '$bun.total_pubs'}},
-      'pos_neg': {'$push': '$positive_negative'}, }},
+      'pos_neg': {'$push': '$positive_negative'},
+      'frags': {'$push': '$frag_num'}}},
     {'$project': {
       '_id': False, 'author': '$_id', 'cits': {'$size': '$cits'},
       'pubs': {'$size': '$pubs'}, 'total_cits': {'$sum': '$binds.total_cits'},
-      'total_pubs': {'$sum': '$binds.total_pubs'}, 'pos_neg': True, }},
+      'total_pubs': {'$sum': '$binds.total_pubs'},
+      'pos_neg': True, 'frags': True}},
     {'$sort': {'cits': -1, 'pubs': -1, 'author': 1}},
   ]
   if topn:
@@ -314,7 +317,12 @@ async def _req_pubs_refauthors(request: web.Request) -> web.StreamResponse:
   ):
     pid = pub['_id']
     pub_pipeline = [{'$match': {'pub_id': pid}}] + pipeline
-    ref_authors = [row async for row in contexts.aggregate(pub_pipeline)]
+    ref_authors = []
+    async for row in contexts.aggregate(pub_pipeline):
+      row.pop('pos_neg', None)
+      row.pop('frags', None)
+      ref_authors.append(row)
+
     pub_out = dict(pub_id=pid, name=pub['name'], ref_authors=ref_authors)
     out.append(pub_out)
   return json_response(out)
@@ -594,6 +602,7 @@ async def _req_pos_neg_refbundles(request: web.Request) -> web.StreamResponse:
   contexts:Collection = mdb.contexts
   out = []
   async for doc in contexts.aggregate(pipeline):
+    doc.pop('frags', None)
     classify = doc.pop('pos_neg', None)
     if classify:
       neutral = sum(1 for v in classify if v['val'] == 0)
@@ -618,7 +627,8 @@ async def _req_pos_neg_refauthors(request: web.Request) -> web.StreamResponse:
   contexts:Collection = mdb.contexts
   out = []
   async for row in contexts.aggregate(pipeline):
-    classify =  row.pop('pos_neg', None)
+    row.pop('frags', None)
+    classify = row.pop('pos_neg', None)
     if classify:
       neutral = sum(1 for v in classify if v['val'] == 0)
       positive = sum(1 for v in classify if v['val'] > 0)
@@ -626,6 +636,45 @@ async def _req_pos_neg_refauthors(request: web.Request) -> web.StreamResponse:
       row.update(
         class_pos_neg=dict(
           neutral=neutral, positive=positive, negative=negative))
+    out.append(row)
+
+  return json_response(out)
+
+
+async def _req_frags_refbundles(request: web.Request) -> web.StreamResponse:
+  app = request.app
+  mdb = app['db']
+
+  topn = getreqarg_topn(request)
+
+  pipeline = _get_refbindles_pipeline(topn)
+
+  contexts:Collection = mdb.contexts
+  out = []
+  async for doc in contexts.aggregate(pipeline):
+    doc.pop('pos_neg', None)
+    frags = Counter(doc.pop('frags', ()))
+    doc.update(frags=frags)
+    out.append(doc)
+
+  return json_response(out)
+
+
+
+async def _req_frags_neg_refauthors(request: web.Request) -> web.StreamResponse:
+  app = request.app
+  mdb = app['db']
+
+  topn = getreqarg_topn(request)
+
+  pipeline = _get_refauthors_pipeline(topn)
+
+  contexts:Collection = mdb.contexts
+  out = []
+  async for row in contexts.aggregate(pipeline):
+    row.pop('pos_neg', None)
+    frags = Counter(row.pop('frags', ()))
+    row.update(frags=frags)
     out.append(row)
 
   return json_response(out)

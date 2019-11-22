@@ -25,3 +25,9 @@ GET http://localhost:8668/cirtec_dev/pos_neg/ref_bundles/
 GET http://localhost:8668/cirtec_dev/pos_neg/ref_authors/
 
 ###
+GET http://localhost:8668/cirtec_dev/frags/ref_bundles/
+
+###
+GET http://localhost:8668/cirtec_dev/frags/ref_authors/
+
+###
