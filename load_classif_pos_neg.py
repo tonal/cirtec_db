@@ -3,8 +3,6 @@
 """
 Расчёт и загрузка классификатора позитив/негатив для контекстов.
 """
-from collections import Counter
-from functools import partial
 from operator import itemgetter
 
 from joblib import load as jl_load
@@ -16,9 +14,6 @@ from sklearn.linear_model import LogisticRegression
 
 from util_text import Text2Seq
 from utils import load_config
-
-
-TOPICS = 'topic_output.json'
 
 
 def main():
