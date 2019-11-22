@@ -19,3 +19,9 @@ GET http://localhost:8668/cirtec_dev/ref_auth4ngramm_tops/
 GET http://localhost:8668/cirtec_dev/pos_neg/pubs/
 
 ###
+GET http://localhost:8668/cirtec_dev/pos_neg/ref_bundles/
+
+###
+GET http://localhost:8668/cirtec_dev/pos_neg/ref_authors/
+
+###

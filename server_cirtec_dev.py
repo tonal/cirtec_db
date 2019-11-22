@@ -62,6 +62,10 @@ def create_srv():
     '/cirtec_dev/ref_auth4ngramm_tops/', _ref_auth4ngramm_tops)
   add_get(
     '/cirtec_dev/pos_neg/pubs/', _req_pos_neg_pubs)
+  add_get(
+    '/cirtec_dev/pos_neg/ref_bundles/', _req_pos_neg_refbundles)
+  add_get(
+    '/cirtec_dev/pos_neg/ref_authors/', _req_pos_neg_refauthors)
 
   app['conf'] = conf
   app['tasks'] = set()
@@ -205,7 +209,10 @@ async def _req_top_refbundles(request: web.Request) -> web.StreamResponse:
   pipeline = _get_refbindles_pipeline(topn)
 
   contexts:Collection = mdb.contexts
-  out = [row async for row in contexts.aggregate(pipeline)]
+  out = []
+  async for doc in contexts.aggregate(pipeline):
+    classify = doc.pop('pos_neg', ())
+    out.append(doc)
 
   return json_response(out)
 
@@ -219,11 +226,12 @@ def _get_refbindles_pipeline(topn:int=None):
     {'$unwind': '$bundles'},
     {'$match': {'bundles': {'$ne': 'nUSJrP'}}},  ##
     {'$group': {
-      '_id': '$bundles', 'cits': {'$sum': 1},
-      'pubs': {'$addToSet': '$pub_id'}}},
+      '_id': '$bundles', 'cits': {'$sum': 1}, 'pubs': {'$addToSet': '$pub_id'},
+      'pos_neg': {'$push': '$positive_negative'}}},
     {'$unwind': '$pubs'},
     {'$group': {
-      '_id': '$_id', 'cits': {'$first': '$cits'}, 'pubs': {'$sum': 1}, }},
+      '_id': '$_id', 'cits': {'$first': '$cits'}, 'pubs': {'$sum': 1},
+      'pos_neg': {'$first': '$pos_neg'}, }},
     # 'pubs_ids': {'$addToSet': '$pubs'}}},
     {'$lookup': {
       'from': 'bundles', 'localField': '_id', 'foreignField': '_id',
@@ -233,7 +241,7 @@ def _get_refbindles_pipeline(topn:int=None):
       'cits': True, 'pubs': True, 'pubs_ids': True,
       'total_cits': '$bundle.total_cits', 'total_pubs': '$bundle.total_pubs',
       'year': '$bundle.year', 'authors': '$bundle.authors',
-      'title': '$bundle.title', }},
+      'title': '$bundle.title', 'pos_neg': True, }},
     {'$sort': {'cits': -1, 'pubs': -1, 'title': 1}}, # {$count: 'cnt'}
   ]
   if topn:
@@ -250,7 +258,10 @@ async def _req_top_refauthors(request: web.Request) -> web.StreamResponse:
   pipeline = _get_refauthors_pipeline(topn)
 
   contexts:Collection = mdb.contexts
-  out = [row async for row in contexts.aggregate(pipeline)]
+  out = []
+  async for row in contexts.aggregate(pipeline):
+    row.pop('pos_neg', None)
+    out.append(row)
 
   return json_response(out)
 
@@ -274,11 +285,12 @@ def _get_refauthors_pipeline(topn:int=None):
       'binds': {
           '$addToSet': {
             '_id': '$bun._id', 'total_cits': '$bun.total_cits',
-            'total_pubs': '$bun.total_pubs'}}}},
+            'total_pubs': '$bun.total_pubs'}},
+      'pos_neg': {'$push': '$positive_negative'}, }},
     {'$project': {
       '_id': False, 'author': '$_id', 'cits': {'$size': '$cits'},
       'pubs': {'$size': '$pubs'}, 'total_cits': {'$sum': '$binds.total_cits'},
-      'total_pubs': {'$sum': '$binds.total_pubs'}, }},
+      'total_pubs': {'$sum': '$binds.total_pubs'}, 'pos_neg': True, }},
     {'$sort': {'cits': -1, 'pubs': -1, 'author': 1}},
   ]
   if topn:
@@ -567,6 +579,54 @@ async def _req_pos_neg_pubs(request: web.Request) -> web.StreamResponse:
       dict(
         pub=pid, name=name, neutral=int(neutral), positive=int(positive),
         negative=int(negative)))
+
+  return json_response(out)
+
+
+async def _req_pos_neg_refbundles(request: web.Request) -> web.StreamResponse:
+  app = request.app
+  mdb = app['db']
+
+  topn = getreqarg_topn(request)
+
+  pipeline = _get_refbindles_pipeline(topn)
+
+  contexts:Collection = mdb.contexts
+  out = []
+  async for doc in contexts.aggregate(pipeline):
+    classify = doc.pop('pos_neg', None)
+    if classify:
+      neutral = sum(1 for v in classify if v['val'] == 0)
+      positive = sum(1 for v in classify if v['val'] > 0)
+      negative = sum(1 for v in classify if v['val'] < 0)
+      doc.update(
+        class_pos_neg=dict(
+          neutral=neutral, positive=positive, negative=negative))
+    out.append(doc)
+
+  return json_response(out)
+
+
+async def _req_pos_neg_refauthors(request: web.Request) -> web.StreamResponse:
+  app = request.app
+  mdb = app['db']
+
+  topn = getreqarg_topn(request)
+
+  pipeline = _get_refauthors_pipeline(topn)
+
+  contexts:Collection = mdb.contexts
+  out = []
+  async for row in contexts.aggregate(pipeline):
+    classify =  row.pop('pos_neg', None)
+    if classify:
+      neutral = sum(1 for v in classify if v['val'] == 0)
+      positive = sum(1 for v in classify if v['val'] > 0)
+      negative = sum(1 for v in classify if v['val'] < 0)
+      row.update(
+        class_pos_neg=dict(
+          neutral=neutral, positive=positive, negative=negative))
+    out.append(row)
 
   return json_response(out)
 
