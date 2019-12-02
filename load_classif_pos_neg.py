@@ -3,6 +3,7 @@
 """
 Расчёт и загрузка классификатора позитив/негатив для контекстов.
 """
+from datetime import datetime
 from operator import itemgetter
 
 from joblib import load as jl_load
@@ -17,6 +18,9 @@ from utils import load_config
 
 
 def main():
+  now = datetime.now
+  start = now()
+  print(start)
   conf = load_config()['dev']
   conf_mongo = conf['mongodb']
 
@@ -27,21 +31,24 @@ def main():
     mcont_update = mcont.update_one
 
     cvect:CountVectorizer = jl_load('positive_negative_cvect.joblib')
+    print(now(), 'cvect')
     model:LogisticRegression = jl_load('positive_negative_model.joblib')
+    print(now(), 'model')
 
     df_need = pd.DataFrame(
       data=parse_contexts(mcont), columns='cid seq'.split())
 
     df_need.info()
     # df_need.dropna(inplace=True)
-    print(df_need.head())
+    print(now(), df_need.head())
 
     X_need = cvect.transform(df_need.seq)
     df_need['labels'] = model.predict(X_need)
 
     # df_need.to_csv('res3_1.csv', columns='cid labels seq'.split(), index=False)
 
-    for row in df_need.itertuples():
+    i = 0
+    for i, row in enumerate(df_need.itertuples(), 1):
       # print(row.cid)
       label = int(row.labels)
       cl = {
@@ -53,9 +60,10 @@ def main():
       }[label]
       pos_neg = {'val': label, 'class': cl}
       mcont_update(dict(_id=row.cid), {'$set': {'positive_negative': pos_neg}})
-    return
+    # return
 
-  # print(i, len(cnts))
+  end = now()
+  print(end, i, end - start)
 
 
 def parse_contexts(mcont:Collection):
