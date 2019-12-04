@@ -23,9 +23,10 @@ from server_cirtec import (
   _req_frags_ngramms_cocitauthors, _req_publ_publications_ngramms,
   _req_frags_ngramms_topics, _req_frags_topics_cocitauthors,
   _req_frags_topics_ngramms, _req_top_cocitauthors, _req_top_cocitauthors_pubs,
-  _req_top_ngramm, _req_top_ngramm_pubs, _req_top_topics, _req_top_topics_pubs,
-  _reg_cnt_ngramm, _reg_cnt_pubs_ngramm)
-from server_utils import getreqarg_topn, json_response, _init_logging
+  _req_top_ngramm, _req_top_topics, _req_top_topics_pubs, _reg_cnt_ngramm,
+  _reg_cnt_pubs_ngramm)
+from server_utils import (
+  getreqarg_topn, json_response, _init_logging, getreqarg_int, getreqarg)
 from utils import load_config
 
 
@@ -677,6 +678,74 @@ async def _req_frags_neg_refauthors(request: web.Request) -> web.StreamResponse:
     row.update(frags=frags)
     out.append(row)
 
+  return json_response(out)
+
+
+async def _req_top_ngramm_pubs(request: web.Request) -> web.StreamResponse:
+  """Топ N фраз по публикациям"""
+  app = request.app
+  mdb = app['db']
+
+  topn = getreqarg_topn(request)
+
+  pipeline = [
+    {'$match': {'linked_papers_ngrams._id': {'$exists': True}}},
+    {'$project': {
+      'prefix': False, 'suffix': False, 'exact': False,
+      'linked_papers_topics': False}},
+    {'$unwind': '$linked_papers_ngrams'},
+    {'$lookup': {
+      'from': 'n_gramms', 'localField': 'linked_papers_ngrams._id',
+      'foreignField': '_id', 'as': 'ngrm'}},
+    {'$unwind': '$ngrm'},
+  ]
+
+  nka = getreqarg_int(request, 'nka')
+  ltype = getreqarg(request, 'ltype')
+
+  if nka or ltype:
+    pipeline = [
+      {'$match': {
+        f'ngrm.{f}': v for f, v in (('nka', nka), ('type', ltype)) if v}}]
+
+  if ltype:
+    gident = '$ngrm.title'
+  else:
+    gident = {'title': '$ngrm.title', 'type': '$ngrm.type'}
+
+  pipeline += [
+  {'$group': {
+      '_id': gident, 'count': {'$sum': '$linked_papers_ngrams.cnt'},
+      'conts': {
+        '$push': {
+          'pub_id': '$pub_id', 'cnt': '$linked_papers_ngrams.cnt'}}}},
+    {'$sort': {'count': -1, '_id': 1}},
+  ]
+
+  if topn:
+    pipeline += [{'$limit': topn}]
+
+  contexts = mdb.contexts
+  get_as_tuple = itemgetter('_id', 'count', 'conts')
+  topN = [get_as_tuple(obj) async for obj in contexts.aggregate(pipeline)]
+
+  get_pubs = itemgetter('pub_id', 'cnt')
+  if ltype:
+    out = {
+      name: dict(
+        all=cnt, contects=Counter(
+          p for p, n in (get_pubs(co) for co in conts)
+          for _ in range(n)
+        ))
+      for name, cnt, conts in topN}
+  else:
+    out = [
+      (name, dict(
+        all=cnt, contects=Counter(
+          p for p, n in (get_pubs(co) for co in conts)
+          for _ in range(n)
+        )))
+      for name, cnt, conts in topN]
   return json_response(out)
 
 
