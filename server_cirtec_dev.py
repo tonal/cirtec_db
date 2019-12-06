@@ -8,6 +8,7 @@ from operator import itemgetter
 from typing import Union
 
 from aiohttp import web
+from fastnumbers import fast_float
 import motor.motor_asyncio as aiomotor
 from pymongo import ASCENDING
 from pymongo.collection import Collection
@@ -23,7 +24,7 @@ from server_cirtec import (
   _req_frags_ngramms_cocitauthors, _req_publ_publications_ngramms,
   _req_frags_ngramms_topics, _req_frags_topics_cocitauthors,
   _req_frags_topics_ngramms, _req_top_cocitauthors, _req_top_cocitauthors_pubs,
-  _req_top_ngramm, _req_top_topics, _req_top_topics_pubs, _reg_cnt_ngramm,
+  _req_top_ngramm, _req_top_topics_pubs, _reg_cnt_ngramm,
   _reg_cnt_pubs_ngramm)
 from server_utils import (
   getreqarg_topn, json_response, _init_logging, getreqarg_int, getreqarg)
@@ -751,7 +752,7 @@ async def _req_top_ngramm_pubs(request: web.Request) -> web.StreamResponse:
 
 
 async def _req_publications(request: web.Request) -> web.StreamResponse:
-  """Топ N фраз по публикациям"""
+  """Публикации"""
   app = request.app
   mdb = app['db']
   publications = mdb.publications
@@ -759,6 +760,43 @@ async def _req_publications(request: web.Request) -> web.StreamResponse:
     doc async for doc in publications.find(
       {'uni_authors': 'Sergey-Sinelnikov-Murylev'}
     ).sort([('year', ASCENDING), ('_id', ASCENDING)])]
+  return json_response(out)
+
+
+async def _req_top_topics(request: web.Request) -> web.StreamResponse:
+  """Топ N топиков"""
+  app = request.app
+  mdb = app['db']
+
+  topn = getreqarg_topn(request)
+
+  probability = getreqarg(request, 'probability')
+  probability = fast_float(probability, default=.5) if probability else .5
+
+  pipeline = [
+    {'$project': {
+      'prefix': False, 'suffix': False, 'exact': False,
+      'linked_papers_ngrams': False}},
+    {'$unwind': '$linked_papers_topics'},
+    {'$match': {'linked_papers_topics.probability': {'$gte': probability}}},
+    {'$group': {
+      '_id': '$linked_papers_topics._id', 'count': {'$sum': 1},
+      'probability_avg': {'$avg': '$linked_papers_topics.probability'},
+      'probability_stddev': {'$stdDevPop': '$linked_papers_topics.probability'},
+      'conts': {'$addToSet': '$_id'}, }},
+    {'$sort': {'count': -1, '_id': 1}}
+  ]
+  if topn:
+    pipeline += [{'$limit': topn}]
+
+  contexts = mdb.contexts
+  curs = contexts.aggregate(pipeline)
+  to_out = lambda _id, count, probability_avg, probability_stddev, conts: dict(
+    topic=_id, count=count, probability_avg=probability_avg,
+    probability_stddev=probability_stddev,
+    contects=conts)
+
+  out = [to_out(**doc) async for doc in curs]
   return json_response(out)
 
 
