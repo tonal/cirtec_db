@@ -34,3 +34,9 @@ GET http://localhost:8668/cirtec_dev/frags/ref_authors/
 GET http://localhost:8668/cirtec_dev/top/ngramms/publications/
 
 ###
+GET http://localhost:8668/cirtec_dev/publications/
+
+###
+GET http://localhost:8668/cirtec_dev/top/topics/
+
+###

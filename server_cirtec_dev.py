@@ -64,6 +64,7 @@ def create_srv():
   add_get('/cirtec_dev/pos_neg/ref_authors/', _req_pos_neg_refauthors)
   add_get('/cirtec_dev/frags/ref_bundles/', _req_frags_refbundles)
   add_get('/cirtec_dev/frags/ref_authors/', _req_frags_neg_refauthors)
+  add_get('/cirtec_dev/publications/', _req_publications)
 
 
   app['conf'] = conf
@@ -746,6 +747,17 @@ async def _req_top_ngramm_pubs(request: web.Request) -> web.StreamResponse:
           for _ in range(n)
         )))
       for name, cnt, conts in topN]
+  return json_response(out)
+
+
+async def _req_publications(request: web.Request) -> web.StreamResponse:
+  """Топ N фраз по публикациям"""
+  app = request.app
+  mdb = app['db']
+  publications = mdb.publications
+  out = [
+    doc async for doc in publications.find(
+      {'uni_authors': 'Sergey-Sinelnikov-Murylev'})]
   return json_response(out)
 
 

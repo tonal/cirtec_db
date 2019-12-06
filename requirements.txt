@@ -23,7 +23,7 @@ html-text==0.5.1
 idna==2.8                 # via requests, yarl
 joblib==0.14.0
 lxml==4.4.2
-more-itertools==8.0.0
+more-itertools==8.0.1
 motor==2.0.0
 multidict==4.6.1          # via aiohttp, yarl
 numpy==1.17.4             # via pandas, scikit-learn, scipy
@@ -48,4 +48,4 @@ urllib3==1.25.7           # via requests
 uvloop==0.14.0
 w3lib==1.21.0             # via parsel
 xlrd==1.2.0
-yarl==1.4.1               # via aiohttp
+yarl==1.4.2               # via aiohttp
