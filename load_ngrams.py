@@ -42,7 +42,7 @@ def update_ngramms(
   mdb:Database, for_del:int, ngramm_paths:Sequence[Tuple[str, str]]
 ) -> Tuple[Collection]:
   """Обновление коллекции n_gramms и дополнение в контексты"""
-  print()
+  print('update_ngramms: Обновление коллекции n_gramms и дополнение в контексты')
   col_gramms = mdb['n_gramms']
   col_gramms.update_many({}, {'$set': {'for_del': for_del}})
   ngrm_update = partial(col_gramms.update_one, upsert=True)

@@ -4,65 +4,78 @@
 Загрузка топиков и топиков в контексты
 """
 from collections import Counter
-from functools import partial
+from datetime import datetime
+from functools import partial, reduce
 import json
 from operator import itemgetter
+from urllib.request import urlopen
 
 from pymongo import MongoClient
+from pymongo.database import Database
 from pymongo.errors import DuplicateKeyError
 
 from utils import load_config
 
 
-TOPICS = 'topic_output.json'
+# TOPICS = 'topic_output.json'
+TOPICS:str = 'http://onir2.ranepa.ru:8081/prl/data/Sergey-Sinelnikov-Murylev/topic_output.json'
 
 
 def main():
+  start = datetime.now()
   conf = load_config()
-  conf_mongo = conf['mongodb_dev']
-
+  conf_mongo = conf['dev']['mongodb']
+  for_del: int = reduce(lambda x, y: x * 100 + y, start.timetuple()[:6])
   with MongoClient(conf_mongo['uri'], compressors='snappy') as client:
     mdb = client[conf_mongo['db']] # 'cirtec'
 
-    # mpubs = mdb['publications']
-    # mpubs_insert = mpubs.insert_one
-    mtops = mdb['topics']
-    mtops_update = partial(mtops.update_one, upsert=True)
-    mcont = mdb['contexts']
-    mcont_update = partial(mcont.update_one, upsert=True)
-    # mauth = mdb['authors']
-    # mauth_update = partial(mauth.update_one, upsert=True)
+    mtops, = update_topics(mdb, for_del, TOPICS)
 
-    topics = json.load(open(TOPICS, encoding='utf-8'))
-    tlp = topics['linked_papers']
+    r = mtops.delete_many({'for_del': for_del})
+    print(f'delete {mtops.name}:', r.deleted_count)
 
-    i = 0
-    for i, topic in enumerate(tlp['topics'], 1):
-      title = topic.pop('topic')
-      topic['title'] = title
-      topic['number'] = int(topic['number'])
-      topic['probability_average'] = float(topic['probability_average'])
-      topic['probability_std'] = float(topic['probability_std'])
-      mtops_update(dict(_id=title), {'$set': topic})
-    print('topic:', i)
 
-    cnts = Counter()
-    i = 0
+def update_topics(mdb:Database, for_del:int, upi_topics):
+  """Обновление коллекции topics и дополнение в контексты"""
+  print('update_topics: Обновление коллекции topics и дополнение в контексты')
 
-    get_as_tuple = itemgetter('ref_key', 'topic', 'probability')
-    for i, cont in enumerate(tlp['contexts'], 1):
-      ref_key, topic, probab = get_as_tuple(cont)
-      pub_id, num, start = ref_key.rsplit('_', 2)
-      cont_id = f'{pub_id}@{start}'
-      mcont_update(
-        dict(_id=cont_id),
-        {
-          '$set': {'ref_num': int(num)},
-          '$addToSet': {
-            'linked_papers_topics': {
-              '_id': topic, 'probability': float(probab)}}})
+  mtops = mdb['topics']
+  mtops_update = partial(mtops.update_one, upsert=True)
+  mcont = mdb['contexts']
+  mcont_update = partial(mcont.update_one, upsert=True)
 
-    print(i, len(cnts))
+  mtops.update_many({}, {'$set': {'for_del': for_del}})
+  mcont.update_many({}, {'$unset': {'linked_papers_topics': 1}})
+
+  # topics = json.load(open(upi_topics, encoding='utf-8'))
+  with urlopen(upi_topics) as f:
+    topics = json.load(f)
+
+  tlp = topics['linked_papers']
+  i = 0
+  for i, topic in enumerate(tlp['topics'], 1):
+    title = topic.pop('topic')
+    topic['title'] = title
+    topic['number'] = int(topic['number'])
+    topic['probability_average'] = float(topic['probability_average'])
+    topic['probability_std'] = float(topic['probability_std'])
+    mtops_update(dict(_id=title), {'$set': topic, '$unset': {'for_del': 1}})
+  print('topic:', i)
+  cnts = Counter()
+  i = 0
+  get_as_tuple = itemgetter('ref_key', 'topic', 'probability')
+  for i, cont in enumerate(tlp['contexts'], 1):
+    ref_key, topic, probab = get_as_tuple(cont)
+    pub_id, num, start = ref_key.rsplit('_', 2)
+    cont_id = f'{pub_id}@{start}'
+    mcont_update(
+      dict(_id=cont_id), {
+      '$set': {'ref_num': int(num)}, '$addToSet': {
+        'linked_papers_topics': {
+          '_id': topic, 'probability': float(probab)}}})
+  print(i, len(cnts))
+
+  return (mtops,)
 
 
 if __name__ == '__main__':
