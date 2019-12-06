@@ -757,7 +757,8 @@ async def _req_publications(request: web.Request) -> web.StreamResponse:
   publications = mdb.publications
   out = [
     doc async for doc in publications.find(
-      {'uni_authors': 'Sergey-Sinelnikov-Murylev'})]
+      {'uni_authors': 'Sergey-Sinelnikov-Murylev'}
+    ).sort([('year', ASCENDING), ('_id', ASCENDING)])]
   return json_response(out)
 
 
