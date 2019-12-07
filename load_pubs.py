@@ -76,8 +76,8 @@ def update_pubs_conts(
     year = norm_spaces(pub.xpath('citer/year/text()').get())
 
     pub_name = ' / '.join(pub_names)
-    doc_pub = dict(name=pub_name, names=pub_names, uni_authors=[AUTHOR],
-      reauthors=authors)
+    doc_pub = dict(
+      name=pub_name, names=pub_names, uni_authors=[AUTHOR], reauthors=authors)
     if year:
       doc_pub.update(year=int(year))
 
