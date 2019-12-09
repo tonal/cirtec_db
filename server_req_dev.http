@@ -46,3 +46,6 @@ GET http://localhost:8668/cirtec_dev/top/topics/publications/
 GET http://localhost:8668/cirtec_dev/top/ngramms/
 
 ###
+GET http://localhost:8668/cirtec_dev/publ/cocitauthors/cocitauthors/
+
+###

@@ -24,7 +24,7 @@ idna==2.8                 # via requests, yarl
 importlib-metadata==1.2.0  # via pluggy, pytest
 joblib==0.14.0
 lxml==4.4.2
-more-itertools==8.0.1
+more-itertools==8.0.2
 motor==2.0.0
 multidict==4.6.1          # via aiohttp, yarl
 numpy==1.17.4             # via pandas, scikit-learn, scipy

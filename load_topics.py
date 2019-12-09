@@ -26,6 +26,7 @@ def main():
   conf = load_config()
   conf_mongo = conf['dev']['mongodb']
   for_del: int = reduce(lambda x, y: x * 100 + y, start.timetuple()[:6])
+
   with MongoClient(conf_mongo['uri'], compressors='snappy') as client:
     mdb = client[conf_mongo['db']] # 'cirtec'
 

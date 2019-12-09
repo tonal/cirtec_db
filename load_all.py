@@ -12,6 +12,7 @@ from pymongo.database import Database
 from pymongo import MongoClient
 
 from load_bundles import update_bundles, BUNDLES
+from load_cocits import update_cocits, COCITS
 from load_ngrams import update_ngramms, NGRAM_DIR
 from load_pubs import update_pubs_conts, SOURCE_XML, SOURCE_URL
 from load_topics import update_topics, TOPICS
@@ -31,7 +32,8 @@ def main():
       update_pubs_conts(mdb, for_del, SOURCE_URL, SOURCE_XML) +
       update_bundles(mdb, for_del, BUNDLES) +
       update_ngramms(mdb, for_del, NGRAM_DIR) +
-      update_topics(mdb, for_del, TOPICS)
+      update_topics(mdb, for_del, TOPICS) +
+      update_cocits(mdb, for_del, COCITS)
     )
 
     for coll in colls:
