@@ -1009,7 +1009,7 @@ async def _req_pos_neg_ngramms(request: web.Request) -> web.StreamResponse:
   app = request.app
   mdb = app['db']
 
-  probability = getreqarg_probability(request)
+  topn = getreqarg_topn(request, default=10)
 
 
   pipeline = [
@@ -1023,18 +1023,28 @@ async def _req_pos_neg_ngramms(request: web.Request) -> web.StreamResponse:
         'as': 'pub'}},
     {'$unwind': '$pub'},
     {'$match': {'pub.uni_authors': 'Sergey-Sinelnikov-Murylev'}},
-    {'$unwind': '$linked_papers_topics'},
-    {'$match': {'linked_papers_topics.probability': {'$gte': probability}}},
+    {'$project': {'pub': False}},
+    {'$unwind': '$linked_papers_ngrams'},
+    {'$lookup': {
+      'from': 'n_gramms', 'localField': 'linked_papers_ngrams._id',
+      'foreignField': '_id', 'as': 'ngrm'}},
+    {'$unwind': '$ngrm'},
+    {'$match': {'ngrm.type': 'lemmas', 'ngrm.nka': 2}},
     {'$group': {
       '_id': {
-        '$arrayElemAt': [
-          ['neutral', 'positive', 'positive', 'negative', 'negative'],
-          '$positive_negative.val']},
-      'topics': {'$addToSet': '$linked_papers_topics._id'},
-      'topic_cnt': {'$sum': 1}}},
+        'pos_neg': {
+          '$arrayElemAt': [
+            ['neutral', 'positive', 'positive', 'negative', 'negative'],
+            '$positive_negative.val']},
+        'title': '$ngrm.title'},
+      'ngrm_cnt': {'$sum': '$linked_papers_ngrams.cnt'}}},
+    {'$sort': {'ngrm_cnt': -1, '_id.title': 1}},
+    {'$group': {
+      '_id': '$_id.pos_neg',
+      'ngramms': {'$push': {'title': '$_id.title', 'count': '$ngrm_cnt'}},}},
     {'$project': {
-        '_id': False, 'class_pos_neg': '$_id',
-        'topic_cnt': '$topic_cnt', 'topics': '$topics'}},
+      '_id': False, 'class_pos_neg': '$_id',
+      'ngramms': {'$slice': ['$ngramms', topn]},}},
     {'$sort': {'class_pos_neg': -1}},
   ]
 

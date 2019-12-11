@@ -32,8 +32,10 @@ def getreqarg_int(request:web.Request, argname:str) -> Optional[int]:
         arg, ex)
 
 
-def getreqarg_topn(request: web.Request) -> Optional[int]:
+def getreqarg_topn(request: web.Request, *, default:int=None) -> Optional[int]:
   topn = getreqarg_int(request, 'topn')
+  if not topn and default:
+    return default
   return topn
 
 
