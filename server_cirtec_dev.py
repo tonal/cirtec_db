@@ -3,8 +3,10 @@
 import asyncio
 from collections import Counter
 from functools import partial
+from itertools import chain, groupby, islice
 import logging
 from operator import itemgetter
+from statistics import mean, pstdev
 from typing import Union
 
 from aiohttp import web
@@ -26,7 +28,8 @@ from server_cirtec import (
   _req_frags_topics_ngramms, _req_top_cocitauthors, _req_top_cocitauthors_pubs,
   _reg_cnt_ngramm, _reg_cnt_pubs_ngramm)
 from server_utils import (
-  getreqarg_topn, json_response, _init_logging, getreqarg_int, getreqarg)
+  getreqarg_topn, json_response, _init_logging, getreqarg_int, getreqarg,
+  getreqarg_probability)
 from utils import load_config
 
 
@@ -444,11 +447,16 @@ async def _req_bund4ngramm_tops(request: web.Request) -> web.StreamResponse:
   app = request.app
   mdb = app['db']
 
+  topn = getreqarg_topn(request)
+  probability = getreqarg_probability(request)
+
   contexts:Collection = mdb.contexts
 
-  b_pipeline = _get_refbindles_pipeline()
-  b_pipeline += [{'$match': {'cits': 5}}]
   out_bund = []
+  '''
+  b_pipeline = _get_refbindles_pipeline()
+  b_pipeline += [{'$match': {'cits': {'$gte': 5}}}]
+
   ref_bund = frozenset([
     o['_id'] async for o in contexts.aggregate(b_pipeline)])
   async for cont in contexts.aggregate([
@@ -471,6 +479,16 @@ async def _req_bund4ngramm_tops(request: web.Request) -> web.StreamResponse:
       'from': 'bundles', 'localField': 'cont.bundles', 'foreignField': '_id',
       'as': 'bund'}},
   ]):
+    """
+    {$unwind: '$bund'},
+    {$group: {
+        _id: '$bund._id', cnt: {$sum: 1}, 
+        authors: {$get_first: '$bund.authors'}, title: {$get_first: '$bund.title'}, year: {$get_first: '$bund.year'},
+        linked_papers_topics: {$push: '$cont.linked_papers_topics'},
+        linked_papers_ngrams: {$push: '$cont.linked_papers_ngrams'},
+        }},
+    {$sort: {cnt: -1}},
+    """
     icont = cont['cont']
     ngramms = icont.get('linked_papers_ngrams')
     bundles = [
@@ -478,9 +496,12 @@ async def _req_bund4ngramm_tops(request: web.Request) -> web.StreamResponse:
         bundle=b['_id'], year=b['year'], title=b['title'],
         authors=b.get('authors'))
       for b in cont['bund']]
-    oauth = dict(
-      cont_id=cont['_id'], bundles=bundles,
-      topics=icont['linked_papers_topics'])
+    topics = icont['linked_papers_topics']
+    if probability:
+      topics = sorted(
+        [t for t in topics if get_probab(t) >= probability],
+        key=get_probab, reverse=True)
+    oauth = dict(cont_id=cont['_id'], bundles=bundles, topics=topics)
     if ngramms:
       ongs = sorted(
         (
@@ -493,7 +514,75 @@ async def _req_bund4ngramm_tops(request: web.Request) -> web.StreamResponse:
       )
       oauth.update(ngramms=ongs[:5])
     out_bund.append(oauth)
+  '''
+  pipeline = [
+    {'$match': {'exact': {'$exists': True}}}, {
+    '$project': {'prefix': False, 'suffix': False, 'exact': False, }},
+    {'$unwind': '$bundles'},
+    {'$match': {'bundles': {'$ne': 'nUSJrP'}}},
+    {'$group': {
+      '_id': '$bundles', 'cits': {'$sum': 1}, 'pubs': {'$addToSet': '$pub_id'},
+      'conts': {'$addToSet': {
+        'cid': '$_id', 'topics': '$linked_papers_topics',
+        'ngrams': '$linked_papers_ngrams'}}}},
+    {'$lookup': {
+      'from': 'bundles', 'localField': '_id', 'foreignField': '_id',
+      'as': 'bundle'}},
+    {'$unwind': '$bundle'},
+    {'$project': {
+      '_id': False,
+      'bundle': '$_id', 'cits': True, 'pubs': {'$size': '$pubs'},
+      'pubs_ids': '$pubs', 'conts': True,
+      'total_cits': '$bundle.total_cits', 'total_pubs': '$bundle.total_pubs',
+      'year': '$bundle.year', 'authors': '$bundle.authors',
+      'title': '$bundle.title',}},
+    {'$sort': {'cits': -1, 'pubs': -1, 'title': 1}},
+  ]
+  if topn:
+    pipeline += [{'$limit': topn}]
 
+  get_probab = itemgetter('probability')
+  get_first = itemgetter(0)
+  get_second = itemgetter(1)
+  get_topic = itemgetter('_id', 'probability')
+  def topic_stat(it_tp):
+    it_tp = tuple(it_tp)
+    probabs = tuple(map(get_second, it_tp))
+    return dict(
+      count=len(it_tp),)
+      # probability_avg=mean(probabs),
+      # probability_pstdev=pstdev(probabs))
+  get_ngr = itemgetter('_id', 'cnt')
+  get_count = itemgetter('count')
+  async for cont in contexts.aggregate(pipeline):
+    conts = cont.pop('conts')
+
+    cont_ids = map(itemgetter('cid'), conts)
+
+    topics = chain.from_iterable(map(itemgetter('topics'), conts))
+    # удалять топики < 0.5
+    topics = ((t, p) for t, p in map(get_topic, topics) if p >= probability)
+    topics = (
+      dict(topic=t, **topic_stat(it_tp))
+      for t, it_tp in groupby(sorted(topics, key=get_first), key=get_first))
+    topics = sorted(topics, key=get_count, reverse=True)
+
+    ngrams = chain.from_iterable(map(itemgetter('ngrams'), conts))
+    # только 2-grams и lemmas
+    ngrams = (
+      (n.split('_', 1)[-1].split(), c)
+      for n, c in map(get_ngr, ngrams) if n.startswith('lemmas_'))
+    ngrams = ((' '.join(n), c) for n, c in ngrams if len(n) == 2)
+    ngrams = (
+      dict(ngramm=n, count=sum(map(get_second, it_nc)))
+      for n, it_nc in groupby(sorted(ngrams, key=get_first), key=get_first))
+    ngrams = sorted(ngrams, key=get_count, reverse=True)
+    ngrams = islice(ngrams, 10)
+    cont.update(
+      cont_ids=tuple(cont_ids),
+      topics=tuple(topics),
+      ngrams=tuple(ngrams))
+    out_bund.append(cont)
   out = out_bund
 
   return json_response(out)
@@ -878,8 +967,7 @@ async def _req_top_topics_pubs(request: web.Request) -> web.StreamResponse:
 
   topn = getreqarg_topn(request)
 
-  probability = getreqarg(request, 'probability')
-  probability = fast_float(probability, default=.5) if probability else .5
+  probability = getreqarg_probability(request)
 
   pipeline = [
     {'$project': {

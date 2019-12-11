@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Optional
 
 from aiohttp import web
+from fastnumbers import fast_float
 import yaml
 
 _logger = logging.getLogger('cirtec')
@@ -48,3 +49,10 @@ def _init_logging():
   # dsn = conf_log.get('sentry', {}).get('dsn')
   # if dsn:
   #   sentry_sdk.init(dsn=dsn, integrations=[AioHttpIntegration()])
+
+
+def getreqarg_probability(request, default=.5):
+  probab = getreqarg(request, 'probability')
+  probability = (
+    fast_float(probab, default=default) if probab else default)
+  return probability
