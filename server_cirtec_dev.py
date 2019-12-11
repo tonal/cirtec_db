@@ -69,6 +69,8 @@ def create_srv():
   add_get('/cirtec_dev/frags/ref_authors/', _req_frags_neg_refauthors)
   add_get('/cirtec_dev/publications/', _req_publications)
   add_get('/cirtec_dev/pos_neg/contexts/', _req_pos_neg_contexts)
+  add_get('/cirtec_dev/pos_neg/topics/', _req_pos_neg_topics)
+  add_get('/cirtec_dev/pos_neg/ngramms/', _req_pos_neg_ngramms)
 
 
   app['conf'] = conf
@@ -964,9 +966,9 @@ async def _req_top_topics_pubs(request: web.Request) -> web.StreamResponse:
 
 async def _req_pos_neg_contexts(request: web.Request) -> web.StreamResponse:
   """2.1.7. Общее распределение классов тональности для контекстов из всех
-     публикаций заданного автора
-     - для каждого класса тональности показать общее количество контекстов,
-     которые к ним относятся
+    публикаций заданного автора
+    - для каждого класса тональности показать общее количество контекстов,
+    которые к ним относятся
   """
   app = request.app
   mdb = app['db']
@@ -980,7 +982,6 @@ async def _req_pos_neg_contexts(request: web.Request) -> web.StreamResponse:
     {'$unwind': '$pub'},
     {'$match': {'pub.uni_authors': 'Sergey-Sinelnikov-Murylev'}},
     {'$group': {
-      # '_id': '$positive_negative.val',
       '_id': {
         '$arrayElemAt': [
           ['neutral', 'positive', 'positive', 'negative', 'negative'],
@@ -991,7 +992,99 @@ async def _req_pos_neg_contexts(request: web.Request) -> web.StreamResponse:
       '_id': False, 'class_pos_neg': '$_id',
       'cont_cnt': {'$size': '$cont_ids'}, 'pub_cnt': {'$size': '$pub_ids'},
       'pub_ids': '$pub_ids', 'cont_ids': '$cont_ids'}},
-    {'$sort': {'pos_neg': -1}},
+    {'$sort': {'class_pos_neg': -1}},
+  ]
+
+  contexts = mdb.contexts
+  curs = contexts.aggregate(pipeline)
+  out = [doc async for doc in curs]
+
+  return json_response(out)
+
+
+async def _req_pos_neg_ngramms(request: web.Request) -> web.StreamResponse:
+  """2.3.4а. Тональность для фраз
+    - для каждого класса тональности показать топ фраз с количеством повторов каждой
+  """
+  app = request.app
+  mdb = app['db']
+
+  probability = getreqarg_probability(request)
+
+
+  pipeline = [
+    {'$match': {
+      'positive_negative': {'$exists': True},
+      'linked_papers_ngrams': {'$exists': True},}},
+    {'$project': {
+      'pub_id': True, 'positive_negative': True, 'linked_papers_ngrams': True}},
+    {'$lookup': {
+        'from': 'publications', 'localField': 'pub_id', 'foreignField': '_id',
+        'as': 'pub'}},
+    {'$unwind': '$pub'},
+    {'$match': {'pub.uni_authors': 'Sergey-Sinelnikov-Murylev'}},
+    {'$unwind': '$linked_papers_topics'},
+    {'$match': {'linked_papers_topics.probability': {'$gte': probability}}},
+    {'$group': {
+      '_id': {
+        '$arrayElemAt': [
+          ['neutral', 'positive', 'positive', 'negative', 'negative'],
+          '$positive_negative.val']},
+      'topics': {'$addToSet': '$linked_papers_topics._id'},
+      'topic_cnt': {'$sum': 1}}},
+    {'$project': {
+        '_id': False, 'class_pos_neg': '$_id',
+        'topic_cnt': '$topic_cnt', 'topics': '$topics'}},
+    {'$sort': {'class_pos_neg': -1}},
+  ]
+
+  contexts = mdb.contexts
+  curs = contexts.aggregate(pipeline)
+  out = [doc async for doc in curs]
+
+  return json_response(out)
+
+
+async def _req_pos_neg_topics(request: web.Request) -> web.StreamResponse:
+  """2.3.4б. Тональность для топиков
+    - для каждого класса тональности показать топ топиков с количеством
+    повторов каждого
+  """
+  app = request.app
+  mdb = app['db']
+
+  probability = getreqarg_probability(request)
+
+
+  pipeline = [
+    {'$match': {
+      'positive_negative': {'$exists': True},
+      'linked_papers_topics': {'$exists': True}}},
+    {'$project': {
+      'pub_id': True, 'positive_negative': True, 'linked_papers_topics': True}},
+    {'$lookup': {
+        'from': 'publications', 'localField': 'pub_id', 'foreignField': '_id',
+        'as': 'pub'}},
+    {'$unwind': '$pub'},
+    {'$match': {'pub.uni_authors': 'Sergey-Sinelnikov-Murylev'}},
+    {'$unwind': '$linked_papers_topics'},
+    {'$match': {'linked_papers_topics.probability': {'$gte': probability}}},
+    {'$group': {
+      '_id': {
+        'pos_neg': {
+          '$arrayElemAt': [
+            ['neutral', 'positive', 'positive', 'negative', 'negative'],
+            '$positive_negative.val']},
+        'topic': '$linked_papers_topics._id'},
+      'topic_cnt': {'$sum': 1}}},
+    {'$sort': {'topic_cnt': -1}},
+    {'$group': {
+      '_id': '$_id.pos_neg',
+      'topics': {'$push': {'topic': '$_id.topic', 'count': '$topic_cnt'}},}},
+    {'$project': {
+      '_id': False, 'class_pos_neg': '$_id',
+      'topic_cnt': {'$size': '$topics'}, 'topics': '$topics'}},
+    {'$sort': {'class_pos_neg': -1}},
   ]
 
   contexts = mdb.contexts

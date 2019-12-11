@@ -52,3 +52,6 @@ GET http://localhost:8668/cirtec_dev/publ/cocitauthors/cocitauthors/
 GET http://localhost:8668/cirtec_dev/pos_neg/contexts/
 
 ###
+GET http://localhost:8668/cirtec_dev/pos_neg/topics/
+
+###
