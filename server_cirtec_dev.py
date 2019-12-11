@@ -988,7 +988,7 @@ async def _req_pos_neg_contexts(request: web.Request) -> web.StreamResponse:
       'pub_ids': {'$addToSet': '$pub_id'},
       'cont_ids': {'$addToSet': '$_id'}}},
     {'$project': {
-      '_id': False, 'pos_neg': '$_id',
+      '_id': False, 'class_pos_neg': '$_id',
       'cont_cnt': {'$size': '$cont_ids'}, 'pub_cnt': {'$size': '$pub_ids'},
       'pub_ids': '$pub_ids', 'cont_ids': '$cont_ids'}},
     {'$sort': {'pos_neg': -1}},
