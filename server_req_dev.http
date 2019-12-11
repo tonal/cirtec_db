@@ -49,3 +49,6 @@ GET http://localhost:8668/cirtec_dev/top/ngramms/
 GET http://localhost:8668/cirtec_dev/publ/cocitauthors/cocitauthors/
 
 ###
+GET http://localhost:8668/cirtec_dev/pos_neg/contexts/
+
+###

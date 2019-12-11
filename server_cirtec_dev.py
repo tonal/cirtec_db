@@ -68,6 +68,7 @@ def create_srv():
   add_get('/cirtec_dev/frags/ref_bundles/', _req_frags_refbundles)
   add_get('/cirtec_dev/frags/ref_authors/', _req_frags_neg_refauthors)
   add_get('/cirtec_dev/publications/', _req_publications)
+  add_get('/cirtec_dev/pos_neg/contexts/', _req_pos_neg_contexts)
 
 
   app['conf'] = conf
@@ -958,6 +959,45 @@ async def _req_top_topics_pubs(request: web.Request) -> web.StreamResponse:
   to_out = lambda _id, pubs, **kwds: dict(topic=_id, **kwds, publications=pubs)
 
   out = [to_out(**doc) async for doc in curs]
+  return json_response(out)
+
+
+async def _req_pos_neg_contexts(request: web.Request) -> web.StreamResponse:
+  """2.1.7. Общее распределение классов тональности для контекстов из всех
+     публикаций заданного автора
+     - для каждого класса тональности показать общее количество контекстов,
+     которые к ним относятся
+  """
+  app = request.app
+  mdb = app['db']
+
+  pipeline = [
+    {'$match': {'positive_negative': {'$exists': True}}},
+    {'$project': {'pub_id': True, 'positive_negative': True}},
+    {'$lookup': {
+      'from': 'publications', 'localField': 'pub_id', 'foreignField': '_id',
+      'as': 'pub'}},
+    {'$unwind': '$pub'},
+    {'$match': {'pub.uni_authors': 'Sergey-Sinelnikov-Murylev'}},
+    {'$group': {
+      # '_id': '$positive_negative.val',
+      '_id': {
+        '$arrayElemAt': [
+          ['neutral', 'positive', 'positive', 'negative', 'negative'],
+          '$positive_negative.val']},
+      'pub_ids': {'$addToSet': '$pub_id'},
+      'cont_ids': {'$addToSet': '$_id'}}},
+    {'$project': {
+      '_id': False, 'pos_neg': '$_id',
+      'cont_cnt': {'$size': '$cont_ids'}, 'pub_cnt': {'$size': '$pub_ids'},
+      'pub_ids': '$pub_ids', 'cont_ids': '$cont_ids'}},
+    {'$sort': {'pos_neg': -1}},
+  ]
+
+  contexts = mdb.contexts
+  curs = contexts.aggregate(pipeline)
+  out = [doc async for doc in curs]
+
   return json_response(out)
 
 
