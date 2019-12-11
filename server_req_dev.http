@@ -58,3 +58,6 @@ GET http://localhost:8668/cirtec_dev/pos_neg/ngramms/
 GET http://localhost:8668/cirtec_dev/pos_neg/topics/
 
 ###
+GET http://localhost:8668/cirtec_dev/pos_neg/cocitauthors/
+
+###

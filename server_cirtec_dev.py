@@ -71,6 +71,7 @@ def create_srv():
   add_get('/cirtec_dev/pos_neg/contexts/', _req_pos_neg_contexts)
   add_get('/cirtec_dev/pos_neg/topics/', _req_pos_neg_topics)
   add_get('/cirtec_dev/pos_neg/ngramms/', _req_pos_neg_ngramms)
+  add_get('/cirtec_dev/pos_neg/cocitauthors/', _req_pos_neg_cocitauthors)
 
 
   app['conf'] = conf
@@ -1011,7 +1012,6 @@ async def _req_pos_neg_ngramms(request: web.Request) -> web.StreamResponse:
 
   topn = getreqarg_topn(request, default=10)
 
-
   pipeline = [
     {'$match': {
       'positive_negative': {'$exists': True},
@@ -1065,7 +1065,6 @@ async def _req_pos_neg_topics(request: web.Request) -> web.StreamResponse:
 
   probability = getreqarg_probability(request)
 
-
   pipeline = [
     {'$match': {
       'positive_negative': {'$exists': True},
@@ -1077,6 +1076,7 @@ async def _req_pos_neg_topics(request: web.Request) -> web.StreamResponse:
         'as': 'pub'}},
     {'$unwind': '$pub'},
     {'$match': {'pub.uni_authors': 'Sergey-Sinelnikov-Murylev'}},
+    {'$project': {'pub': False}},
     {'$unwind': '$linked_papers_topics'},
     {'$match': {'linked_papers_topics.probability': {'$gte': probability}}},
     {'$group': {
@@ -1094,6 +1094,54 @@ async def _req_pos_neg_topics(request: web.Request) -> web.StreamResponse:
     {'$project': {
       '_id': False, 'class_pos_neg': '$_id',
       'topic_cnt': {'$size': '$topics'}, 'topics': '$topics'}},
+    {'$sort': {'class_pos_neg': -1}},
+  ]
+
+  contexts = mdb.contexts
+  curs = contexts.aggregate(pipeline)
+  out = [doc async for doc in curs]
+
+  return json_response(out)
+
+
+async def _req_pos_neg_cocitauthors(request: web.Request) -> web.StreamResponse:
+  """2.3.5. Тональность для со-цитируемых авторов
+    - для каждого класса тональности привести топ со-цитируемых источников/авторов
+  """
+  app = request.app
+  mdb = app['db']
+
+  topn = getreqarg_topn(request, default=10)
+
+  pipeline = [
+    {'$match': {
+      'positive_negative': {'$exists': True},
+      'cocit_authors': {'$exists': True}}},
+    {'$project': {
+      'pub_id': True, 'positive_negative': True, 'cocit_authors': True}},
+    {'$lookup': {
+        'from': 'publications', 'localField': 'pub_id', 'foreignField': '_id',
+        'as': 'pub'}},
+    {'$unwind': '$pub'},
+    {'$match': {'pub.uni_authors': 'Sergey-Sinelnikov-Murylev'}},
+    {'$project': {'pub': False}},
+    {'$unwind': '$cocit_authors'},
+    {'$group': {
+      '_id': {
+        'pos_neg': {
+          '$arrayElemAt': [
+            ['neutral', 'positive', 'positive', 'negative', 'negative'],
+            '$positive_negative.val']},
+        'title': '$cocit_authors'},
+      'coauthor_cnt': {'$sum': 1}}},
+    {'$sort': {'coauthor_cnt': -1, '_id.title': 1}},
+    {'$group': {
+      '_id': '$_id.pos_neg',
+      'cocitauthor': {
+        '$push': {'author': '$_id.title', 'count': '$coauthor_cnt'}},}},
+    {'$project': {
+      '_id': False, 'class_pos_neg': '$_id',
+      'cocitauthors': {'$slice': ['$cocitauthor', topn]} }},
     {'$sort': {'class_pos_neg': -1}},
   ]
 
