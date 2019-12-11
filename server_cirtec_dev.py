@@ -453,68 +453,6 @@ async def _req_bund4ngramm_tops(request: web.Request) -> web.StreamResponse:
   contexts:Collection = mdb.contexts
 
   out_bund = []
-  '''
-  b_pipeline = _get_refbindles_pipeline()
-  b_pipeline += [{'$match': {'cits': {'$gte': 5}}}]
-
-  ref_bund = frozenset([
-    o['_id'] async for o in contexts.aggregate(b_pipeline)])
-  async for cont in contexts.aggregate([
-    {'$match': {'exact': {'$exists': True}}},
-    {'$project': {
-      'prefix': False, 'suffix': False, 'exact': False,
-      'linked_papers_topics': False, 'linked_papers_ngrams': False}},
-    {'$unwind': '$bundles'},
-    {'$match': {'bundles': {'$ne': 'nUSJrP'}}},
-    {'$match': {'bundles': {'$in': list(ref_bund)}}},
-    {'$group': {'_id': '$_id', 'cnt': {'$sum': 1}}},
-    {'$sort': {'cnt': -1, '_id': 1}},
-    {'$lookup': {
-      'from': 'contexts', 'localField': '_id', 'foreignField': '_id',
-      'as': 'cont'}},
-    {'$project': {
-      'cont.prefix': False, 'cont.suffix': False, 'cont.exact': False, }},
-    {'$unwind': '$cont'},
-    {'$lookup': {
-      'from': 'bundles', 'localField': 'cont.bundles', 'foreignField': '_id',
-      'as': 'bund'}},
-  ]):
-    """
-    {$unwind: '$bund'},
-    {$group: {
-        _id: '$bund._id', cnt: {$sum: 1}, 
-        authors: {$get_first: '$bund.authors'}, title: {$get_first: '$bund.title'}, year: {$get_first: '$bund.year'},
-        linked_papers_topics: {$push: '$cont.linked_papers_topics'},
-        linked_papers_ngrams: {$push: '$cont.linked_papers_ngrams'},
-        }},
-    {$sort: {cnt: -1}},
-    """
-    icont = cont['cont']
-    ngramms = icont.get('linked_papers_ngrams')
-    bundles = [
-      dict(
-        bundle=b['_id'], year=b['year'], title=b['title'],
-        authors=b.get('authors'))
-      for b in cont['bund']]
-    topics = icont['linked_papers_topics']
-    if probability:
-      topics = sorted(
-        [t for t in topics if get_probab(t) >= probability],
-        key=get_probab, reverse=True)
-    oauth = dict(cont_id=cont['_id'], bundles=bundles, topics=topics)
-    if ngramms:
-      ongs = sorted(
-        (
-          dict(ngramm=n, type=t, cnt=c)
-          for (t, n), c in (
-            (ngr['_id'].split('_'), ngr['cnt']) for ngr in ngramms)
-          if t == 'lemmas' and len(n.split()) == 2
-        ),
-        key=lambda o: (-o['cnt'], o['type'], o['ngramm'])
-      )
-      oauth.update(ngramms=ongs[:5])
-    out_bund.append(oauth)
-  '''
   pipeline = [
     {'$match': {'exact': {'$exists': True}}}, {
     '$project': {'prefix': False, 'suffix': False, 'exact': False, }},
@@ -593,57 +531,83 @@ async def _ref_auth4ngramm_tops(request: web.Request) -> web.StreamResponse:
   app = request.app
   mdb = app['db']
 
+  topn = getreqarg_topn(request)
+  probability = getreqarg_probability(request)
+
   contexts:Collection = mdb.contexts
 
-  a_pipeline = _get_refauthors_pipeline()
-  a_pipeline += [{'$match': {'cits': 5}}]
-
-  out_acont = []
-  ref_authors = frozenset(
-    [o['author'] async for o in contexts.aggregate(a_pipeline)])
-  async for cont in contexts.aggregate([
-    {'$match': {'exact': {'$exists': True}}},
-    {'$project': {
-      'prefix': False, 'suffix': False, 'exact': False,
-      'linked_papers_topics': False, 'linked_papers_ngrams': False}},
+  out_bund = []
+  pipeline = [
+    {'$match': {'exact': {'$exists': True}}}, {
+    '$project': {'prefix': False, 'suffix': False, 'exact': False, }},
     {'$unwind': '$bundles'},
     {'$match': {'bundles': {'$ne': 'nUSJrP'}}},
     {'$lookup': {
       'from': 'bundles', 'localField': 'bundles', 'foreignField': '_id',
-      'as': 'bun'}},
-    {'$unwind': '$bun'},
-    {'$unwind': '$bun.authors'},
-    {'$match': {'bun.authors': {'$in': list(ref_authors)}}},
+      'as': 'bundle'}},
+    {'$unwind': '$bundle'},
+    {'$unwind': '$bundle.authors'},
     {'$group': {
-      '_id': '$_id', 'cnt': {'$sum': 1},
-      'authors': {'$addToSet': '$bun.authors'}}},
-    {'$sort': {'cnt': -1, '_id': 1}},
-    {'$lookup': {
-      'from': 'contexts', 'localField': '_id', 'foreignField': '_id',
-      'as': 'cont'}},
+      '_id': '$bundle.authors', 'pubs': {'$addToSet': '$pub_id'},
+      'conts': {'$addToSet': {
+        'cid': '$_id', 'topics': '$linked_papers_topics',
+        'ngrams': '$linked_papers_ngrams'}}}},
     {'$project': {
-      'cont.prefix': False, 'cont.suffix': False, 'cont.exact': False, }},
-    {'$unwind': '$cont'},
-  ]):
-    icont = cont['cont']
-    ngramms = icont.get('linked_papers_ngrams')
-    oauth = dict(
-      cont_id=cont['_id'], ref_authors=cont['authors'],
-      topics=icont['linked_papers_topics'])
-    if ngramms:
-      ongs = sorted(
-        (
-          dict(ngramm=n, type=t, cnt=c)
-          for (t, n), c in (
-            (ngr['_id'].split('_'), ngr['cnt']) for ngr in ngramms)
-          if t == 'lemmas' and len(n.split()) == 2
-        ),
-        key=lambda o: (-o['cnt'], o['type'], o['ngramm'])
-      )
-      oauth.update(ngramms=ongs[:5])
-    out_acont.append(oauth)
+      '_id': False,
+      'aurhor': '$_id', 'cits': {'$size': '$conts'}, 'pubs': {'$size': '$pubs'},
+      'pubs_ids': '$pubs', 'conts': '$conts',
+      'total_cits': '$bundle.total_cits', 'total_pubs': '$bundle.total_pubs',
+      'year': '$bundle.year', 'authors': '$bundle.authors',
+      'title': '$bundle.title',}},
+    {'$sort': {'cits': -1, 'pubs': -1, 'title': 1}},
+  ]
+  if topn:
+    pipeline += [{'$limit': topn}]
 
-  out = out_acont
+  get_probab = itemgetter('probability')
+  get_first = itemgetter(0)
+  get_second = itemgetter(1)
+  get_topic = itemgetter('_id', 'probability')
+  def topic_stat(it_tp):
+    it_tp = tuple(it_tp)
+    probabs = tuple(map(get_second, it_tp))
+    return dict(
+      count=len(it_tp),)
+      # probability_avg=mean(probabs),
+      # probability_pstdev=pstdev(probabs))
+  get_ngr = itemgetter('_id', 'cnt')
+  get_count = itemgetter('count')
+  async for cont in contexts.aggregate(pipeline):
+    conts = cont.pop('conts')
+
+    cont_ids = map(itemgetter('cid'), conts)
+
+    topics = chain.from_iterable(map(itemgetter('topics'), conts))
+    # удалять топики < 0.5
+    topics = ((t, p) for t, p in map(get_topic, topics) if p >= probability)
+    topics = (
+      dict(topic=t, **topic_stat(it_tp))
+      for t, it_tp in groupby(sorted(topics, key=get_first), key=get_first))
+    topics = sorted(topics, key=get_count, reverse=True)
+
+    get_ngrs = lambda cont: cont.get('ngrams') or ()
+    ngrams = chain.from_iterable(map(get_ngrs, conts))
+    # только 2-grams и lemmas
+    ngrams = (
+      (n.split('_', 1)[-1].split(), c)
+      for n, c in map(get_ngr, ngrams) if n.startswith('lemmas_'))
+    ngrams = ((' '.join(n), c) for n, c in ngrams if len(n) == 2)
+    ngrams = (
+      dict(ngramm=n, count=sum(map(get_second, it_nc)))
+      for n, it_nc in groupby(sorted(ngrams, key=get_first), key=get_first))
+    ngrams = sorted(ngrams, key=get_count, reverse=True)
+    ngrams = islice(ngrams, 10)
+    cont.update(
+      cont_ids=tuple(cont_ids),
+      topics=tuple(topics),
+      ngrams=tuple(ngrams))
+    out_bund.append(cont)
+  out = out_bund
 
   return json_response(out)
 
