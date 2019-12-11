@@ -567,7 +567,8 @@ async def _req_bund4ngramm_tops(request: web.Request) -> web.StreamResponse:
       for t, it_tp in groupby(sorted(topics, key=get_first), key=get_first))
     topics = sorted(topics, key=get_count, reverse=True)
 
-    ngrams = chain.from_iterable(map(itemgetter('ngrams'), conts))
+    get_ngrs = lambda cont: cont.get('ngrams') or ()
+    ngrams = chain.from_iterable(map(get_ngrs, conts))
     # только 2-grams и lemmas
     ngrams = (
       (n.split('_', 1)[-1].split(), c)
