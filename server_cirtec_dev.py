@@ -73,6 +73,9 @@ def create_srv():
   add_get('/cirtec_dev/pos_neg/ngramms/', _req_pos_neg_ngramms)
   add_get('/cirtec_dev/pos_neg/cocitauthors/', _req_pos_neg_cocitauthors)
   add_get('/cirtec_dev/frags/pos_neg/contexts/', _req_frags_pos_neg_contexts)
+  add_get(
+    '/cirtec_dev/frags/pos_neg/cocitauthors/cocitauthors/',
+    _req_frags_pos_neg_cocitauthors2)
 
 
   app['conf'] = conf
@@ -1194,6 +1197,99 @@ async def _req_frags_pos_neg_contexts(request: web.Request) -> web.StreamRespons
   contexts = mdb.contexts
   curs = contexts.aggregate(pipeline)
   out = [doc async for doc in curs]
+
+  return json_response(out)
+
+
+async def _req_frags_pos_neg_cocitauthors2(
+  request: web.Request
+) -> web.StreamResponse:
+  """2.4.2. Со-цитируемые авторы, распределение тональности их
+    со-цитирований и распределение по 5-ти фрагментам
+    - для каждой пары со-цитируемых авторов показать распределение классов
+    тональности контекстов, в которых эта пара со-цитируется и
+    распределение этих контекстов по 5-ти фрагментам
+  """
+  app = request.app
+  mdb = app['db']
+
+  topn = getreqarg_topn(request)
+
+
+  pipeline = [
+    {'$match': {
+      'positive_negative': {'$exists': True},
+      'cocit_authors': {'$exists': True}}},
+    {'$project': {
+      'pub_id': True, 'positive_negative': True, 'cocit_authors': True,
+      'frag_num': True}},
+    {'$lookup': {
+      'from': 'publications', 'localField': 'pub_id', 'foreignField': '_id',
+      'as': 'pub'}},
+    {'$unwind': '$pub'},
+    {'$match': {'pub.uni_authors': 'Sergey-Sinelnikov-Murylev'}},
+    {'$project': {'pub': False}},
+    {'$unwind': '$cocit_authors'},
+    {'$lookup': {
+      'from': 'contexts', 'localField': '_id', 'foreignField': '_id',
+      'as': 'cont'}},
+    {'$project': {
+      'pub_id': True, 'positive_negative': True, 'cocit_authors': True,
+      'frag_num': True, 'cont.cocit_authors': True}},
+    {'$unwind': '$cont'},
+    {'$unwind': '$cont.cocit_authors'},
+    {'$match': {'$expr': {'$ne': ['$cocit_authors', '$cont.cocit_authors']}}},
+    {'$group': {
+      '_id': {
+        'cocitauthor1': {'$cond': [
+          {'$gte': ['$cocit_authors', '$cont.cocit_authors'],},
+          '$cont.cocit_authors', '$cocit_authors']},
+        'cocitauthor2': {'$cond': [
+          {'$gte': ['$cocit_authors', '$cont.cocit_authors'],},
+          '$cocit_authors', '$cont.cocit_authors']},
+        'cont_id': '$_id'},
+      'cont': {'$first': {
+        'pub_id': '$pub_id', 'frag_num': '$frag_num',
+        'positive_negative': '$positive_negative'}},}},
+    {'$sort': {'_id': 1}},
+    {'$group': {
+      '_id': {
+        'cocitauthor1': '$_id.cocitauthor1',
+        'cocitauthor2': '$_id.cocitauthor2'},
+      'count': {'$sum': 1},
+      'conts': {'$push': {
+        'cont_id': '$_id.cont_id', 'pub_id': '$cont.pub_id',
+        'frag_num': '$cont.frag_num',
+        'positive_negative': '$cont.positive_negative',},},}},
+    {'$sort': {'count': -1, '_id': 1}},
+    {'$project': {
+      '_id': False,
+      'cocitpair': {
+        'author1': '$_id.cocitauthor1', 'author2': '$_id.cocitauthor2'},
+      'count': '$count', 'conts': '$conts', }},
+  ]
+  if topn:
+    pipeline += [{'$limit': topn}]
+
+  contexts = mdb.contexts
+  curs = contexts.aggregate(pipeline)
+  # out = [doc async for doc in curs]
+  out = []
+  async for doc in curs:
+    cocitpair = doc['cocitpair']
+    conts = doc['conts']
+    pub_ids = tuple(frozenset(map(itemgetter('pub_id'), conts)))
+    cont_ids = tuple(map(itemgetter('cont_id'), conts))
+    frags = Counter(map(itemgetter('frag_num'), conts))
+    classif = tuple(map(itemgetter('positive_negative'), conts))
+    neutral = sum(1 for v in classif  if v['val'] == 0)
+    positive = sum(1 for v in classif if v['val'] > 0)
+    negative = sum(1 for v in classif if v['val'] < 0)
+    out.append(dict(
+      cocitpair=tuple(cocitpair.values()),
+      cont_cnt=len(cont_ids), pub_cnt=len(pub_ids),
+      frags=dict(sorted(frags.items())), neutral=neutral, positive=positive,
+      negative=negative, pub_ids=pub_ids, cont_ids=cont_ids))
 
   return json_response(out)
 
