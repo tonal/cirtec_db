@@ -66,12 +66,13 @@ def create_srv():
   add_get('/cirtec_dev/pos_neg/ref_bundles/', _req_pos_neg_refbundles)
   add_get('/cirtec_dev/pos_neg/ref_authors/', _req_pos_neg_refauthors)
   add_get('/cirtec_dev/frags/ref_bundles/', _req_frags_refbundles)
-  add_get('/cirtec_dev/frags/ref_authors/', _req_frags_neg_refauthors)
+  add_get('/cirtec_dev/frags/ref_authors/', _req_frags_refauthors)
   add_get('/cirtec_dev/publications/', _req_publications)
   add_get('/cirtec_dev/pos_neg/contexts/', _req_pos_neg_contexts)
   add_get('/cirtec_dev/pos_neg/topics/', _req_pos_neg_topics)
   add_get('/cirtec_dev/pos_neg/ngramms/', _req_pos_neg_ngramms)
   add_get('/cirtec_dev/pos_neg/cocitauthors/', _req_pos_neg_cocitauthors)
+  add_get('/cirtec_dev/frags/pos_neg/contexts/', _req_frags_pos_neg_contexts)
 
 
   app['conf'] = conf
@@ -721,7 +722,7 @@ async def _req_frags_refbundles(request: web.Request) -> web.StreamResponse:
 
 
 
-async def _req_frags_neg_refauthors(request: web.Request) -> web.StreamResponse:
+async def _req_frags_refauthors(request: web.Request) -> web.StreamResponse:
   app = request.app
   mdb = app['db']
 
@@ -1143,6 +1144,51 @@ async def _req_pos_neg_cocitauthors(request: web.Request) -> web.StreamResponse:
       '_id': False, 'class_pos_neg': '$_id',
       'cocitauthors': {'$slice': ['$cocitauthor', topn]} }},
     {'$sort': {'class_pos_neg': -1}},
+  ]
+
+  contexts = mdb.contexts
+  curs = contexts.aggregate(pipeline)
+  out = [doc async for doc in curs]
+
+  return json_response(out)
+
+
+async def _req_frags_pos_neg_contexts(request: web.Request) -> web.StreamResponse:
+  """2.3.6. Распределение тональности контекстов по 5-ти фрагментам
+    - для каждого класса тональности показать распределение
+    соответствующих контектсов по 5-ти фрагментам
+  """
+  app = request.app
+  mdb = app['db']
+
+  pipeline = [
+    {'$match': {
+      'positive_negative': {'$exists': True}, 'frag_num': {'$exists': True}}},
+    {'$project': {'pub_id': True, 'positive_negative': True, 'frag_num': True}},
+    {'$lookup': {
+      'from': 'publications', 'localField': 'pub_id', 'foreignField': '_id',
+      'as': 'pub'}},
+    {'$unwind': '$pub'},
+    {'$match': {'pub.uni_authors': 'Sergey-Sinelnikov-Murylev'}},
+    {'$project': {'pub': False}},
+    {'$group': {
+      '_id': {
+        'class_pos_neg': {
+        '$arrayElemAt': [
+          ['neutral', 'positive', 'positive', 'negative', 'negative'],
+          '$positive_negative.val']},
+        'frag_num': '$frag_num'},
+      'pub_ids': {'$addToSet': '$pub_id'},
+      'cont_ids': {'$addToSet': '$_id'}}},
+    {'$sort': {'_id.class_pos_neg': -1}},
+    {'$group': {
+      '_id': '$_id.frag_num',
+      'classes': {'$push': {
+          'pos_neg': '$_id.class_pos_neg',
+          'pub_ids': '$pub_ids', 'cont_ids': '$cont_ids'}}}},
+    {'$project': {
+      '_id': False, 'frag_num': '$_id', 'classes': '$classes'}},
+    {'$sort': {'frag_num': 1}},
   ]
 
   contexts = mdb.contexts

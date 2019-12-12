@@ -24,8 +24,8 @@ idna==2.8                 # via requests, yarl
 joblib==0.14.1
 lxml==4.4.2
 more-itertools==8.0.2
-motor==2.0.0
-multidict==4.7.0          # via aiohttp, yarl
+motor==2.1.0
+multidict==4.7.1          # via aiohttp, yarl
 numpy==1.17.4             # via pandas, scikit-learn, scipy
 pandas==0.25.3
 parsel==1.5.2
