@@ -92,19 +92,24 @@ def _add_old_reqs(add_get):
   #   Распределение цитирований по 5-ти фрагментам для отдельных публикаций. #заданного автора.
   add_get(r'/cirtec_dev/frags/publications/', _req_frags_pubs)
   #   Кросс-распределение «со-цитируемые авторы» по публикациям
-  add_get(r'/cirtec_dev/publ/publications/cocitauthors/',
+  add_get(
+    r'/cirtec_dev/publ/publications/cocitauthors/',
     _req_publ_publications_cocitauthors)
   #   Кросс-распределение «фразы из контекстов цитирований» по публикациям
-  add_get(r'/cirtec_dev/publ/publications/ngramms/', _req_publ_publications_ngramms)
+  add_get(
+    r'/cirtec_dev/publ/publications/ngramms/', _req_publ_publications_ngramms)
   #   Кросс-распределение «топики контекстов цитирований» по публикациям
-  add_get(r'/cirtec_dev/publ/publications/topics/', _req_publ_publications_topics)
+  add_get(
+    r'/cirtec_dev/publ/publications/topics/', _req_publ_publications_topics)
   #   Распределение «со-цитируемые авторы» по 5-ти фрагментам
   add_get(r'/cirtec_dev/frags/cocitauthors/', _req_frags_cocitauthors)
   #   Кросс-распределение «5 фрагментов» - «со-цитируемые авторы»
-  add_get(r'/cirtec_dev/frags/cocitauthors/cocitauthors/',
+  add_get(
+    r'/cirtec_dev/frags/cocitauthors/cocitauthors/',
     _req_frags_cocitauthors_cocitauthors)
   #   Кросс-распределение «публикации» - «со-цитируемые авторы»
-  add_get(r'/cirtec_dev/publ/cocitauthors/cocitauthors/',
+  add_get(
+    r'/cirtec_dev/publ/cocitauthors/cocitauthors/',
     _req_publ_cocitauthors_cocitauthors)
   #   Распределение «5 фрагментов» - «фразы из контекстов цитирований»
   add_get(r'/cirtec_dev/frags/ngramms/', _req_frags_ngramm)
@@ -119,23 +124,28 @@ def _add_old_reqs(add_get):
   #   Кросс-распределение «публикации» - «топики контекстов цитирований»
   add_get(r'/cirtec_dev/publ/topics/topics/', _req_publ_topics_topics)
   # Б Кросс-распределение «со-цитирования» - «фразы из контекстов цитирований»
-  add_get(r'/cirtec_dev/frags/cocitauthors/ngramms/',
+  add_get(
+    r'/cirtec_dev/frags/cocitauthors/ngramms/',
     _req_frags_cocitauthors_ngramms)
   #   Кросс-распределение «со-цитирования» - «топики контекстов цитирований»
-  add_get(r'/cirtec_dev/frags/cocitauthors/topics/', _req_frags_cocitauthors_topics)
+  add_get(
+    r'/cirtec_dev/frags/cocitauthors/topics/', _req_frags_cocitauthors_topics)
   # В Кросс-распределение «фразы» - «со-цитирования»
-  add_get(r'/cirtec_dev/frags/ngramms/cocitauthors/',
+  add_get(
+    r'/cirtec_dev/frags/ngramms/cocitauthors/',
     _req_frags_ngramms_cocitauthors)
   #   Кросс-распределение «фразы» - «топики контекстов цитирований»
   add_get(r'/cirtec_dev/frags/ngramms/topics/', _req_frags_ngramms_topics)
   # Г Кросс-распределение «топики» - «со-цитирования»
-  add_get(r'/cirtec_dev/frags/topics/cocitauthors/', _req_frags_topics_cocitauthors)
+  add_get(
+    r'/cirtec_dev/frags/topics/cocitauthors/', _req_frags_topics_cocitauthors)
   #   Кросс-распределение «топики» - «фразы»
   add_get(r'/cirtec_dev/frags/topics/ngramms/', _req_frags_topics_ngramms)
   # Топ N со-цитируемых авторов
   add_get(r'/cirtec_dev/top/cocitauthors/', _req_top_cocitauthors)
   # Топ N со-цитируемых авторов по публикациям
-  add_get(r'/cirtec_dev/top/cocitauthors/publications/', _req_top_cocitauthors_pubs)
+  add_get(
+    r'/cirtec_dev/top/cocitauthors/publications/', _req_top_cocitauthors_pubs)
   # Топ N фраз
   add_get(r'/cirtec_dev/top/ngramms/', _req_top_ngramm)
   # Топ N фраз по публикациям

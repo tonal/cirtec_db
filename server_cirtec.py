@@ -19,8 +19,16 @@ from server_requests import (
   _req_publ_ngramm_ngramm, _req_frags_ngramms_cocitauthors,
   _req_frags_ngramms_topics, _req_frags_topics, _req_frags_topics_topics,
   _req_publ_topics_topics, _req_frags_topics_cocitauthors,
-  _req_frags_topics_ngramms, _req_top_ngramm, _req_top_ngramm_pubs,
-  _req_top_topics, _req_top_topics_pubs, _reg_cnt_ngramm, _reg_cnt_pubs_ngramm)
+  _req_frags_topics_ngramms, _reg_cnt_ngramm, _reg_cnt_pubs_ngramm)
+from server_requests2 import (
+  _req_top_refbundles, _req_top_refauthors, _req_pubs_refauthors,
+  _req_auth_bund4ngramm_tops, _req_bund4ngramm_tops, _ref_auth4ngramm_tops,
+  _req_pos_neg_pubs, _req_pos_neg_refbundles, _req_pos_neg_refauthors,
+  _req_frags_refbundles, _req_frags_refauthors, _req_top_ngramm_pubs,
+  _req_top_ngramm, _req_publications, _req_top_topics, _req_top_topics_pubs,
+  _req_pos_neg_contexts, _req_pos_neg_ngramms, _req_pos_neg_topics,
+  _req_pos_neg_cocitauthors, _req_frags_pos_neg_contexts,
+  _req_frags_pos_neg_cocitauthors2)
 from server_utils import _init_logging
 from utils import load_config
 
@@ -46,6 +54,39 @@ def create_srv():
   router = app.router
   add_get = partial(router.add_get, allow_head=False)
 
+  _add_old_reqs(add_get)
+
+  add_get('/cirtec/top/ref_bundles/', _req_top_refbundles)
+  add_get('/cirtec/top/ref_authors/', _req_top_refauthors)
+  add_get('/cirtec/pubs/ref_authors/', _req_pubs_refauthors)
+  add_get('/cirtec/ref_auth_bund4ngramm_tops/', _req_auth_bund4ngramm_tops)
+  add_get('/cirtec/ref_bund4ngramm_tops/', _req_bund4ngramm_tops)
+  add_get('/cirtec/ref_auth4ngramm_tops/', _ref_auth4ngramm_tops)
+  add_get('/cirtec/pos_neg/pubs/', _req_pos_neg_pubs)
+  add_get('/cirtec/pos_neg/ref_bundles/', _req_pos_neg_refbundles)
+  add_get('/cirtec/pos_neg/ref_authors/', _req_pos_neg_refauthors)
+  add_get('/cirtec/frags/ref_bundles/', _req_frags_refbundles)
+  add_get('/cirtec/frags/ref_authors/', _req_frags_refauthors)
+  add_get('/cirtec/publications/', _req_publications)
+  add_get('/cirtec/pos_neg/contexts/', _req_pos_neg_contexts)
+  add_get('/cirtec/pos_neg/topics/', _req_pos_neg_topics)
+  add_get('/cirtec/pos_neg/ngramms/', _req_pos_neg_ngramms)
+  add_get('/cirtec/pos_neg/cocitauthors/', _req_pos_neg_cocitauthors)
+  add_get('/cirtec/frags/pos_neg/contexts/', _req_frags_pos_neg_contexts)
+  add_get(
+    '/cirtec/frags/pos_neg/cocitauthors/cocitauthors/',
+    _req_frags_pos_neg_cocitauthors2)
+
+
+  app['conf'] = conf
+  app['tasks'] = set()
+  app.cleanup_ctx.append(_db_context)
+  app.on_cleanup.append(_clean_tasks)
+
+  return app, conf
+
+
+def _add_old_reqs(add_get):
   # А Суммарное распределение цитирований по 5-ти фрагментам для всех публикаций
   add_get(r'/cirtec/frags/', _req_frags)
   #   Распределение цитирований по 5-ти фрагментам для отдельных публикаций. #заданного автора.
@@ -114,13 +155,6 @@ def create_srv():
 
   add_get(r'/cirtec/cnt/ngramms/', _reg_cnt_ngramm)
   add_get(r'/cirtec/cnt/publications/ngramms/', _reg_cnt_pubs_ngramm)
-
-  app['conf'] = conf
-  app['tasks'] = set()
-  app.cleanup_ctx.append(_db_context)
-  app.on_cleanup.append(_clean_tasks)
-
-  return app, conf
 
 
 def _load_conf() -> dict:

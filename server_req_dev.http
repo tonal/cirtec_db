@@ -67,3 +67,6 @@ GET http://localhost:8668/cirtec_dev/frags/pos_neg/contexts/
 GET http://localhost:8668/cirtec_dev/frags/pos_neg/cocitauthors/cocitauthors/
 
 ###
+GET http://localhost:8668/cirtec_dev/frags/topics/topics/
+
+###
