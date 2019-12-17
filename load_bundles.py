@@ -15,6 +15,7 @@ from pymongo.collection import Collection
 from pymongo.database import Database
 from pymongo.errors import DuplicateKeyError
 
+from load_utils import rename_new_field
 from utils import load_config, norm_spaces
 
 # BUNDLES:str = 'linked_papers_base.json'
@@ -40,8 +41,6 @@ def main():
 
 def update_bundles(mdb:Database, for_del:int, bundles:str) -> Tuple[Collection]:
   """Обновление коллекции bundles и дополнение в публикации и контексты"""
-  print(
-    'update_bundles: Обновление коллекции bundles и дополнение в публикации и контексты')
   mbnds = mdb['bundles']
   mbnds.update_many({}, {'$set': {'for_del': for_del}})
   mbnds_update = partial(mbnds.update_one, upsert=True)
@@ -49,7 +48,6 @@ def update_bundles(mdb:Database, for_del:int, bundles:str) -> Tuple[Collection]:
   mcont_update = partial(mcont.update_one, upsert=True)
   mpubs = mdb['publications']
   mpubs_insert = mpubs.insert_one
-  mpubs = mdb['publications']
   mpubs_update = partial(mpubs.update_one, upsert=True)
 
   # topics = json.load(open(bundles, encoding='utf-8'))
@@ -98,7 +96,7 @@ def update_bundles(mdb:Database, for_del:int, bundles:str) -> Tuple[Collection]:
           bundle_doc.update(total_pubs=total_pubs)
         mbnds_update(
           dict(_id=bundle),{
-            '$set': bundle_doc, '$addToSet': {'bibs': bib_bib},
+            '$set': bundle_doc, '$addToSet': {'bibs_new': bib_bib},
             '$unset': {'for_del': 1}})
       doc_refs.append(ref_doc)
 
@@ -118,12 +116,17 @@ def update_bundles(mdb:Database, for_del:int, bundles:str) -> Tuple[Collection]:
           mcont_update(
             dict(_id=iref), {
             '$set': {'pub_id': rpub_id, 'start': fast_int(rstart)},
-            '$addToSet': {'bundles': bundle}, '$unset': {'for_del': 1}})
+            '$addToSet': {'bundles_new': bundle}, '$unset': {'for_del': 1}})
         cache_conts.add(iref)
 
     mpubs_update(
       dict(_id=pub_id), {'$set': dict(refs=doc_refs), '$unset': {'for_del': 1}})
+
     print(pub_id, len(doc_refs))
+
+  rename_new_field(mbnds, 'bibs')
+  rename_new_field(mcont, 'bundles')
+
   return (mbnds,)
 
 

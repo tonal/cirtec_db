@@ -14,6 +14,7 @@ from pymongo import MongoClient
 from pymongo.database import Database
 from pymongo.errors import DuplicateKeyError
 
+from load_utils import rename_new_field
 from utils import load_config
 
 
@@ -36,9 +37,8 @@ def main():
     print(f'delete {mtops.name}:', r.deleted_count)
 
 
-def update_topics(mdb:Database, for_del:int, upi_topics):
+def update_topics(mdb:Database, for_del:int, uri_topics:str):
   """Обновление коллекции topics и дополнение в контексты"""
-  print('update_topics: Обновление коллекции topics и дополнение в контексты')
 
   mtops = mdb['topics']
   mtops_update = partial(mtops.update_one, upsert=True)
@@ -48,8 +48,8 @@ def update_topics(mdb:Database, for_del:int, upi_topics):
   mtops.update_many({}, {'$set': {'for_del': for_del}})
   mcont.update_many({}, {'$unset': {'linked_papers_topics': 1}})
 
-  # topics = json.load(open(upi_topics, encoding='utf-8'))
-  with urlopen(upi_topics) as f:
+  # topics = json.load(open(uri_topics, encoding='utf-8'))
+  with urlopen(uri_topics) as f:
     topics = json.load(f)
 
   tlp = topics['linked_papers']
@@ -72,9 +72,12 @@ def update_topics(mdb:Database, for_del:int, upi_topics):
     mcont_update(
       dict(_id=cont_id), {
       '$set': {'ref_num': int(num)}, '$addToSet': {
-        'linked_papers_topics': {
+        'linked_papers_topics_new': {
           '_id': topic, 'probability': float(probab)}}})
+
   print(i, len(cnts))
+
+  rename_new_field(mcont, 'linked_papers_topics')
 
   return (mtops,)
 

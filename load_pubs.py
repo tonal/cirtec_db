@@ -21,8 +21,8 @@ from pymongo.errors import DuplicateKeyError
 
 from utils import load_config, norm_spaces
 
-SOURCE_XML = 'http://cirtec.ranepa.ru/prl/groups/Sergey-Sinelnikov-Murylev/xml/linked_papers.xml'
-SOURCE_URL = 'http://cirtec.ranepa.ru/cgi/spadist4bundle.cgi?code=linked_papers&c=Sergey-Sinelnikov-Murylev'
+SOURCE_URL = 'http://onir2.ranepa.ru:8081/cgi/spadist4bundle.cgi?code=linked_papers&c=Sergey-Sinelnikov-Murylev'
+SOURCE_XML = 'http://onir2.ranepa.ru:8081/prl/groups/Sergey-Sinelnikov-Murylev/xml/linked_papers.xml'
 AUTHOR = 'Sergey-Sinelnikov-Murylev'
 
 re_start_stop = re.compile(
@@ -55,7 +55,6 @@ def update_pubs_conts(
   mdb:Database, for_del:int, cont_url:str, linked_papers_xml:str
 ) -> Tuple[Collection, ...]:
   """Обновление публикаций и контекстов"""
-  print('update_pubs_conts: Обновление публикаций и контекстов')
   mpubs:Collection = mdb['publications']
   mpubs_update = partial(mpubs.update_one, upsert=True)
   mcont:Collection = mdb['contexts']

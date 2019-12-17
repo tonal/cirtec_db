@@ -1,4 +1,5 @@
 # -*- codong: utf-8 -*-
+from typing import Optional
 
 
 def test_conf(conf):
@@ -7,7 +8,7 @@ def test_conf(conf):
   assert conf['srv_run_args']['port']
 
 
-async def req_tipn(client, url:str, topn:int):
+async def req_tipn(client, url:str, topn:Optional[int]):
   if topn:
     kwd = dict(params=dict(topn=str(topn)))
   else:

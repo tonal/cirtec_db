@@ -10,17 +10,23 @@ import json
 from operator import itemgetter
 from pathlib import Path
 from typing import Tuple, Sequence
+from urllib.parse import urljoin
+from urllib.request import urlopen
 
 from pymongo import MongoClient
 from pymongo.collection import Collection
 from pymongo.database import Database
 from pymongo.errors import DuplicateKeyError
 
+from load_utils import rename_new_field
 from utils import load_config
 
 
-NGRAM_TEMPL = '*-gram-result.json'
-NGRAM_DIR = [('l', 'lemmas')]
+NGRAM_ROOT:str = 'http://onir2.ranepa.ru:8081/prl/data/Sergey-Sinelnikov-Murylev/'
+NGRAM_DIR = (
+  ('l', 'lemmas'), ('no-l', 'nolemmas'),)
+NGRAM_TEMPL = '{nka}-gram-result.json'.format
+NKAS = (2, 3, 4, 5, 6)
 
 
 def main():
@@ -32,17 +38,16 @@ def main():
   with MongoClient(conf_mongo['uri'], compressors='snappy') as client:
     mdb = client[conf_mongo['db']] # 'cirtec'
 
-    col_gramms, = update_ngramms(mdb, for_del, NGRAM_DIR)
+    col_gramms, = update_ngramms(mdb, for_del, NGRAM_ROOT)
 
     r = col_gramms.delete_many({'for_del': for_del})
     print(f'delete {col_gramms.name}:', r.deleted_count)
 
 
 def update_ngramms(
-  mdb:Database, for_del:int, ngramm_paths:Sequence[Tuple[str, str]]
+  mdb:Database, for_del:int, ngramm_root:str
 ) -> Tuple[Collection]:
   """Обновление коллекции n_gramms и дополнение в контексты"""
-  print('update_ngramms: Обновление коллекции n_gramms и дополнение в контексты')
   col_gramms = mdb['n_gramms']
   col_gramms.update_many({}, {'$set': {'for_del': for_del}})
   ngrm_update = partial(col_gramms.update_one, upsert=True)
@@ -52,14 +57,23 @@ def update_ngramms(
   cnt = 0
   PREF = 'linked_papers_'
   PREF_LEN = len(PREF)
-  for (ngramm_path, obj_type) in ngramm_paths:
-    for fngram in Path(ngramm_path).glob(NGRAM_TEMPL):
-      nka = int(fngram.stem.split('-', 1)[0])
+  for (ngramm_path, obj_type) in NGRAM_DIR:
+    type_uri = urljoin(ngramm_root, f'{ngramm_path}/')
+    print(type_uri)
+    for nka in NKAS:
+      # nka = int(fngram.stem.split('-', 1)[0])
+      fname = NGRAM_TEMPL(nka=nka)
+      ngramms_uri = urljoin(type_uri, fname)
       # col_name = f'gramm_{nka}_{NGRAM_DIR}'
-      print(fngram, nka, obj_type)
+      # print(fngram, nka, obj_type)
+      print(ngramms_uri, nka, obj_type)
+      # continue
 
       ngram_doc = None
-      ngrams = json.load(fngram.open(encoding='utf-8'))
+      # ngrams = json.load(fngram.open(encoding='utf-8'))
+      with urlopen(ngramms_uri) as f:
+        ngrams = json.load(f)
+
       for title, doc in ngrams.items():
         all_cnt = doc['count']
         # print(' ', title, all_cnt)
@@ -76,7 +90,7 @@ def update_ngramms(
           mcont_update(dict(_id=cont_id), {
             '$set': {'pub_id': pub_id, 'start': start},
             '$addToSet': {
-              'linked_papers_ngrams': {'_id': ngr_id, 'cnt': gcnt}}})
+              'linked_papers_ngrams_new': {'_id': ngr_id, 'cnt': gcnt}}})
           lp_cnt += gcnt
         if not lp_cnt:
           continue
@@ -90,6 +104,9 @@ def update_ngramms(
           # return
       print(' ', cnt, ngram_doc)
   print(cnt)
+
+  rename_new_field(mcont, 'linked_papers_ngrams')
+
   return (col_gramms,)
 
 
