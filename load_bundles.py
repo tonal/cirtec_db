@@ -19,7 +19,6 @@ from load_utils import rename_new_field
 from utils import load_config, norm_spaces
 
 # BUNDLES:str = 'linked_papers_base.json'
-# BUNDLES:str = 'http://cirtec.repec.org/groups/authors/Sergey-Sinelnikov-Murylev/linked_papers_base.json'
 BUNDLES:str = 'http://onir2.ranepa.ru:8081/groups/authors/Sergey-Sinelnikov-Murylev/linked_papers_base.json'
 
 

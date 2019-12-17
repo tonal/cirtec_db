@@ -268,7 +268,7 @@ async def _req_bund4ngramm_tops(request: web.Request) -> web.StreamResponse:
   out_bund = []
   pipeline = [
     {'$match': {'exact': {'$exists': True}}}, {
-    '$project': {'prefix': False, 'suffix': False, 'exact': False, }},
+      '$project': {'prefix': False, 'suffix': False, 'exact': False, }},
     {'$unwind': '$bundles'},
     {'$match': {'bundles': {'$ne': 'nUSJrP'}}},
     {'$group': {
@@ -301,16 +301,18 @@ async def _req_bund4ngramm_tops(request: web.Request) -> web.StreamResponse:
     probabs = tuple(map(get_second, it_tp))
     return dict(
       count=len(it_tp),)
-      # probability_avg=mean(probabs),
-      # probability_pstdev=pstdev(probabs))
-  get_ngr = itemgetter('_id', 'cnt')
+    # probability_avg=mean(probabs),
+    # probability_pstdev=pstdev(probabs))
+  get_topics = lambda cont: cont.get('topics') or ()
   get_count = itemgetter('count')
+  get_ngrs = lambda cont: cont.get('ngrams') or ()
+  get_ngr = itemgetter('_id', 'cnt')
   async for cont in contexts.aggregate(pipeline):
     conts = cont.pop('conts')
 
     cont_ids = map(itemgetter('cid'), conts)
 
-    topics = chain.from_iterable(map(itemgetter('topics'), conts))
+    topics = chain.from_iterable(map(get_topics, conts))
     # удалять топики < 0.5
     topics = ((t, p) for t, p in map(get_topic, topics) if p >= probability)
     topics = (
@@ -318,7 +320,6 @@ async def _req_bund4ngramm_tops(request: web.Request) -> web.StreamResponse:
       for t, it_tp in groupby(sorted(topics, key=get_first), key=get_first))
     topics = sorted(topics, key=get_count, reverse=True)
 
-    get_ngrs = lambda cont: cont.get('ngrams') or ()
     ngrams = chain.from_iterable(map(get_ngrs, conts))
     # только 2-grams и lemmas
     ngrams = (
