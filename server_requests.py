@@ -340,54 +340,75 @@ async def _req_frags_cocitauthors_cocitauthors(
   mdb = app['db']
 
   topn = getreqarg_topn(request)
-  topn_cocitauthors: int = getreqarg_int(request, 'topn_cocitauthors')
 
+  pipeline = [
+    {'$match': {
+      'cocit_authors': {'$exists': True}, 'frag_num': {'$exists': True},}},
+    {'$project': {
+      'pub_id': True, 'cocit_authors': True, 'frag_num': True}},
+    {'$lookup': {
+      'from': 'publications', 'localField': 'pub_id', 'foreignField': '_id',
+      'as': 'pub'}},
+    {'$unwind': '$pub'},
+    {'$match': {'pub.uni_authors': 'Sergey-Sinelnikov-Murylev'}},
+    {'$project': {'pub': False}},
+    {'$unwind': '$cocit_authors'},
+    {'$lookup': {
+      'from': 'contexts', 'localField': '_id', 'foreignField': '_id',
+      'as': 'cont'}},
+    {'$project': {
+        'pub_id': True, 'cocit_authors': True, 'frag_num': True,
+        'cont.cocit_authors': True}},
+    {'$unwind': '$cont'},
+    {'$unwind': '$cont.cocit_authors'},
+    {'$match': {'$expr': {'$ne': ['$cocit_authors', '$cont.cocit_authors']}}},
+    {'$group': {
+      '_id': {
+        'cocitauthor1': {
+          '$cond': [{'$gte': ['$cocit_authors', '$cont.cocit_authors'], },
+            '$cont.cocit_authors', '$cocit_authors']},
+        'cocitauthor2': {
+          '$cond': [{'$gte': ['$cocit_authors', '$cont.cocit_authors'], },
+            '$cocit_authors', '$cont.cocit_authors']},
+        'cont_id': '$_id'},
+      'cont': {
+        '$first': {
+          'pub_id': '$pub_id', 'frag_num': '$frag_num', }}, }},
+    {'$sort': {'_id': 1}},
+    {'$group': {
+      '_id': {
+        'cocitauthor1': '$_id.cocitauthor1',
+        'cocitauthor2': '$_id.cocitauthor2'},
+      'count': {'$sum': 1},
+      'conts': {
+        '$push': {
+          'cont_id': '$_id.cont_id', 'pub_id': '$cont.pub_id',
+          'frag_num': '$cont.frag_num', }, }, }},
+    {'$sort': {'count': -1, '_id': 1}},
+    {'$project': {
+      '_id': False,
+      'cocitpair': {
+        'author1': '$_id.cocitauthor1', 'author2': '$_id.cocitauthor2'},
+      'count': '$count', 'conts': '$conts', }},
+  ]
+  if topn:
+    pipeline += [{'$limit': topn}]
   contexts = mdb.contexts
-  topN = await _get_topn_cocit_authors(contexts, topn)
+  curs = contexts.aggregate(pipeline)
+  out = []
 
-  exists = ()
-  if topn_cocitauthors:
-    if not topn or topn >= topn_cocitauthors:
-      exists = frozenset(map(itemgetter(0), topN[:topn_cocitauthors]))
-    else:
-      topNa = await _get_topn_cocit_authors(contexts, topn_cocitauthors)
-      exists = frozenset(map(itemgetter(0), topNa))
+  async for doc in curs:
+    cocitpair = doc['cocitpair']
+    conts = doc['conts']
+    pub_ids = tuple(frozenset(map(itemgetter('pub_id'), conts)))
+    cont_ids = tuple(map(itemgetter('cont_id'), conts))
+    frags = Counter(map(itemgetter('frag_num'), conts))
+    out.append(dict(
+      cocitpair=tuple(cocitpair.values()),
+      cont_cnt=len(cont_ids), pub_cnt=len(pub_ids),
+      frags=dict(sorted(frags.items())), pub_ids=pub_ids, cont_ids=cont_ids))
 
-  out_dict = {}
-  for i, (cocitauthor, cnt) in enumerate(topN, 1):
-    frags = Counter()
-    coaut = defaultdict(Counter)
-    async for doc in contexts.find(
-      {'cocit_authors': cocitauthor, 'frag_num': {'$gt': 0}},
-      projection=['frag_num', 'cocit_authors']
-    ).sort('frag_num'):
-      # print(i, doc)
-      if exists:
-        coauthors = frozenset(
-          c for c in doc['cocit_authors'] if c != cocitauthor and c in exists)
-      else:
-        coauthors = frozenset(
-          c for c in doc['cocit_authors'] if c != cocitauthor)
-      if not coauthors:
-        continue
-      fnum = doc['frag_num']
-      frags[fnum] += 1
-      for ca in coauthors:
-        coaut[ca][fnum] += 1
-
-    if not coaut:
-      continue
-
-    out_cocitauthors = {}
-    out_dict[cocitauthor] = dict(
-      sum=cnt, frags=frags, cocitauthors=out_cocitauthors)
-
-    for j, (co, cnts) in enumerate(
-      sorted(coaut.items(), key=lambda kv: (-sum(kv[1].values()), kv[0])), 1
-    ):
-      out_cocitauthors[co] = dict(frags=cnts, sum=sum(cnts.values()))
-
-  return json_response(out_dict)
+  return json_response(out)
 
 
 async def _req_publ_cocitauthors_cocitauthors(
