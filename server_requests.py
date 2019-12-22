@@ -3,6 +3,7 @@
 Запросы сделанные в первую итерацию
 """
 from collections import Counter, defaultdict
+import logging
 from operator import itemgetter
 from typing import Optional, Sequence, Union, Tuple
 
@@ -10,6 +11,9 @@ from aiohttp import web
 from pymongo.collection import Collection
 
 from server_utils import json_response, getreqarg_topn, getreqarg_int, getreqarg
+
+
+_logger = logging.getLogger('cirtec')
 
 
 async def _req_frags(request:web.Request) -> web.StreamResponse:

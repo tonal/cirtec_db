@@ -5,6 +5,7 @@
 
 from collections import Counter
 from itertools import chain, groupby, islice
+import logging
 from operator import itemgetter
 
 from aiohttp import web
@@ -14,6 +15,9 @@ from pymongo.collection import Collection
 from server_utils import (
   getreqarg_topn, json_response, getreqarg_probability,
   getreqarg_nka, getreqarg_ltype)
+
+
+_logger = logging.getLogger('cirtec')
 
 
 async def _req_top_refbundles(request: web.Request) -> web.StreamResponse:
@@ -572,7 +576,7 @@ async def _req_top_ngramm_pubs(request: web.Request) -> web.StreamResponse:
   ltype = await getreqarg_ltype(request)
 
   if nka or ltype:
-    pipeline = [
+    pipeline += [
       {'$match': {
         f'ngrm.{f}': v for f, v in (('nka', nka), ('type', ltype)) if v}}]
 
@@ -592,6 +596,8 @@ async def _req_top_ngramm_pubs(request: web.Request) -> web.StreamResponse:
 
   if topn:
     pipeline += [{'$limit': topn}]
+
+  # _logger.debug('pipeline: %s', pipeline)
 
   contexts = mdb.contexts
   get_as_tuple = itemgetter('_id', 'count', 'conts')
