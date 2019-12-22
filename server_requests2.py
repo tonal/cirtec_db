@@ -378,10 +378,10 @@ async def _ref_auth4ngramm_tops(request: web.Request) -> web.StreamResponse:
   if topn:
     pipeline += [{'$limit': topn}]
 
-  get_probab = itemgetter('probability')
+  get_topics = lambda c: c.get('topics', ())
+  get_topic = itemgetter('_id', 'probability')
   get_first = itemgetter(0)
   get_second = itemgetter(1)
-  get_topic = itemgetter('_id', 'probability')
   def topic_stat(it_tp):
     it_tp = tuple(it_tp)
     probabs = tuple(map(get_second, it_tp))
@@ -389,14 +389,14 @@ async def _ref_auth4ngramm_tops(request: web.Request) -> web.StreamResponse:
       count=len(it_tp),)
       # probability_avg=mean(probabs),
       # probability_pstdev=pstdev(probabs))
-  get_ngr = itemgetter('_id', 'cnt')
   get_count = itemgetter('count')
+  get_ngr = itemgetter('_id', 'cnt')
   async for cont in contexts.aggregate(pipeline):
     conts = cont.pop('conts')
 
     cont_ids = map(itemgetter('cid'), conts)
 
-    topics = chain.from_iterable(map(itemgetter('topics'), conts))
+    topics = chain.from_iterable(map(get_topics, conts))
     # удалять топики < 0.5
     topics = ((t, p) for t, p in map(get_topic, topics) if p >= probability)
     topics = (
