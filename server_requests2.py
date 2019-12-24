@@ -12,6 +12,8 @@ from aiohttp import web
 from fastnumbers import fast_float
 from pymongo import ASCENDING
 from pymongo.collection import Collection
+
+from server_requests import get_ngramm_filter
 from server_utils import (
   getreqarg_topn, json_response, getreqarg_probability,
   getreqarg_nka, getreqarg_ltype)
@@ -576,9 +578,7 @@ async def _req_top_ngramm_pubs(request: web.Request) -> web.StreamResponse:
   ltype = getreqarg_ltype(request)
 
   if nka or ltype:
-    pipeline += [
-      {'$match': {
-        f'ngrm.{f}': v for f, v in (('nka', nka), ('type', ltype)) if v}}]
+    pipeline += [get_ngramm_filter(nka, ltype, 'ngrm')]
 
   if ltype:
     gident = '$ngrm.title'
@@ -646,9 +646,7 @@ async def _req_top_ngramm(request: web.Request) -> web.StreamResponse:
   ltype = getreqarg_ltype(request)
 
   if nka or ltype:
-    pipeline = [
-      {'$match': {
-        f'ngrm.{f}': v for f, v in (('nka', nka), ('type', ltype)) if v}}]
+    pipeline = [get_ngramm_filter(nka, ltype, 'ngrm')]
 
   if ltype:
     gident = '$ngrm.title'

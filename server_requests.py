@@ -506,10 +506,7 @@ async def _req_frags_cocitauthors_ngramms(request: web.Request) -> web.StreamRes
   ]
   if nka or ltype:
     # {'$match': {'cont.nka': nka, 'cont.type': ltype}},
-    pipeline += [
-      {'$match': {
-        f'cont.{f}': v for f, v in (('nka', nka), ('type', ltype)) if v}},
-    ]
+    pipeline += [get_ngramm_filter(nka, ltype, 'cont')]
   pipeline += [
     {'$unwind': '$cont.linked_papers'},
     {'$match': {'$expr': {'$eq': ["$_id", "$cont.linked_papers.cont_id"]}}},
@@ -691,10 +688,7 @@ async def _req_frags_ngramm(request: web.Request) -> web.StreamResponse:
   ]
 
   if nka or ltype:
-    pipeline += [
-      {'$match': {
-        f'ngramm.{f}': v for f, v in (('nka', nka), ('type', ltype)) if v}}
-    ]
+    pipeline += [get_ngramm_filter(nka, ltype, 'ngramm')]
 
   pipeline += [
     {'$project': {
@@ -1173,8 +1167,8 @@ async def _req_frags_topics_ngramms(request: web.Request) -> web.StreamResponse:
   if not topn_gramm:
     topn_gramm = 500
 
-  nka = getreqarg_int(request, 'nka')
-  ltype = getreqarg(request, 'ltype')
+  nka = getreqarg_nka(request)
+  ltype = getreqarg_ltype(request)
 
   if topn_gramm:
     n_gramms = mdb.n_gramms
@@ -1185,42 +1179,46 @@ async def _req_frags_topics_ngramms(request: web.Request) -> web.StreamResponse:
     exists = ()
 
   pipeline = [
-    {'$project': {'prefix': False, 'suffix': False, 'exact': False}}, {
-      '$lookup': {
-        'from': 'n_gramms', 'localField': '_id',
-        'foreignField': 'linked_papers.cont_id', 'as': 'cont'}},
-    {'$unwind': '$cont'},
+    {'$project': {
+      'prefix': 0, 'suffix': 0, 'exact': 0, 'positive_negative': 0,
+      'bundles': 0, 'linked_papers_topics': 0}},
+    {'$unwind': '$linked_papers_ngrams'},
+    {'$lookup': {
+      'from': 'n_gramms', 'localField': 'linked_papers_ngrams._id',
+      'foreignField': '_id', 'as': 'ngrm'}},
+    {'$unwind': '$ngrm'},
   ]
+
   if nka or ltype:
-    pipeline += [
-      {'$match': {
-        f'cont.{f}' : v for f, v in (('nka', nka), ('type', ltype)) if v}}]
+    pipeline += [get_ngramm_filter(nka, ltype, 'ngrm')]
+
   pipeline += [
-    {'$project': {'cont.type': False}},  # 'cont.linked_papers': False,
-    {'$sort': {'cont.count_in_linked_papers': -1, 'cont.count_all': -1}},
-    # {'$limit': topn_gramms}
+    {'$sort': {'ngrm.count_in_linked_papers': -1, 'ngrm.count_all': -1}},
   ]
 
   top_topics = await _get_topn_topics(mdb.topics, topn)
   contexts = mdb.contexts
   out_dict = {}
+  zerro_frags = {n: 0 for n in range(1, 6)}
   for i, (topic, cnt, conts) in enumerate(top_topics, 1):
-    frags = Counter()
-    congr = defaultdict(Counter)
+    frags = Counter(zerro_frags)
+    congr = defaultdict(partial(Counter, zerro_frags))
 
     work_pipeline = [
       {'$match': {'frag_num': {'$gt': 0}, '_id': {'$in': conts}}},
     ] + pipeline
 
+    # _logger.debug('topic: "%s", cnt: %s, pipeline: %s', topic, cnt, work_pipeline)
+
     async for doc in contexts.aggregate(work_pipeline):
-      cont = doc['cont']
+      cont = doc['ngrm']
       ngr = cont['title']
-      if exists and ngr not in exists:
+      if exists and cont['_id'] not in exists:
         continue
 
       fnum = doc['frag_num']
       frags[fnum] += 1
-      congr[ngr][fnum] += 1 # cont['linked_papers']['cnt']
+      congr[ngr][fnum] += 1
       if topn_crpssgramm and len(congr) == topn_crpssgramm:
         break
 
@@ -1261,10 +1259,7 @@ async def _get_topn_ngramm(
   ]
 
   if nka or ltype:
-    pipeline += [
-      {'$match': {
-        f'ngramm.{f}': v for f, v in (('nka', nka), ('type', ltype)) if v}}
-    ]
+    pipeline += [get_ngramm_filter(nka, ltype, 'ngramm')]
 
   if ltype:
     title = '$ngramm.title'
@@ -1278,11 +1273,23 @@ async def _get_topn_ngramm(
   if topn:
     pipeline += [{'$limit': topn}]
 
-  _logger.debug('pipeline: %s', pipeline)
+  # _logger.debug('pipeline: %s', pipeline)
   get_as_tuple = itemgetter('title', 'count', 'conts')
   contexts:Collection = colls.database.contexts
   topN = tuple([get_as_tuple(doc) async for doc in contexts.aggregate(pipeline)])
   return topN
+
+
+def get_ngramm_filter(
+  nka: Optional[int], ltype: Optional[str],
+  ngrm_field: Optional[str]=None
+):
+  if not ngrm_field:
+    return {'$match': {f: v for f, v in (('nka', nka), ('type', ltype)) if v}}
+
+  return {
+    '$match': {
+      f'{ngrm_field}.{f}': v for f, v in (('nka', nka), ('type', ltype)) if v}}
 
 
 async def _get_topn_topics(
@@ -1346,8 +1353,7 @@ async def _req_top_ngramm_pubs(request: web.Request) -> web.StreamResponse:
   nka = getreqarg_int(request, 'nka')
   ltype = getreqarg(request, 'ltype')
   if nka or ltype:
-    pipeline = [
-      {'$match': {f: v for f, v in (('nka', nka), ('type', ltype)) if v}}]
+    pipeline = [get_ngramm_filter(nka, ltype)]
   else:
     pipeline = []
 
@@ -1418,8 +1424,7 @@ async def _reg_cnt_ngramm(request: web.Request) -> web.StreamResponse:
   nka = getreqarg_int(request, 'nka')
   ltype = getreqarg(request, 'ltype')
   if nka or ltype:
-    pipeline = [
-      {'$match': {f: v for f, v in (('nka', nka), ('type', ltype)) if v}}]
+    pipeline = [get_ngramm_filter(nka, ltype)]
   else:
     pipeline = []
 
@@ -1456,8 +1461,7 @@ async def _reg_cnt_pubs_ngramm(request: web.Request) -> web.StreamResponse:
   nka = getreqarg_int(request, 'nka')
   ltype = getreqarg(request, 'ltype')
   if nka or ltype:
-    pipeline = [
-      {'$match': {f: v for f, v in (('nka', nka), ('type', ltype)) if v}}]
+    pipeline = [get_ngramm_filter(nka, ltype)]
   else:
     pipeline = []
 
