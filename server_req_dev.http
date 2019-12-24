@@ -85,3 +85,6 @@ GET http://localhost:8668/cirtec_dev/frags/ngramms/?ltype=lemmas
 GET http://localhost:8668/cirtec_dev/frags/topics/ngramms/
 
 ###
+GET http://localhost:8668/cirtec_dev/frags/ngramms/topics/
+
+###

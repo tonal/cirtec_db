@@ -939,26 +939,25 @@ async def _req_frags_ngramms_topics(request: web.Request) -> web.StreamResponse:
   contexts = mdb.contexts
 
   out_dict = {}
+  zerro_frags = {n: 0 for n in range(1, 6)}
   for i, (ngrmm, cnt, conts) in enumerate(top_ngramms, 1):
-    frags = Counter()
-    congr = defaultdict(Counter)
+    frags = Counter(zerro_frags)
+    congr = defaultdict(partial(Counter, zerro_frags))
 
-    async for doc in contexts.aggregate([
+    pipeline = [
       {'$match': {'frag_num': {'$gt': 0}, '_id': {'$in': conts}}},
-      {'$project': {'prefix': False, 'suffix': False, 'exact': False}},
-      {'$lookup': {
-        'from': 'topics', 'localField': '_id',
-        'foreignField': 'linked_papers.cont_id', 'as': 'cont'}},
-      {'$unwind': '$cont'},
-      {'$unwind': '$cont.linked_papers'},
-      {'$match': {'$expr': {'$eq': ["$_id", "$cont.linked_papers.cont_id"]}}},
-      {'$project': {'cont.type': False}}, # 'cont.linked_papers': False,
-    ]):
-      cont = doc['cont']
-      ngr = cont['title']
+      {'$project': {
+        'prefix': 0, 'suffix': 0, 'exact': 0, 'positive_negative': 0,
+        'bundles': 0, 'linked_papers_ngrams': 0}},
+      {'$unwind': '$linked_papers_topics'},
+    ]
+    # _logger.debug('ngrmm: "%s", cnt: %s, pipeline: %s', ngrmm, cnt, pipeline)
+    async for doc in contexts.aggregate(pipeline):
+      cont = doc['linked_papers_topics']
+      topic = cont['_id']
       fnum = doc['frag_num']
       frags[fnum] += 1
-      congr[ngr][fnum] += 1
+      congr[topic][fnum] += 1
 
     crosstopics = {}
     out_dict[ngrmm] = dict(sum=cnt, frags=frags, crosstopics=crosstopics)
