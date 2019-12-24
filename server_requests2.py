@@ -191,7 +191,7 @@ async def _req_auth_bund4ngramm_tops(request: web.Request) -> web.StreamResponse
     ngramms = icont.get('linked_papers_ngrams')
     oauth = dict(
       cont_id=cont['_id'], ref_authors=cont['authors'],
-      topics=icont['linked_papers_topics'])
+      topics=icont.get('linked_papers_topics'))
     if ngramms:
       ongs = sorted(
         (
@@ -241,7 +241,7 @@ async def _req_auth_bund4ngramm_tops(request: web.Request) -> web.StreamResponse
       for b in cont['bund']]
     oauth = dict(
       cont_id=cont['_id'], bundles=bundles,
-      topics=icont['linked_papers_topics'])
+      topics=icont.get('linked_papers_topics'))
     if ngramms:
       ongs = sorted(
         (
