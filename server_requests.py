@@ -10,8 +10,9 @@ from typing import Optional, Sequence, Union, Tuple
 from aiohttp import web
 from pymongo.collection import Collection
 
-from server_utils import json_response, getreqarg_topn, getreqarg_int, getreqarg
-
+from server_utils import (
+  json_response, getreqarg_topn, getreqarg_int, getreqarg, getreqarg_nka,
+  getreqarg_ltype)
 
 _logger = logging.getLogger('cirtec')
 
@@ -185,17 +186,15 @@ async def _req_publ_publications_ngramms(
   topn = getreqarg_topn(request)
   if not topn:
     topn = 10
-  # nka: int = 2, ltype:str = 'lemmas'
-  nka:int = getreqarg_int(request, 'nka')
-  ltype:str = getreqarg(request, 'ltype')
+
+  nka:int = getreqarg_nka(request)
+  ltype:str = getreqarg_ltype(request)
+
   if nka or ltype:
-    preselect = [
-      {'$match': {f: v for f, v in (('nka', nka), ('type', ltype)) if v}}]
     postmath = [
       {'$match': {
         f: v for f, v in (('cont.nka', nka), ('cont.type', ltype)) if v}}]
   else:
-    preselect = []
     postmath = None
 
   pipeline = [
@@ -220,12 +219,9 @@ async def _req_publ_publications_ngramms(
   out_pub_dict = {}
 
   for pub_id, pub_desc in pubs.items():
-    topN = await _get_topn(
-      n_gramms, topn,
-      preselect=preselect + [
-        {'$match': {'linked_papers.cont_id': {'$regex': f'^{pub_id}@'}}}],
-      sum_expr='$linked_papers.cnt')
+    topN = await _get_topn_ngramm(n_gramms, nka, ltype, topn, pub_id=pub_id)
     exists = frozenset(t for t, _, _ in topN)
+
     out_dict = {}
     oconts = set()
 
@@ -283,11 +279,7 @@ async def _req_publ_publications_topics(request: web.Request) -> web.StreamRespo
   out_pub_dict = {}
 
   for pub_id, pub_desc in pubs.items():
-    topN = await _get_topn(
-      topics,
-      preselect=[
-        {'$match': {'linked_papers.cont_id': {'$regex': f'^{pub_id}@'}}}],
-      topn=topn)
+    topN = await _get_topn_topics(topics, topn=topn, pub_id=pub_id)
 
     out_dict = {}
     oconts = set()
@@ -489,18 +481,13 @@ async def _req_frags_cocitauthors_ngramms(request: web.Request) -> web.StreamRes
   topn_gramm:int = getreqarg_int(request, 'topn_gramm')
   if not topn_gramm:
     topn_gramm = 500
-  nka:int = getreqarg_int(request, 'nka')
-  ltype:str = getreqarg(request, 'ltype')
+
+  nka:int = getreqarg_nka(request)
+  ltype:str = getreqarg_ltype(request)
 
   if topn_gramm:
     n_gramms = mdb.n_gramms
-    if nka or ltype:
-      preselect = [
-        {'$match': {f: v for f, v in (('nka', nka), ('type', ltype)) if v}}]
-    else:
-      preselect = None
-    top_ngramms = await _get_topn(
-      n_gramms, topn_gramm, preselect=preselect, sum_expr='$linked_papers.cnt')
+    top_ngramms = await _get_topn_ngramm(n_gramms, nka, ltype, topn_gramm)
     exists = frozenset(t for t, _, _ in top_ngramms)
   else:
     exists = ()
@@ -567,7 +554,7 @@ async def _req_frags_cocitauthors_topics(request: web.Request) -> web.StreamResp
   topn_topics:int = getreqarg_int(request, 'topn_topics')
   if topn_topics:
     topics = mdb.topics
-    top_topics = await _get_topn(topics, topn=topn)
+    top_topics = await _get_topn_topics(topics, topn=topn)
     exists = frozenset(t for t, _, _ in top_topics)
   else:
     exists = ()
@@ -679,49 +666,62 @@ async def _req_frags_ngramm(request: web.Request) -> web.StreamResponse:
   topn = getreqarg_topn(request)
   if not topn:
     topn = 10
-  # nka: int = 2, ltype:str = 'lemmas'
-  nka:int = getreqarg_int(request, 'nka')
-  ltype:str = getreqarg(request, 'ltype')
+
+  nka:int = getreqarg_nka(request)
+  ltype:str = getreqarg_ltype(request)
+
+  pipeline = [
+    {'$match': {
+      'frag_num': {'$exists': 1}, 'linked_papers_ngrams': {'$exists': 1}}},
+    {'$project': {
+      '_id': 1, 'frag_num': 1, 'linked_paper': '$linked_papers_ngrams'}},
+    {'$unwind': '$linked_paper'},
+    {'$group': {
+      '_id': {'_id': '$linked_paper._id', 'frag_num': '$frag_num'},
+      'count': {'$sum': '$linked_paper.cnt'},}},
+    {'$group': {
+      '_id': '$_id._id', 'count': {'$sum': '$count'},
+      'frags': {'$push': {'frag_num': '$_id.frag_num', 'count': '$count',}},}},
+    {'$sort': {'count': -1, '_id': 1}},
+    {'$lookup': {
+      'from': 'n_gramms', 'localField': '_id', 'foreignField': '_id',
+      'as': 'ngramm'}},
+    {'$unwind': '$ngramm'},
+  ]
 
   if nka or ltype:
-    pipeline = [
-      {'$match': {f: v for f, v in (('nka', nka), ('type', ltype)) if v}}]
-  else:
-    pipeline = []
+    pipeline += [
+      {'$match': {
+        f'ngramm.{f}': v for f, v in (('nka', nka), ('type', ltype)) if v}}
+    ]
 
   pipeline += [
-    {'$unwind': '$linked_papers'},
-    {'$lookup': {
-      'from': 'contexts', 'localField': 'linked_papers.cont_id',
-      'foreignField': '_id', 'as': 'cont'}},
     {'$project': {
-      'cont.prefix': False, 'cont.suffix': False, 'cont.exact': False}},
-    {'$unwind': '$cont'},
-    {'$match': {'cont.frag_num': {'$gt': 0}}},
-    {'$group': {
-      '_id': {'nka': '$nka', 'title': '$title', 'type': '$type'},
-      'count': {'$sum': '$linked_papers.cnt'},
-      'frags': {'$push': '$cont.frag_num'}}},
-    {'$sort': {'count': -1, '_id': 1}},
-  ]
+      'title': '$ngramm.title', 'type': '$ngramm.type', 'nka': '$ngramm.nka',
+      'count': '$count', 'frags': '$frags'}}]
+
   if topn:
     pipeline += [{'$limit': topn}]
 
-  n_gramms = mdb.n_gramms
+  _logger.debug('pipeline: %s', pipeline)
+  contexts = mdb.contexts
   out_dict = {}
 
-  async for doc in n_gramms.aggregate(pipeline):
-    did = doc['_id']
-    title = did['title']
+  async for doc in contexts.aggregate(pipeline):
+    title = doc['title']
     cnt = doc['count']
-    frags = Counter(doc['frags'])
-    dtype = did['type']
-    out = dict(sum=cnt, frags=frags, nka=did['nka'], type=dtype)
+    frags = {n: 0 for n in range(1, 6)}
+    frags.update(map(itemgetter('frag_num', 'count'), doc['frags']))
+    dtype = doc['type']
+    out = dict(sum=cnt, frags=frags)
+    if not nka:
+      out.update(nka=doc['nka'])
     if ltype:
       out_dict[title] = out
     else:
-      out['title'] = title
-      out_dict[f'{dtype}_{title}'] = out
+      out.update(type = dtype, title=title)
+      did = doc['_id']
+      out_dict[did] = out
 
   return json_response(out_dict)
 
@@ -738,18 +738,14 @@ async def _req_frags_ngramm_ngramm(request: web.Request) -> web.StreamResponse:
   nka:int = getreqarg_int(request, 'nka')
   ltype:str = getreqarg(request, 'ltype')
   if nka or ltype:
-    preselect = [
-      {'$match': {f: v for f, v in (('nka', nka), ('type', ltype)) if v}}]
     postmath = [
       {'$match': {
         f: v for f, v in (('cont.nka', nka), ('cont.type', ltype)) if v}}]
   else:
-    preselect = None
     postmath = None
 
   n_gramms = mdb.n_gramms
-  topN = await _get_topn(
-    n_gramms, topn, preselect=preselect, sum_expr='$linked_papers.cnt')
+  topN = await _get_topn_ngramm(n_gramms, nka, ltype, topn)
   exists = frozenset(t for t, _, _ in topN)
   out_dict = {}
   contexts = mdb.contexts
@@ -809,18 +805,14 @@ async def _req_publ_ngramm_ngramm(request: web.Request) -> web.StreamResponse:
   nka:int = getreqarg_int(request, 'nka')
   ltype:str = getreqarg(request, 'ltype')
   if nka or ltype:
-    preselect = [
-      {'$match': {f: v for f, v in (('nka', nka), ('type', ltype)) if v}}]
     postmath = [
       {'$match': {
         f: v for f, v in (('cont.nka', nka), ('cont.type', ltype)) if v}}]
   else:
-    preselect = None
     postmath = None
 
   n_gramms = mdb.n_gramms
-  topN = await _get_topn(
-    n_gramms, topn, preselect=preselect, sum_expr='$linked_papers.cnt')
+  topN = await _get_topn_ngramm(n_gramms, nka, ltype, topn)
   exists = frozenset(t for t, _, _ in topN)
   out_dict = {}
   contexts = mdb.contexts
@@ -889,15 +881,9 @@ async def _req_frags_ngramms_cocitauthors(request: web.Request) -> web.StreamRes
 
   nka:int = getreqarg_int(request, 'nka')
   ltype:str = getreqarg(request, 'ltype')
-  if nka or ltype:
-    preselect = [
-      {'$match': {f: v for f, v in (('nka', nka), ('type', ltype)) if v}}]
-  else:
-    preselect = None
 
   n_gramms = mdb.n_gramms
-  top_ngramms = await _get_topn(
-    n_gramms, topn, preselect=preselect, sum_expr='$linked_papers.cnt')
+  top_ngramms = await _get_topn_ngramm(n_gramms, nka, ltype, topn)
 
   out_dict = {}
   for i, (ngramm, cnt, conts) in enumerate(top_ngramms, 1):
@@ -944,22 +930,16 @@ async def _req_frags_ngramms_topics(request: web.Request) -> web.StreamResponse:
   topn_topics:int = getreqarg_int(request, 'topn_topics')
   if topn_topics:
     topics = mdb.topics
-    topNt = await _get_topn(topics, topn=topn_topics)
+    topNt = await _get_topn_topics(topics, topn=topn_topics)
     exists = frozenset(t for t, _, _ in topNt)
   else:
     exists = ()
 
-  nka:int = getreqarg_int(request, 'nka')
-  ltype:str = getreqarg(request, 'ltype')
-  if nka or ltype:
-    preselect = [
-      {'$match': {f: v for f, v in (('nka', nka), ('type', ltype)) if v}}]
-  else:
-    preselect = None
+  nka:int = getreqarg_nka(request)
+  ltype:str = getreqarg_ltype(request)
 
   n_gramms = mdb.n_gramms
-  top_ngramms = await _get_topn(
-    n_gramms, topn, preselect=preselect, sum_expr='$linked_papers.cnt')
+  top_ngramms = await _get_topn_ngramm(n_gramms, nka, ltype, topn)
 
   contexts = mdb.contexts
 
@@ -1003,18 +983,25 @@ async def _req_frags_topics(request: web.Request) -> web.StreamResponse:
   topn = getreqarg_topn(request)
 
   topics = mdb.topics
-  pipeline = [
-    {'$unwind': '$linked_papers'}, {
+  pipeline = [{
     '$lookup': {
-      'from': 'contexts', 'localField': 'linked_papers.cont_id',
-      'foreignField': '_id', 'as': 'cont'}},
-    {'$project': {
-      'cont.prefix': False, 'cont.suffix': False, 'cont.exact': False}},
+      'from': 'contexts', 'localField': '_id',
+      'foreignField': 'linked_papers_topics._id', 'as': 'cont'}},
     {'$unwind': '$cont'},
-    {'$match': {'cont.frag_num': {'$gt': 0}}},
+    {'$project': {
+      'title': 1, 'linked_paper': '$cont.linked_papers_topics',
+      'cont_id': '$cont._id', 'pub_id': '$cont.pub_id',
+      'frag_num': '$cont.frag_num'}},
+    {'$unwind': '$linked_paper'},
+    {'$match': {
+      'frag_num': {'$gt': 0}, '$expr': {'$eq': ['$_id', '$linked_paper._id']}}},
     {'$group': {
-      '_id': '$title', 'count': {'$sum': 1},
-      'frags': {'$push': '$cont.frag_num'}}},
+      '_id': {'title': '$title', 'frag_num': '$frag_num', },
+      'count': {'$sum': 1}, }},
+    {'$sort': {'_id': 1, 'count': -1}},
+    {'$group': {
+      '_id': '$_id.title', 'count': {'$sum': '$count'},
+      'frags': {'$push': {'frag_num': '$_id.frag_num', 'count': '$count'}}, }},
     {'$sort': {'count': -1, '_id': 1}},
   ]
   if topn:
@@ -1024,7 +1011,8 @@ async def _req_frags_topics(request: web.Request) -> web.StreamResponse:
   async for doc in topics.aggregate(pipeline):
     cnt = doc['count']
     title = doc['_id']
-    frags = Counter(doc['frags'])
+    frags = {n: 0 for n in range(1, 6)}
+    frags.update(map(itemgetter('frag_num', 'count'), doc['frags']))
     out_dict[title] = dict(sum=cnt, frags=frags)
 
   return json_response(out_dict)
@@ -1038,7 +1026,7 @@ async def _req_frags_topics_topics(request: web.Request) -> web.StreamResponse:
   topn = getreqarg_topn(request)
 
   topics = mdb.topics
-  topN = await _get_topn(topics, topn=topn)
+  topN = await _get_topn_topics(topics, topn=topn)
 
   contexts = mdb.contexts
   out_dict = {}
@@ -1085,7 +1073,7 @@ async def _req_publ_topics_topics(request: web.Request) -> web.StreamResponse:
   topn = getreqarg_topn(request)
 
   topics = mdb.topics
-  topN = await _get_topn(topics, topn=topn)
+  topN = await _get_topn_topics(topics, topn=topn)
 
   contexts = mdb.contexts
   out_dict = {}
@@ -1144,7 +1132,7 @@ async def _req_frags_topics_cocitauthors(
     exists = ()
 
   topics = mdb.topics
-  topN = await _get_topn(topics, topn=topn)
+  topN = await _get_topn_topics(topics, topn=topn)
 
   out_dict = {}
   for i, (topic, cnt, conts) in enumerate(topN, 1):
@@ -1192,13 +1180,8 @@ async def _req_frags_topics_ngramms(request: web.Request) -> web.StreamResponse:
 
   if topn_gramm:
     n_gramms = mdb.n_gramms
-    if nka or ltype:
-      preselect = [
-        {'$match': {f: v for f, v in (('nka', nka), ('type', ltype)) if v}}]
-    else:
-      preselect = None
-    top_ngramms = await _get_topn(
-      n_gramms, topn_gramm, preselect=preselect, sum_expr='$linked_papers.cnt')
+
+    top_ngramms = await _get_topn_ngramm(n_gramms, nka, ltype, topn_gramm)
     exists = frozenset(t for t, _, _ in top_ngramms)
   else:
     exists = ()
@@ -1220,7 +1203,7 @@ async def _req_frags_topics_ngramms(request: web.Request) -> web.StreamResponse:
     # {'$limit': topn_gramms}
   ]
 
-  top_topics = await _get_topn(mdb.topics, topn)
+  top_topics = await _get_topn_topics(mdb.topics, topn)
   contexts = mdb.contexts
   out_dict = {}
   for i, (topic, cnt, conts) in enumerate(top_topics, 1):
@@ -1254,25 +1237,84 @@ async def _req_frags_topics_ngramms(request: web.Request) -> web.StreamResponse:
   return json_response(out_dict)
 
 
-async def _get_topn(
-  colls, topn:Optional[int], *, preselect:Optional[Sequence]=None,
-  sum_expr:Union[int, str]=1
+async def _get_topn_ngramm(
+  colls:Collection, nka:Optional[int], ltype:Optional[str], topn:Optional[int],
+  *, pub_id:Optional[str]=None,
 ) -> Tuple:
-  get_as_tuple = itemgetter('_id', 'count', 'conts')
-  if preselect:
-    pipeline = list(preselect)
+
+  if pub_id:
+    pipeline = [{'$match': {'pub_id': pub_id}}]
   else:
     pipeline = []
+
   pipeline += [
-    {'$unwind': '$linked_papers'},
+    {'$match': {'linked_papers_ngrams': {'$exists': True}}},
+    {'$project': {
+      '_id': 1, 'pub_id': 1, 'linked_paper': '$linked_papers_ngrams'}},
+    {'$unwind': '$linked_paper'},
     {'$group': {
-      '_id': '$title', 'count': {'$sum': sum_expr},
+      '_id': '$linked_paper._id', 'count': {'$sum': '$linked_paper.cnt'},
+      'pub_ids': {'$addToSet': '$pub_id'}, 'cont_ids': {'$addToSet': '$_id'},}},
+    {'$sort': {'count': -1, '_id': 1}},
+    {'$lookup': {
+      'from': 'n_gramms', 'localField': '_id', 'foreignField': '_id',
+      'as': 'ngramm'}},
+    {'$unwind': '$ngramm'},
+  ]
+
+  if nka or ltype:
+    pipeline += [
+      {'$match': {
+        f'ngramm.{f}': v for f, v in (('nka', nka), ('type', ltype)) if v}}
+    ]
+
+  if ltype:
+    title = '$ngramm.title'
+  else:
+    title = '$_id'
+
+  projects = {'_id': 0, 'title': title, 'count': 1, 'conts': '$cont_ids'}
+
+  pipeline += [{'$project': projects}]
+
+  if topn:
+    pipeline += [{'$limit': topn}]
+
+  _logger.debug('pipeline: %s', pipeline)
+  get_as_tuple = itemgetter('title', 'count', 'conts')
+  contexts:Collection = colls.database.contexts
+  topN = tuple([get_as_tuple(doc) async for doc in contexts.aggregate(pipeline)])
+  return topN
+
+
+async def _get_topn_topics(
+  colls:Collection, topn:Optional[int], *, pub_id:Optional[str]=None
+) -> Tuple:
+  """Получение наиболее часто встречающихся топиков"""
+  pipeline = [
+    {'$lookup': {
+      'from': 'contexts', 'localField': '_id',
+      'foreignField': 'linked_papers_topics._id', 'as': 'cont'}},
+    {'$unwind': '$cont'},
+    {'$project': {
+      'title': 1, 'linked_paper': '$cont.linked_papers_topics',
+      'cont_id': '$cont._id', 'pub_id': '$cont.pub_id'}},
+    {'$unwind': '$linked_paper'},
+    {'$match': {'$expr': {'$eq': ['$_id', '$linked_paper._id']}}}
+  ]
+
+  if pub_id:
+    pipeline += [{'$match': {'pub_id': pub_id}}]
+
+  pipeline += [
+    {'$group': {'_id': '$title', 'count': {'$sum': 1},
       'conts': {'$addToSet': '$linked_papers.cont_id'}}},
     {'$sort': {'count': -1, '_id': 1}},
   ]
   if topn:
     pipeline += [{'$limit': topn}]
 
+  get_as_tuple = itemgetter('_id', 'count', 'conts')
   topN = tuple([get_as_tuple(doc) async for doc in colls.aggregate(pipeline)])
 
   return topN
@@ -1287,15 +1329,9 @@ async def _req_top_ngramm(request: web.Request) -> web.StreamResponse:
 
   nka = getreqarg_int(request, 'nka')
   ltype = getreqarg(request, 'ltype')
-  if nka or ltype:
-    preselect = [
-      {'$match': {f: v for f, v in (('nka', nka), ('type', ltype)) if v}}]
-  else:
-    preselect = None
 
   n_gramms = mdb.n_gramms
-  topN = await _get_topn(
-    n_gramms, topn, preselect=preselect, sum_expr='$linked_papers.cnt')
+  topN = await _get_topn_ngramm(n_gramms, nka, ltype, topn)
 
   out = tuple(dict(title=n, contects=conts) for n, _, conts in topN)
   return json_response(out)
@@ -1351,7 +1387,7 @@ async def _req_top_topics(request: web.Request) -> web.StreamResponse:
   topn = getreqarg_topn(request)
 
   topics = mdb.topics
-  topN = await _get_topn(topics, topn=topn)
+  topN = await _get_topn_topics(topics, topn=topn)
 
   out = tuple(dict(title=n, contects=conts) for n, _, conts in topN)
   return json_response(out)
@@ -1365,7 +1401,7 @@ async def _req_top_topics_pubs(request: web.Request) -> web.StreamResponse:
   topn = getreqarg_topn(request)
 
   topics = mdb.topics
-  topN = await _get_topn(topics, topn=topn)
+  topN = await _get_topn_topics(topics, topn=topn)
 
   # out = tuple(dict(title=n, contects=conts) for n, _, conts in topN)
   out = {

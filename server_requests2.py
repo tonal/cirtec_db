@@ -572,8 +572,8 @@ async def _req_top_ngramm_pubs(request: web.Request) -> web.StreamResponse:
     {'$unwind': '$ngrm'},
   ]
 
-  nka = await getreqarg_nka(request)
-  ltype = await getreqarg_ltype(request)
+  nka = getreqarg_nka(request)
+  ltype = getreqarg_ltype(request)
 
   if nka or ltype:
     pipeline += [

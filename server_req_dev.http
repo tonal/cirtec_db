@@ -73,3 +73,15 @@ GET http://localhost:8668/cirtec_dev/frags/topics/topics/
 GET http://localhost:8668/cirtec_dev/frags/cocitauthors/cocitauthors/
 
 ###
+GET http://localhost:8668/cirtec_dev/frags/topics/
+
+###
+GET http://localhost:8668/cirtec_dev/frags/ngramms/
+
+###
+GET http://localhost:8668/cirtec_dev/frags/ngramms/?ltype=lemmas
+
+###
+GET http://localhost:8668/cirtec_dev/frags/topics/ngramms/
+
+###

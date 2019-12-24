@@ -60,11 +60,11 @@ def getreqarg_probability(request, default:float=.5) -> float:
   return probability
 
 
-async def getreqarg_nka(request) -> Optional[int]:
+def getreqarg_nka(request) -> Optional[int]:
   nka = getreqarg_int(request, 'nka')
   return nka
 
 
-async def getreqarg_ltype(request) -> Optional[str]:
+def getreqarg_ltype(request) -> Optional[str]:
   ltype = getreqarg(request, 'ltype')
   return ltype
