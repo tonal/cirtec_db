@@ -3,6 +3,7 @@
 Запросы сделанные в первую итерацию
 """
 from collections import Counter, defaultdict
+from functools import partial
 import logging
 from operator import itemgetter
 from typing import Optional, Sequence, Union, Tuple
@@ -1031,24 +1032,21 @@ async def _req_frags_topics_topics(request: web.Request) -> web.StreamResponse:
   contexts = mdb.contexts
   out_dict = {}
   for i, (ngrmm, cnt, conts) in enumerate(topN, 1):
-    congr = defaultdict(Counter)
+    congr = defaultdict(partial(Counter, {n: 0 for n in range(1, 6)}))
 
-    async for doc in contexts.aggregate([
+    pipeline = [
       {'$match': {'frag_num': {'$gt': 0}, '_id': {'$in': conts}}},
-      {'$project': {'prefix': False, 'suffix': False, 'exact': False}},
-      {'$lookup': {
-        'from': 'topics', 'localField': '_id',
-        'foreignField': 'linked_papers.cont_id', 'as': 'cont'}},
-      {'$unwind': '$cont'},
-      {'$unwind': '$cont.linked_papers'},
-      {'$match': {'$expr': {'$eq': ["$_id", "$cont.linked_papers.cont_id"]}}},
-      {'$project': {'cont.type': False}}, # 'cont.linked_papers': False,
-      # {'$sort': {'frag_num': 1}},
-    ]):
-      cont = doc['cont']
-      ngr = cont['title']
-      # if ngr not in exists:
-      #   continue
+      {'$project': {
+        'prefix': 0, 'suffix': 0, 'exact': 0, 'linked_papers_ngrams': 0,
+        'positive_negative': 0, 'bundles': 0}},
+      {'$unwind': '$linked_papers_topics'},
+    ]
+    # _logger.debug('ngrmm: "%s":, cnt %s, pipeline: %s', ngrmm, cnt, pipeline)
+    async for doc in contexts.aggregate(pipeline):
+
+      cont = doc['linked_papers_topics']
+      ngr = cont['_id']
+
       fnum = doc['frag_num']
       congr[ngr][fnum] += 1
 
@@ -1308,12 +1306,13 @@ async def _get_topn_topics(
 
   pipeline += [
     {'$group': {'_id': '$title', 'count': {'$sum': 1},
-      'conts': {'$addToSet': '$linked_papers.cont_id'}}},
+      'conts': {'$addToSet': '$cont_id'}}},
     {'$sort': {'count': -1, '_id': 1}},
   ]
   if topn:
     pipeline += [{'$limit': topn}]
 
+  # _logger.debug('pipeline: %s', pipeline)
   get_as_tuple = itemgetter('_id', 'count', 'conts')
   topN = tuple([get_as_tuple(doc) async for doc in colls.aggregate(pipeline)])
 
