@@ -50,7 +50,7 @@ async def init_server(aiohttp_client):
   '/cirtec_dev/top/cocitauthors/',
   '/cirtec_dev/top/ngramms/',
   '/cirtec_dev/top/topics/',
-  '/cirtec_dev/top/cocitrefs/,
+  '/cirtec_dev/top/cocitrefs/',
   '/cirtec_dev/top/cocitrefs/cocitrefs/',
 ])
 async def test_get_urls(aiohttp_client, url:str, topn:int):

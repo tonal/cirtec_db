@@ -1120,7 +1120,6 @@ async def _req_top_cocitrefs(request: web.Request) -> web.StreamResponse:
     repack(**doc) async for doc in _get_topn_cocit_refs(
       contexts, topn, include_conts=True, include_descr=True)]
 
-  # out = tuple(dict(title=n, contects=conts) for n, _, conts in topN)
   out = tuple(outs)
 
   return json_response(out)
@@ -1181,7 +1180,7 @@ async def _req_top_cocitrefs2(
   if topn:
     pipeline += [{'$limit': topn}]
 
-  _logger.debug('pipeline: %s', pipeline)
+  # _logger.debug('pipeline: %s', pipeline)
 
   contexts = mdb.contexts
   curs = contexts.aggregate(pipeline)
