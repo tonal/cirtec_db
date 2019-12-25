@@ -6,14 +6,17 @@ from collections import Counter, defaultdict
 from functools import partial
 import logging
 from operator import itemgetter
-from typing import Optional, Sequence, Union, Tuple
 
 from aiohttp import web
 from pymongo.collection import Collection
+from server_get_top import (
+  _get_topn_cocit_authors, _get_topn_ngramm, _get_topn_topics,
+  get_ngramm_filter)
 
 from server_utils import (
   json_response, getreqarg_topn, getreqarg_int, getreqarg, getreqarg_nka,
   getreqarg_ltype)
+
 
 _logger = logging.getLogger('cirtec')
 
@@ -617,38 +620,6 @@ async def _req_frags_cocitauthors_topics(request: web.Request) -> web.StreamResp
       crosstopics[co] = dict(frags=cnts, sum=sum(cnts.values()))
 
   return json_response(out_dict)
-
-
-async def _get_topn_cocit_authors(
-  contexts, topn:Optional[int], *, include_conts:bool=False
-):
-  """Получить самых со-цитируемых авторов"""
-  if include_conts:
-    group = {
-      '$group': {
-        '_id': '$cocit_authors', 'count': {'$sum': 1},
-        'conts': {'$addToSet': '$_id'}}}
-    get_as_tuple = itemgetter('_id', 'count', 'conts')
-  else:
-    group = {'$group': {'_id': '$cocit_authors', 'count': {'$sum': 1}}}
-    get_as_tuple = itemgetter('_id', 'count')
-
-  pipeline = [
-    {'$match': {'frag_num': {'$gt': 0}, 'cocit_authors': {'$exists': 1}}},
-    {'$project': {
-      'prefix': 0, 'suffix': 0, 'exact': 0, 'positive_negative': 0,
-      'bundles': 0, 'linked_papers_ngrams': 0, 'linked_papers_topics': 0}},
-    {'$unwind': '$cocit_authors'},
-    # {'$group': {'_id': '$cocit_authors', 'count': {'$sum': 1}}},
-    group,
-    {'$sort': {'count': -1, '_id': 1}},
-  ]
-  if topn:
-    pipeline += [{'$limit': topn}]
-
-  # _logger.debug('pipeline: %s', pipeline)
-  top50 = [get_as_tuple(doc) async for doc in contexts.aggregate(pipeline)]
-  return tuple(top50)
 
 
 async def _req_top_cocitauthors(request: web.Request) -> web.StreamResponse:
@@ -1255,99 +1226,6 @@ async def _req_frags_topics_ngramms(request: web.Request) -> web.StreamResponse:
       crossgrams[co] = dict(frags=cnts, sum=sum(cnts.values()))
 
   return json_response(out_dict)
-
-
-async def _get_topn_ngramm(
-  colls:Collection, nka:Optional[int], ltype:Optional[str], topn:Optional[int],
-  *, pub_id:Optional[str]=None,
-) -> Tuple:
-
-  if pub_id:
-    pipeline = [{'$match': {'pub_id': pub_id}}]
-  else:
-    pipeline = []
-
-  pipeline += [
-    {'$match': {'linked_papers_ngrams': {'$exists': True}}},
-    {'$project': {
-      '_id': 1, 'pub_id': 1, 'linked_paper': '$linked_papers_ngrams'}},
-    {'$unwind': '$linked_paper'},
-    {'$group': {
-      '_id': '$linked_paper._id', 'count': {'$sum': '$linked_paper.cnt'},
-      'pub_ids': {'$addToSet': '$pub_id'}, 'cont_ids': {'$addToSet': '$_id'},}},
-    {'$sort': {'count': -1, '_id': 1}},
-    {'$lookup': {
-      'from': 'n_gramms', 'localField': '_id', 'foreignField': '_id',
-      'as': 'ngramm'}},
-    {'$unwind': '$ngramm'},
-  ]
-
-  if nka or ltype:
-    pipeline += [get_ngramm_filter(nka, ltype, 'ngramm')]
-
-  if ltype:
-    title = '$ngramm.title'
-  else:
-    title = '$_id'
-
-  projects = {'_id': 0, 'title': title, 'count': 1, 'conts': '$cont_ids'}
-
-  pipeline += [{'$project': projects}]
-
-  if topn:
-    pipeline += [{'$limit': topn}]
-
-  # _logger.debug('pipeline: %s', pipeline)
-  get_as_tuple = itemgetter('title', 'count', 'conts')
-  contexts:Collection = colls.database.contexts
-  topN = tuple([get_as_tuple(doc) async for doc in contexts.aggregate(pipeline)])
-  return topN
-
-
-def get_ngramm_filter(
-  nka: Optional[int], ltype: Optional[str],
-  ngrm_field: Optional[str]=None
-):
-  if not ngrm_field:
-    return {'$match': {f: v for f, v in (('nka', nka), ('type', ltype)) if v}}
-
-  return {
-    '$match': {
-      f'{ngrm_field}.{f}': v for f, v in (('nka', nka), ('type', ltype)) if v}}
-
-
-async def _get_topn_topics(
-  colls:Collection, topn:Optional[int], *, pub_id:Optional[str]=None
-) -> Tuple:
-  """Получение наиболее часто встречающихся топиков"""
-  pipeline = [
-    {'$lookup': {
-      'from': 'contexts', 'localField': '_id',
-      'foreignField': 'linked_papers_topics._id', 'as': 'cont'}},
-    {'$unwind': '$cont'},
-    {'$project': {
-      'title': 1, 'linked_paper': '$cont.linked_papers_topics',
-      'cont_id': '$cont._id', 'pub_id': '$cont.pub_id'}},
-    {'$unwind': '$linked_paper'},
-    {'$match': {'$expr': {'$eq': ['$_id', '$linked_paper._id']}}}
-  ]
-
-  if pub_id:
-    pipeline += [{'$match': {'pub_id': pub_id}}]
-
-  pipeline += [
-    {'$group': {'_id': '$title', 'count': {'$sum': 1},
-      'conts': {'$addToSet': '$cont_id'}}},
-    {'$sort': {'count': -1, '_id': 1}},
-  ]
-  if topn:
-    pipeline += [{'$limit': topn}]
-
-  # _logger.debug('pipeline: %s', pipeline)
-  get_as_tuple = itemgetter('_id', 'count', 'conts')
-  topN = tuple([get_as_tuple(doc) async for doc in colls.aggregate(pipeline)])
-
-  return topN
 
 
 async def _req_top_ngramm(request: web.Request) -> web.StreamResponse:

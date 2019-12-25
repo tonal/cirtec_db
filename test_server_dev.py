@@ -39,7 +39,7 @@ async def init_server(aiohttp_client):
   '/cirtec_dev/frags/cocitauthors/topics/',
   '/cirtec_dev/frags/topics/',
   '/cirtec_dev/frags/topics/topics/',
-  '/cirtec_dev/publ/topics/topics/'
+  '/cirtec_dev/publ/topics/topics/',
   '/cirtec_dev/frags/topics/cocitauthors/',
   '/cirtec_dev/frags/topics/ngramms/',
   '/cirtec_dev/frags/ngramms/',
@@ -50,6 +50,8 @@ async def init_server(aiohttp_client):
   '/cirtec_dev/top/cocitauthors/',
   '/cirtec_dev/top/ngramms/',
   '/cirtec_dev/top/topics/',
+  '/cirtec_dev/top/cocitrefs/,
+  '/cirtec_dev/top/cocitrefs/cocitrefs/',
 ])
 async def test_get_urls(aiohttp_client, url:str, topn:int):
   client = await init_server(aiohttp_client)

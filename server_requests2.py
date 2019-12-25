@@ -13,7 +13,7 @@ from fastnumbers import fast_float
 from pymongo import ASCENDING
 from pymongo.collection import Collection
 
-from server_requests import get_ngramm_filter
+from server_get_top import get_ngramm_filter, _get_topn_cocit_refs
 from server_utils import (
   getreqarg_topn, json_response, getreqarg_probability,
   getreqarg_nka, getreqarg_ltype)
@@ -1097,5 +1097,105 @@ async def _req_frags_pos_neg_cocitauthors2(
       cont_cnt=len(cont_ids), pub_cnt=len(pub_ids),
       frags=dict(sorted(frags.items())), neutral=neutral, positive=positive,
       negative=negative, pub_ids=pub_ids, cont_ids=cont_ids))
+
+  return json_response(out)
+
+
+async def _req_top_cocitrefs(request: web.Request) -> web.StreamResponse:
+  """Топ N со-цитируемых авторов"""
+  app = request.app
+  mdb = app['db']
+
+  topn = getreqarg_topn(request)
+
+  def repack(_id, count, conts, bundles):
+    authors = bundles.get('authors')
+    title = bundles['title']
+    year = bundles.get('year', '?')
+    descr = f'{" ".join(authors) if authors else "?"} ({year}) {title}'
+    return dict(bid=_id, descr=descr, contects=conts)
+
+  contexts = mdb.contexts
+  outs = [
+    repack(**doc) async for doc in _get_topn_cocit_refs(
+      contexts, topn, include_conts=True, include_descr=True)]
+
+  # out = tuple(dict(title=n, contects=conts) for n, _, conts in topN)
+  out = tuple(outs)
+
+  return json_response(out)
+
+
+async def _req_top_cocitrefs2(
+  request: web.Request
+) -> web.StreamResponse:
+  """Со-цитируемые рефереры"""
+  app = request.app
+  mdb = app['db']
+
+  topn = getreqarg_topn(request)
+
+
+  pipeline = [
+    {'$match': {'cocit_refs': {'$exists': 1}, 'frag_num': {'$exists': 1}}},
+    {'$project': {'pub_id': 1, 'cocit_refs': 1, 'frag_num': 1}},
+    {'$lookup': {
+      'from': 'publications', 'localField': 'pub_id', 'foreignField': '_id',
+      'as': 'pub'}},
+    {'$unwind': '$pub'},
+    {'$match': {'pub.uni_authors': 'Sergey-Sinelnikov-Murylev'}},
+    {'$project': {'pub': 0}},
+    {'$unwind': '$cocit_refs'},
+    {'$lookup': {
+      'from': 'contexts', 'localField': '_id', 'foreignField': '_id',
+      'as': 'cont'}},
+    {'$project': {
+      'pub_id': 1, 'cocit_refs': 1, 'frag_num': 1, 'cont.cocit_refs': 1}},
+    {'$unwind': '$cont'},
+    {'$unwind': '$cont.cocit_refs'},
+    {'$match': {'$expr': {'$ne': ['$cocit_refs', '$cont.cocit_refs']}}},
+    {'$group': {
+      '_id': {
+        'cocitref1': {
+          '$cond': [{'$gte': ['$cocit_refs', '$cont.cocit_refs'], },
+            '$cont.cocit_refs', '$cocit_refs']}, 'cocitref2': {
+          '$cond': [{'$gte': ['$cocit_refs', '$cont.cocit_refs'], },
+            '$cocit_refs', '$cont.cocit_refs']}, 'cont_id': '$_id'},
+      'cont': {
+        '$first': {
+          'pub_id': '$pub_id', 'frag_num': '$frag_num', }}, }},
+    {'$sort': {'_id': 1}},
+    {'$group': {
+        '_id': {
+          'cocitref1': '$_id.cocitref1', 'cocitref2': '$_id.cocitref2'},
+        'count': {'$sum': 1}, 'conts': {
+          '$push': {
+            'cont_id': '$_id.cont_id', 'pub_id': '$cont.pub_id',
+            'frag_num': '$cont.frag_num', }, }, }},
+    {'$sort': {'count': -1, '_id': 1}},
+    {'$project': {
+      '_id': 0, 'cocitpair': {
+        'ref1': '$_id.cocitref1', 'ref2': '$_id.cocitref2'},
+      'count': '$count', 'conts': '$conts', }},
+  ]
+  if topn:
+    pipeline += [{'$limit': topn}]
+
+  _logger.debug('pipeline: %s', pipeline)
+
+  contexts = mdb.contexts
+  curs = contexts.aggregate(pipeline)
+  # out = [doc async for doc in curs]
+  out = []
+  async for doc in curs:
+    cocitpair = doc['cocitpair']
+    conts = doc['conts']
+    pub_ids = tuple(frozenset(map(itemgetter('pub_id'), conts)))
+    cont_ids = tuple(map(itemgetter('cont_id'), conts))
+    frags = Counter(map(itemgetter('frag_num'), conts))
+    out.append(dict(
+      cocitpair=tuple(cocitpair.values()),
+      cont_cnt=len(cont_ids), pub_cnt=len(pub_ids),
+      frags=dict(sorted(frags.items())), pub_ids=pub_ids, cont_ids=cont_ids))
 
   return json_response(out)
