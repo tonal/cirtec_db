@@ -59,7 +59,15 @@ async def test_get_urls(aiohttp_client, url:str, topn:int):
   assert 200 == rsp.status
   jrsp = await rsp.json()
   if topn:
-    assert len(jrsp) == topn
+    assert 0 < len(jrsp) <= topn
+
+
+async def test_pubs_ref_authors(aiohttp_client):
+  client = await init_server(aiohttp_client)
+  rsp = await client.get('/cirtec_dev/pubs/ref_authors/')
+  assert 200 == rsp.status
+  jrsp = await rsp.json()
+  assert 0 < len(jrsp)
 
 
 async def test_frags_publications(aiohttp_client):
