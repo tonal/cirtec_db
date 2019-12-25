@@ -1071,27 +1071,30 @@ async def _req_publ_topics_topics(request: web.Request) -> web.StreamResponse:
   topics = mdb.topics
   topN = await _get_topn_topics(topics, topn=topn)
 
+  pipeline = [
+    {'$project': {
+      'prefix': 0, 'suffix': 0, 'exact': 0, 'positive_negative': 0,
+      'bundles': 0, 'linked_papers_ngrams': 0}},
+    {'$lookup': {
+        'from': 'topics', 'localField': 'linked_papers_topics._id',
+      'foreignField': '_id', 'as': 'cont'}},
+    {'$unwind': '$cont'},
+    {'$unwind': '$linked_papers_topics'},
+    {'$match': {'$expr': {'$eq': ['$linked_papers_topics._id', '$cont._id']}}},
+  ]
+
   contexts = mdb.contexts
   out_dict = {}
   for i, (topic, cnt, conts) in enumerate(topN, 1):
     congr = defaultdict(set)
 
-    async for doc in contexts.aggregate([
+    work_pipeline = [
       {'$match': {'frag_num': {'$gt': 0}, '_id': {'$in': conts}}},
-      {'$project': {'prefix': False, 'suffix': False, 'exact': False}},
-      {'$lookup': {
-        'from': 'topics', 'localField': '_id',
-        'foreignField': 'linked_papers.cont_id', 'as': 'cont'}},
-      {'$unwind': '$cont'},
-      {'$unwind': '$cont.linked_papers'},
-      {'$match': {'$expr': {'$eq': ["$_id", "$cont.linked_papers.cont_id"]}}},
-      {'$project': {'cont.type': False}}, # 'cont.linked_papers': False,
-      # {'$sort': {'frag_num': 1}},
-    ]):
+    ] + pipeline
+    _logger.debug('topic: "%s", cnt: %s, pipeline: %s', topic, cnt, work_pipeline)
+    async for doc in contexts.aggregate(work_pipeline):
       cont = doc['cont']
       ngr = cont['title']
-      # if ngr not in exists:
-      #   continue
       pub_id = doc['pub_id']
       congr[ngr].add(pub_id)
 
