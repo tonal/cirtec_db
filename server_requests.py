@@ -497,40 +497,51 @@ async def _req_frags_cocitauthors_ngramms(request: web.Request) -> web.StreamRes
   topN = await _get_topn_cocit_authors(contexts, topn, include_conts=True)
 
   pipeline = [
-    # 'cocit_authors': cocitauthor}}, #
-    {'$project': {'prefix': False, 'suffix': False, 'exact': False}}, {
-      '$lookup': {
-        'from': 'n_gramms', 'localField': '_id',
-        'foreignField': 'linked_papers.cont_id', 'as': 'cont'}},
+    {'$project': {
+      'prefix': 0, 'suffix': 0, 'exact': 0, 'positive_negative': 0,
+      'bundles': 0, 'linked_papers_topics': 0}},
+    {'$lookup': {
+      'from': 'n_gramms', 'localField': 'linked_papers_ngrams._id',
+      'foreignField': '_id', 'as': 'cont'}},
     {'$unwind': '$cont'},
   ]
+
   if nka or ltype:
-    # {'$match': {'cont.nka': nka, 'cont.type': ltype}},
     pipeline += [get_ngramm_filter(nka, ltype, 'cont')]
+
   pipeline += [
-    {'$unwind': '$cont.linked_papers'},
-    {'$match': {'$expr': {'$eq': ["$_id", "$cont.linked_papers.cont_id"]}}},
-    {'$project': {'cont.type': False}},  # 'cont.linked_papers': False,
-    # {'$sort': {'frag_num': 1}},
+    {'$unwind': '$linked_papers_ngrams'},
+    {'$match': {'$expr': {'$eq': ['$cont._id', '$linked_papers_ngrams._id']}}},
   ]
+
   out_dict = {}
   for i, (cocitauthor, cnt, conts) in enumerate(topN, 1):
     frags = Counter()
     congr = defaultdict(Counter)
+    titles = {}
+    types = {}
 
     work_pipeline = [
       {'$match': {'frag_num': {'$gt': 0}, '_id': {'$in': conts}}},
     ] +  pipeline
 
+    # _logger.debug('cocitauthor: "%s", cnt: %s, pipeline: %s', cocitauthor, cnt, work_pipeline)
     async for doc in contexts.aggregate(work_pipeline):
       cont = doc['cont']
-      ngr = cont['title']
-      if topn_gramm and ngr not in exists:
+      ngr_title = cont['title']
+      ngr_id = cont['_id']
+      if topn_gramm and ngr_id not in exists:
         continue
 
       fnum = doc['frag_num']
       frags[fnum] += 1
-      congr[ngr][fnum] += cont['linked_papers']['cnt']
+      ngr_cnt = doc['linked_papers_ngrams']['cnt']
+      if ltype:
+        congr[ngr_title][fnum] += ngr_cnt
+      else:
+        congr[ngr_id][fnum] += ngr_cnt
+        titles[ngr_id] = ngr_title
+        types[ngr_id] = cont['type']
 
     crossgrams = {}
     out_dict[cocitauthor] = dict(sum=cnt, frags=frags, crossgrams=crossgrams)
@@ -538,7 +549,12 @@ async def _req_frags_cocitauthors_ngramms(request: web.Request) -> web.StreamRes
     for j, (co, cnts) in enumerate(
       sorted(congr.items(), key=lambda kv: (-sum(kv[1].values()), kv[0])), 1
     ):
-      crossgrams[co] = dict(frags=cnts, sum=sum(cnts.values()))
+      if titles:
+        ngr = dict(
+          title=titles[co], type=types[co], frags=cnts, sum=sum(cnts.values()))
+      else:
+        ngr = dict(frags=cnts, sum=sum(cnts.values()))
+      crossgrams[co] = ngr
 
   return json_response(out_dict)
 
@@ -611,18 +627,21 @@ async def _get_topn_cocit_authors(
     group = {'$group': {'_id': '$cocit_authors', 'count': {'$sum': 1}}}
     get_as_tuple = itemgetter('_id', 'count')
 
-  pipe = [
-    {'$match': {'frag_num': {'$gt': 0}, 'cocit_authors': {'$exists': True}}},
-    {'$project': {'prefix': False, 'suffix': False, 'exact': False}},
+  pipeline = [
+    {'$match': {'frag_num': {'$gt': 0}, 'cocit_authors': {'$exists': 1}}},
+    {'$project': {
+      'prefix': 0, 'suffix': 0, 'exact': 0, 'positive_negative': 0,
+      'bundles': 0, 'linked_papers_ngrams': 0, 'linked_papers_topics': 0}},
     {'$unwind': '$cocit_authors'},
     # {'$group': {'_id': '$cocit_authors', 'count': {'$sum': 1}}},
     group,
     {'$sort': {'count': -1, '_id': 1}},
   ]
   if topn:
-    pipe += [{'$limit': topn}]
+    pipeline += [{'$limit': topn}]
 
-  top50 = [get_as_tuple(doc) async for doc in contexts.aggregate(pipe)]
+  # _logger.debug('pipeline: %s', pipeline)
+  top50 = [get_as_tuple(doc) async for doc in contexts.aggregate(pipeline)]
   return tuple(top50)
 
 
