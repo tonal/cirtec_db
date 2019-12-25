@@ -91,3 +91,6 @@ GET http://localhost:8668/cirtec_dev/frags/ngramms/topics/
 GET http://localhost:8668/cirtec_dev/frags/cocitauthors/ngramms/
 
 ###
+GET http://localhost:8668/cirtec_dev/frags/cocitauthors/topics/
+
+###
