@@ -27,7 +27,6 @@ async def init_server(aiohttp_client):
 @pytest.mark.parametrize('url', [
   '/cirtec_dev/top/ref_bundles/',
   '/cirtec_dev/top/ref_authors/',
-  '/cirtec_dev/pubs/ref_authors/',
   '/cirtec_dev/ref_auth_bund4ngramm_tops/',
   '/cirtec_dev/ref_bund4ngramm_tops/',
   '/cirtec_dev/ref_auth4ngramm_tops/',
