@@ -36,8 +36,6 @@ def main():
     _ = update_cocits_authors(mdb, for_del, COCITS_AUTHORS)
     _ = update_cocits_refs(mdb, for_del, COCITS_REFS)
     # get_no_base(mdb, get_conames(COCITS_REFS))
-    # r = mcont.find({'cocit_authors': {'$exists': True}}).count()
-    # print(f'delete {mcont.name}:', r)
 
 
 def update_cocits_authors(mdb:Database, for_del:int, url:str):
@@ -73,6 +71,10 @@ def _update_cocits(mdb:Database, for_del:int, field:str, uri:str):
 
   for i, (author, values) in enumerate(cocits.items(), 1):
     # print(i, author)
+    if author == 'null':
+      # в данных бывают артефакты
+      continue
+    coauthor = ''
     try:
       cocits2 = values['co']
     except KeyError:
@@ -84,6 +86,9 @@ def _update_cocits(mdb:Database, for_del:int, field:str, uri:str):
     j = 0
     for j, (coauthor, conts) in enumerate(cocits2.items(), 1):
       # print(' ', j, coauthor, len(conts))
+      if coauthor == 'null':
+        # в данных бывают артефакты
+        continue
 
       k = 0
       for k, cont in enumerate(conts, 1):
