@@ -16,7 +16,8 @@ import requests
 from load_classif_pos_neg import update_class_pos_neg
 from load_pubs import update_pubs_conts, SOURCE_XML, SOURCE_URL
 from load_bundles import update_bundles, BUNDLES
-from load_cocits import update_cocits, COCITS
+from load_cocits import (
+  update_cocits_authors, COCITS_AUTHORS, update_cocits_refs, COCITS_REFS)
 from load_ngrams import update_ngramms, NGRAM_ROOT
 from load_topics import update_topics, TOPICS
 from utils import load_config
@@ -44,7 +45,8 @@ def main():
         (update_bundles, BUNDLES),
         (update_ngramms, NGRAM_ROOT),
         (update_topics, TOPICS),
-        (update_cocits, COCITS),
+        (update_cocits_authors, COCITS_AUTHORS),
+        (update_cocits_refs, COCITS_REFS),
         (update_class_pos_neg,),
       )
       for c in do_upd(u, *args)
