@@ -46,7 +46,7 @@ def update_topics(mdb:Database, for_del:int, uri_topics:str):
   mcont_update = partial(mcont.update_one, upsert=True)
 
   mtops.update_many({}, {'$set': {'for_del': for_del}})
-  mcont.update_many({}, {'$unset': {'linked_papers_topics': 1}})
+  # mcont.update_many({}, {'$unset': {'linked_papers_topics': 1}})
 
   # topics = json.load(open(uri_topics, encoding='utf-8'))
   with urlopen(uri_topics) as f:

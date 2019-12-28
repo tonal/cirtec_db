@@ -32,7 +32,12 @@ start =
                 element Start { xsd:integer },
                 element End { xsd:integer },
                 element Exact { text },
-                element Reference { xsd:integer }+
+                element Reference {
+                    attribute end { xsd:integer },
+                    attribute exact { text },
+                    attribute start { xsd:integer },
+                    xsd:integer
+                }+
             }+,
             element citer {
                 element author { text }+,

@@ -60,7 +60,9 @@ def main():
 
 
 def check_date():
-  for uri in (SOURCE_URL, SOURCE_XML, BUNDLES, TOPICS, *COCITS):
+  for uri in (
+    SOURCE_URL, SOURCE_XML, BUNDLES, TOPICS, COCITS_AUTHORS, COCITS_REFS
+  ):
     rsp = requests.head(uri)
     print(uri, rsp.status_code)
     # for k, v in rsp.headers.items():

@@ -72,7 +72,11 @@ def parse_contexts(mcont:Collection):
   for i, cont in enumerate(mcont.find({'exact': {'$exists': True}}), 1):
     # print(i, f'"{li.rstrip()}"')
     cid, prefix, exact, suffix = get_flds(cont)
-    text = ' '.join([prefix, exact, suffix])
+    try:
+      text = ' '.join([prefix, exact, suffix])
+    except:
+      print(cid, tuple(map(bool, [prefix, exact, suffix])), prefix, exact, suffix)
+      raise
     seq = seq2text(text)
     yield cid, seq
 

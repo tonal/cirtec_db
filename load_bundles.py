@@ -41,7 +41,6 @@ def main():
 def update_bundles(mdb:Database, for_del:int, bundles:str) -> Tuple[Collection]:
   """Обновление коллекции bundles и дополнение в публикации и контексты"""
   mbnds = mdb['bundles']
-  mbnds.update_many({}, {'$set': {'for_del': for_del}})
   mbnds_update = partial(mbnds.update_one, upsert=True)
   mcont = mdb['contexts']
   mcont_update = partial(mcont.update_one, upsert=True)
@@ -52,6 +51,8 @@ def update_bundles(mdb:Database, for_del:int, bundles:str) -> Tuple[Collection]:
   # topics = json.load(open(bundles, encoding='utf-8'))
   with urlopen(bundles) as f:
     topics = json.load(f)
+
+  mbnds.update_many({}, {'$set': {'for_del': for_del}})
 
   def bib2bib(a, y, t):
     res = {}

@@ -32,14 +32,14 @@ packaging==19.2           # via pytest
 pandas==0.25.3
 parsel==1.5.2
 pluggy==0.13.1            # via pytest
-py==1.8.0                 # via pytest
+py==1.8.1                 # via pytest
 pycares==3.1.0            # via aiodns
 pycparser==2.19           # via cffi
 pymongo[snappy,srv]==3.10.0
 pymorphy2-dicts-ru==2.4.404381.4453942
 pymorphy2-dicts==2.4.393442.3710985  # via pymorphy2
 pymorphy2==0.8
-pyparsing==2.4.5          # via packaging
+pyparsing==2.4.6          # via packaging
 pytest-aiohttp==0.3.0
 pytest==5.3.2             # via pytest-aiohttp
 python-dateutil==2.8.1    # via pandas

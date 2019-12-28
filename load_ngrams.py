@@ -49,11 +49,13 @@ def update_ngramms(
 ) -> Tuple[Collection]:
   """Обновление коллекции n_gramms и дополнение в контексты"""
   col_gramms = mdb['n_gramms']
-  col_gramms.update_many({}, {'$set': {'for_del': for_del}})
   ngrm_update = partial(col_gramms.update_one, upsert=True)
   mcont = mdb['contexts']
   mcont_update = partial(mcont.update_one, upsert=True)
-  mcont.update_many({}, {'$unset': {'linked_papers_ngrams': 1}})
+  # mcont.update_many({}, {'$unset': {'linked_papers_ngrams': 1}})
+
+  col_gramms.update_many({}, {'$set': {'for_del': for_del}})
+
   cnt = 0
   PREF = 'linked_papers_'
   PREF_LEN = len(PREF)

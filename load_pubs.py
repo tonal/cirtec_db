@@ -59,13 +59,21 @@ def update_pubs_conts(
   mpubs_update = partial(mpubs.update_one, upsert=True)
   mcont:Collection = mdb['contexts']
   mcont_update = partial(mcont.update_one, upsert=True)
+
   mpubs.update_many({}, {'$set': {'for_del': for_del}})
   mcont.update_many({}, {'$set': {'for_del': for_del}})
-  pub_conts = load_url(cont_url)
+
+  i = cont_cnt = 0
+  # pub_conts = load_url(cont_url)
   xml_root = etree.parse(linked_papers_xml)
   root = Selector(root=xml_root)
   for i, pub in enumerate(root.xpath('//ref'), 1):
     pub_id = pub.xpath('@found_in').get()
+    futli = pub.xpath('@futli').get()
+
+    # Минимальная позицыя референса считается окончанием статьи.
+    start_ref = min(map(int, map(Selector.get, pub.xpath('reference/@start'))))
+
     pub_names = tuple(
       sorted(norm_spaces(t) for t in pub.xpath('citer/title/text()').getall()))
 
@@ -76,7 +84,8 @@ def update_pubs_conts(
 
     pub_name = ' / '.join(pub_names)
     doc_pub = dict(
-      name=pub_name, names=pub_names, uni_authors=[AUTHOR], reauthors=authors)
+      name=pub_name, names=pub_names, uni_authors=[AUTHOR], reauthors=authors,
+      futli=futli)
     if year:
       doc_pub.update(year=int(year))
 
@@ -84,9 +93,27 @@ def update_pubs_conts(
     print(i, pub_id, pub_name)
 
     j = 0
-    for j, (cont_id, cont) in enumerate(pub_conts[pub_id], 1):
+    one_five = start_ref / 5
+    for j, cont_elt in enumerate(pub.xpath('intextref')):
+      start = int(cont_elt.xpath('Start/text()').get())
+      end = int(cont_elt.xpath('End/text()').get())
+      prefix = cont_elt.xpath('Prefix/text()').get() or ''
+      exact = cont_elt.xpath('Exact/text()').get()
+      suffix = cont_elt.xpath('Suffix/text()').get() or ''
+      if start_ref <= start:
+        fnum = 5
+      else:
+        fnum = int(start / one_five) + 1
+      cont = dict(
+        pub_id=pub_id, frag_num=fnum,
+        start=start, end=end, prefix=prefix, exact=exact, suffix=suffix)
+      cont_id = f'{pub_id}@{start}'
       mcont_update(dict(_id=cont_id), {'$set': cont, '$unset': {'for_del': 1}})
+
     print(' ', j)
+    cont_cnt += j
+
+  print(cont_cnt)
   return mcont, mpubs
 
 
