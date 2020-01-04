@@ -25,7 +25,7 @@ joblib==0.14.1
 lxml==4.4.2
 more-itertools==8.0.2
 motor==2.1.0
-multidict==4.7.2          # via aiohttp, yarl
+multidict==4.7.3          # via aiohttp, yarl
 numpy==1.18.0             # via pandas, scikit-learn, scipy
 pandas==0.25.3
 parsel==1.5.2
@@ -40,7 +40,7 @@ python-snappy==0.5.4      # via pymongo
 pytz==2019.3              # via pandas
 pyyaml==5.2
 requests==2.22.0
-scikit-learn==0.22        # via sklearn
+scikit-learn==0.22.1      # via sklearn
 scipy==1.4.1              # via scikit-learn
 six==1.13.0               # via parsel, python-dateutil, w3lib
 sklearn==0.0
