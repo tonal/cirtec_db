@@ -1,33 +1,31 @@
 # Заполняем базу данных
 
-## Публикации и контексты
-
-Заполняются из текста со следующей страницы: [Sergey-Sinelnikov-Murylev ru](http://cirtec.ranepa.ru/cgi/spadist4bundle.cgi?code=linked_papers&c=Sergey-Sinelnikov-Murylev)
-или с [Sergey-Sinelnikov-Murylev org](http://cirtec.repec.org/cgi/spadist4bundle.cgi?code=linked_papers&c=Sergey-Sinelnikov-Murylev)
-
-На странице находятся блоки данных о публикации.
-
-Каждый начинается со ссылки на публикацию вида:
-`https://socionet.ru/publication.xml?h=repec:rnp:ecopol:1532`
-  
-Где `repec:rnp:ecopol:1532` - уникальный ID контекста.
-
-Далее идёт список фрагментов со списком контекстов цитирования.
-
-
 ## Запросы к серверу
+
+В большинстве запросов можно ограничить выдачу:
+  - **topn**: число интерисующих элементов.
+
+Везде, где в запросах встречаются «фразы» можно указать арность и тип с помощью 
+следующих параметров: 
+  - **nka**: арность фразы.
+  - **ltype**: использовать леммизированые *lemmas* или нелеммизированные *nolemmas* фразы
+В случае, если тип не указан, он выдаётся ответе для каждой фразы.
+
+Везде, где в запросах встречаются «топики контекстов цитирований» можно указать 
+минимальную вероятность учитываемых топиков: 
+  - **probability**: минимальная вероятность
 
 ### А Суммарное распределение цитирований по 5-ти фрагментам для всех публикаций
 ```http request
 GET /cirtec/frags/
 ```
 
-### А Распределение цитирований по 5-ти фрагментам для отдельных публикаций. #заданного автора.
+### А Распределение цитирований по 5-ти фрагментам для отдельных публикаций.
 ```http request
 GET /cirtec/frags/publications/
 ```
 
-### Кросс-распределение «со-цитируемые авторы» по публикациям
+### А Кросс-распределение «со-цитируемые авторы» по публикациям
 ```http request
 GET /cirtec/publ/publications/cocitauthors/
 ```
@@ -35,8 +33,7 @@ GET /cirtec/publ/publications/cocitauthors/
   - **topn**: число интерисующих со-цитируемых авторов из topN. Можно не указывать
   - **topn_cocitauthors**: число интерисующих со-цитируемых кросс-авторов из topN. Можно не указывать
 
-
-###   Кросс-распределение «фразы из контекстов цитирований» по публикациям
+### А Кросс-распределение «фразы из контекстов цитирований» по публикациям
 ```http request
 GET /cirtec/publ/publications/ngramms/
 ```
@@ -45,15 +42,22 @@ GET /cirtec/publ/publications/ngramms/
   - **nka**: арность фразы. Можно не указывать.
   - **ltype**: использовать леммизированые *lemmas* или нелеммизированные *nolemmas* фразы
   
-###   Кросс-распределение «топики контекстов цитирований» по публикациям
+### А Кросс-распределение «топики контекстов цитирований» по публикациям
 ```http request
 GET /cirtec/publ/publications/topics/
 ```
 Параметры:
   - **topn**: число интерисующих топиков из topN. Можно не указывать
 
+### А Кросс-распределение «публикации» - «со-цитируемые авторы»
+```http request
+GET /cirtec/publ/cocitauthors/cocitauthors/
+```
+Параметры:
+  - **topn**: число интерисующих со-цитируемых авторов из topN. Можно не указывать
+  - **topn_cocitauthors**: число интерисующих со-цитируемых кросс-авторов из topN. Можно не указывать
 
-### Количества употребления фраз в контексте
+### А Количества употребления фраз в контексте
 ```http request
 /cirtec/cnt/publications/ngramms/
 ```
@@ -83,7 +87,7 @@ GET /cirtec/frags/cocitauthors/cocitauthors/
   - **topn**: число интерисующих со-цитируемых авторов из topN. Можно не указывать
   - **topn_cocitauthors**: число интерисующих со-цитируемых кросс-авторов из topN. Можно не указывать
 
-### Кросс-распределение «публикации» - «со-цитируемые авторы»
+### А Кросс-распределение «публикации» - «со-цитируемые авторы»
 ```http request
 GET /cirtec/pubs/cocitauthors/cocitauthors/
 ```
@@ -247,3 +251,118 @@ GET /cirtec/top/topics/publications/
 ```
 Параметры:
   - **topn**: число интерисующих топиков из topN. Можно не указывать
+
+### Топ N фраз
+```http request
+GET /cirtec/top/ngramms/
+```
+
+### Топ N фраз по публикациям
+```http request
+GET /cirtec/top/ngramms/publications/
+```
+
+### Топ N фраз
+```http request
+GET /cirtec/cnt/ngramms/
+```
+
+### Топ N фраз по публикациям
+```http request
+GET /cirtec/cnt/publications/ngramms/
+```
+
+### Топ N бандлов
+```http request
+GET /cirtec/top/ref_bundles/
+```
+
+### Топ N авторов бандлов
+```http request
+GET /cirtec/top/ref_authors/
+```
+
+### Топ N авторов бандлов по публикациям
+```http request
+GET /cirtec/pubs/ref_authors/
+```
+
+### Кросс-распределение бандлов и топиков с фразами 
+```http request
+GET /cirtec/ref_bund4ngramm_tops/
+```
+
+### Кросс-распределение авторов бандлов и топиков с фразами 
+```http request
+GET /cirtec/ref_auth4ngramm_tops/
+```
+
+### Распределение тональности позитивный/негативный по публикациям
+```http request
+GET /cirtec/pos_neg/pubs/
+```
+
+### Распределение тональности позитивный/негативный по бандлам
+```http request
+GET /cirtec/pos_neg/ref_bundles/
+```
+
+### Распределение тональности позитивный/негативный по авторам бандлов
+```http request
+GET /cirtec/pos_neg/ref_authors/
+```
+
+### Распределение бандлов по фрагментам
+```http request
+GET /cirtec/frags/ref_bundles/
+```
+
+### Распределение авторов бандлов по фрагментам
+```http request
+GET /cirtec/frags/ref_authors/
+```
+
+### информация о публикациях
+```http request
+GET /cirtec/publications/
+```
+
+### Общее распределение классов тональности для контекстов из всех публикаций заданного автора
+```http request
+GET /cirtec/pos_neg/contexts/
+```
+
+### Тональность для топиков
+```http request
+GET /cirtec/pos_neg/topics/
+```
+
+### Тональность для фраз
+```http request
+GET /cirtec/pos_neg/ngramms/
+```
+
+### Тональность для со-цитируемых авторов
+```http request
+GET /cirtec/pos_neg/cocitauthors/
+```
+
+### Распределение тональности контекстов по 5-ти фрагментам
+```http request
+GET /cirtec/frags/pos_neg/contexts/
+```
+
+### Со-цитируемые авторы, кросс-распределение тональности их со-цитирований и распределение по 5-ти фрагментам
+```http request
+GET /cirtec/frags/pos_neg/cocitauthors/cocitauthors/
+```
+
+### Топ N со-цитируемых бандлов
+```http request
+GET /cirtec_dev/top/cocitrefs/
+```
+
+### Кросс-распределение «со-цитируемые бандлов» 
+```http request
+GET /cirtec_dev/top/cocitrefs/cocitrefs/
+```
