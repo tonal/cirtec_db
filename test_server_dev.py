@@ -23,8 +23,9 @@ async def init_server(aiohttp_client):
   return client
 
 
-@pytest.mark.parametrize('topn', [None, 5])
+@pytest.mark.parametrize('topn', [None, 5, 10])
 @pytest.mark.parametrize('url', [
+  '/cirtec_dev/publ/publications/ngramms/',
   '/cirtec_dev/top/ref_bundles/',
   '/cirtec_dev/top/ref_authors/',
   '/cirtec_dev/ref_auth_bund4ngramm_tops/',

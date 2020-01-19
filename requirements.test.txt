@@ -18,37 +18,37 @@ cssselect==1.1.0          # via parsel
 dawg-python==0.7.2        # via pymorphy2
 dnspython==1.16.0         # via pymongo
 docopt==0.6.2             # via pymorphy2
-fastnumbers==2.2.1
+fastnumbers==3.0.0
 html-text==0.5.1
 idna==2.8                 # via requests, yarl
 joblib==0.14.1
 lxml==4.4.2
-more-itertools==8.0.2
+more-itertools==8.1.0
 motor==2.1.0
-multidict==4.7.3          # via aiohttp, yarl
-numpy==1.18.0             # via pandas, scikit-learn, scipy
-packaging==19.2           # via pytest
+multidict==4.7.4          # via aiohttp, yarl
+numpy==1.18.1             # via pandas, scikit-learn, scipy
+packaging==20.0           # via pytest
 pandas==0.25.3
 parsel==1.5.2
 pluggy==0.13.1            # via pytest
 py==1.8.1                 # via pytest
-pycares==3.1.0            # via aiodns
+pycares==3.1.1            # via aiodns
 pycparser==2.19           # via cffi
-pymongo[snappy,srv]==3.10.0
+pymongo[snappy,srv]==3.10.1
 pymorphy2-dicts-ru==2.4.404381.4453942
 pymorphy2-dicts==2.4.393442.3710985  # via pymorphy2
 pymorphy2==0.8
 pyparsing==2.4.6          # via packaging
 pytest-aiohttp==0.3.0
-pytest==5.3.2             # via pytest-aiohttp
+pytest==5.3.3             # via pytest-aiohttp
 python-dateutil==2.8.1    # via pandas
 python-snappy==0.5.4      # via pymongo
 pytz==2019.3              # via pandas
-pyyaml==5.2
+pyyaml==5.3
 requests==2.22.0
 scikit-learn==0.22.1      # via sklearn
 scipy==1.4.1              # via scikit-learn
-six==1.13.0               # via packaging, parsel, python-dateutil, w3lib
+six==1.14.0               # via packaging, parsel, python-dateutil, w3lib
 sklearn==0.0
 urllib3==1.25.7           # via requests
 uvloop==0.14.0

@@ -178,13 +178,14 @@ async def _req_publ_publications_cocitauthors(
 async def _req_publ_publications_ngramms(
   request: web.Request
 ) -> web.StreamResponse:
+  """Кросс-распределение «фразы из контекстов цитирований» по публикациям"""
   app = request.app
   mdb = app['db']
 
   publications = mdb.publications
   pubs = {
     pdoc['_id']: pdoc['name']
-    async for pdoc in publications.find({'name': {'$exists': True}})
+    async for pdoc in publications.find({'name': {'$exists': True}}).sort('_id')
   }
 
   topn = getreqarg_topn(request)
@@ -202,66 +203,74 @@ async def _req_publ_publications_ngramms(
     postmath = None
 
   pipeline = [
-    {'$project': {'prefix': False, 'suffix': False, 'exact': False}},
+    {'$project': {
+      'prefix': 0, 'suffix': 0, 'exact': 0, 'linked_papers_topics': 0,
+      'positive_negative': 0, 'bundles': 0},},
+    {'$unwind': '$linked_papers_ngrams'},
     {'$lookup': {
-      'from': 'n_gramms', 'localField': '_id',
-      'foreignField': 'linked_papers.cont_id', 'as': 'cont'}},
+      'from': 'n_gramms', 'localField': 'linked_papers_ngrams._id',
+      'foreignField': '_id', 'as': 'cont'}},
     {'$unwind': '$cont'},
   ]
   if postmath:
     pipeline += postmath
-  pipeline += [
-    {'$unwind': '$cont.linked_papers'},
-    {'$match': {'$expr': {'$eq': ["$_id", "$cont.linked_papers.cont_id"]}}},
-    {'$project': {'cont.type': False}},  # 'cont.linked_papers': False,
-    # {'$sort': {'frag_num': 1}},
-  ]
 
   contexts = mdb.contexts
   n_gramms = mdb.n_gramms
 
-  out_pub_dict = {}
+  out_pub_list = []
 
   for pub_id, pub_desc in pubs.items():
-    topN = await _get_topn_ngramm(n_gramms, nka, ltype, topn, pub_id=pub_id)
-    exists = frozenset(t for t, _, _ in topN)
+    topN = await _get_topn_ngramm(
+      n_gramms, nka, ltype, topn, pub_id=pub_id, title_always_id=True,
+      show_type=True)
+    exists = frozenset(map(itemgetter(0), topN))
 
-    out_dict = {}
+    out_list = []
     oconts = set()
 
-    for i, (ngrmm, cnt, conts) in enumerate(topN, 1):
+    for i, (ngrmm, ntype, cnt, conts) in enumerate(topN, 1):
       congr = defaultdict(set)
+      ngrms = {}
 
       work_pipeline = [
-                        {'$match': {'_id': {'$in': conts}, 'pub_id': pub_id}}
-                      ] + pipeline
-
+        {'$match': {'_id': {'$in': conts}, 'pub_id': pub_id}}
+      ] + pipeline + [
+        {'$match': {'cont.type': ntype}}
+      ]
+      # _logger.debug('pipeline: %s', work_pipeline)
       async for doc in contexts.aggregate(work_pipeline):
         cont = doc['cont']
+        ngr_id = cont['_id']
         ngr = cont['title']
-        if ngr not in exists:
+        if ngr_id not in exists:
           continue
-        cid = cont['linked_papers']['cont_id']
+        cid = doc['_id']
         oconts.add(cid)
-        congr[ngr].add(cid)
+        congr[ngr_id].add(cid)
+        ngrms[ngr_id] = dict(type=cont['type'], title=ngr, nka=cont['nka'])
 
       pubs = congr.pop(ngrmm)
-      crossgrams = {}
+      b_ngrm = ngrms.pop(ngrmm)
+      crossgrams = []
 
       for j, (co, vals) in enumerate(
         sorted(congr.items(), key=lambda kv: (-len(kv[1]), kv[0])), 1
       ):
-        crossgrams[co] = tuple(sorted(vals))
+        co_ = ngrms[co]
+        crossgrams.append(
+          dict(type=co_['type'], title=co_['title'], conts_len=len(vals)))
 
-      out_dict[ngrmm] = dict(
-        pubs=tuple(sorted(pubs)), pubs_len=len(pubs),
-        crossgrams=crossgrams, crossgrams_len=len(crossgrams))
+      out_list.append(dict(
+        type=b_ngrm['type'], title=b_ngrm['title'], nka=b_ngrm['nka'],
+        conts=tuple(sorted(pubs)), conts_len=len(pubs),
+        crossgrams=crossgrams, crossgrams_len=len(crossgrams)))
 
-    out_pub_dict[pub_id] = dict(
-      descr=pub_desc, ngrams=out_dict, ngrams_len=len(out_dict),
-      conts=tuple(sorted(oconts)), conts_len=len(conts))
+    out_pub_list.append(dict(
+      pub_id=pub_id, descr=pub_desc, ngrams=out_list, ngrams_len=len(out_list),
+      conts=tuple(sorted(oconts)), conts_len=len(oconts)))
 
-  return json_response(out_pub_dict)
+  return json_response(out_pub_list)
 
 
 async def _req_publ_publications_topics(request: web.Request) -> web.StreamResponse:

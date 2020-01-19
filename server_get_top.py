@@ -84,7 +84,7 @@ async def _get_topn_cocit_refs(
 
 async def _get_topn_ngramm(
   colls:Collection, nka:Optional[int], ltype:Optional[str], topn:Optional[int],
-  *, pub_id:Optional[str]=None,
+  *, pub_id:Optional[str]=None, title_always_id:bool=False, show_type:bool=False
 ) -> Tuple:
 
   if pub_id:
@@ -110,12 +110,14 @@ async def _get_topn_ngramm(
   if nka or ltype:
     pipeline += [get_ngramm_filter(nka, ltype, 'ngramm')]
 
-  if ltype:
+  if ltype and not title_always_id:
     title = '$ngramm.title'
   else:
     title = '$_id'
 
-  projects = {'_id': 0, 'title': title, 'count': 1, 'conts': '$cont_ids'}
+  projects = {
+    '_id': 0, 'type': '$ngramm.type', 'title': title, 'count': 1,
+    'conts': '$cont_ids'}
 
   pipeline += [{'$project': projects}]
 
@@ -123,7 +125,9 @@ async def _get_topn_ngramm(
     pipeline += [{'$limit': topn}]
 
   # _logger.debug('pipeline: %s', pipeline)
-  get_as_tuple = itemgetter('title', 'count', 'conts')
+  get_as_tuple = (
+    itemgetter('title', 'type', 'count', 'conts') if show_type
+    else itemgetter('title', 'count', 'conts'))
   contexts:Collection = colls.database.contexts
   topN = tuple([get_as_tuple(doc) async for doc in contexts.aggregate(pipeline)])
   return topN
