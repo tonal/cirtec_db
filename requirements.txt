@@ -44,7 +44,7 @@ scikit-learn==0.22.1      # via sklearn
 scipy==1.4.1              # via scikit-learn
 six==1.14.0               # via parsel, python-dateutil, w3lib
 sklearn==0.0
-urllib3==1.25.7           # via requests
+urllib3==1.25.8           # via requests
 uvloop==0.14.0
 w3lib==1.21.0             # via parsel
 xlrd==1.2.0
