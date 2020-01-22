@@ -78,9 +78,9 @@ def create_srv():
     '/cirtec/frags/pos_neg/cocitauthors/cocitauthors/',
     _req_frags_pos_neg_cocitauthors2)
   # Топ N со-цитируемых авторов
-  add_get(r'/cirtec_dev/top/cocitrefs/', _req_top_cocitrefs)
-  add_get(r'/cirtec_dev/top/cocitrefs/cocitrefs/', _req_top_cocitrefs2)
-  add_get('/cirtec_dev/by_frags/ref_authors/', _req_by_frags_refauthors)
+  add_get(r'/cirtec/top/cocitrefs/', _req_top_cocitrefs)
+  add_get(r'/cirtec/top/cocitrefs/cocitrefs/', _req_top_cocitrefs2)
+  add_get('/cirtec/by_frags/ref_authors/', _req_by_frags_refauthors)
 
 
   app['conf'] = conf
