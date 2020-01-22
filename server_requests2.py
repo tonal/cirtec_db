@@ -555,6 +555,31 @@ async def _req_frags_refauthors(request: web.Request) -> web.StreamResponse:
   return json_response(out)
 
 
+async def _req_by_frags_refauthors(request: web.Request) -> web.StreamResponse:
+  app = request.app
+  mdb = app['db']
+
+  topn = getreqarg_topn(request)
+
+  pipeline = _get_refauthors_pipeline(topn)
+
+  contexts:Collection = mdb.contexts
+  out = []
+  for fnum in range(1, 6):
+    out_frag = []
+    work_pipe = [
+      {'$match': {'frag_num': fnum}}
+    ] + pipeline
+    async for row in contexts.aggregate(work_pipe):
+      row.pop('pos_neg', None)
+      row.pop('frags', None)
+      out_frag.append(row)
+
+    out.append(dict(frag_num=fnum, refauthors=out_frag))
+
+  return json_response(out)
+
+
 async def _req_top_ngramm_pubs(request: web.Request) -> web.StreamResponse:
   """Топ N фраз по публикациям"""
   app = request.app

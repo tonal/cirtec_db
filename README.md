@@ -366,3 +366,8 @@ GET /cirtec_dev/top/cocitrefs/
 ```http request
 GET /cirtec_dev/top/cocitrefs/cocitrefs/
 ```
+
+### Для каждого из 5-ти фрагментов публикаций топ авторов референсов.
+```http request
+GET /cirtec_dev/by_frags/ref_authors/
+```
