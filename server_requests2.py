@@ -93,10 +93,10 @@ async def _req_top_refauthors(request: web.Request) -> web.StreamResponse:
 
 def _get_refauthors_pipeline(topn:int=None):
   pipeline = [
-    {'$match': {'exact': {'$exists': True}}},
+    {'$match': {'exact': {'$exists': 1}}},
     {'$project': {
-      'prefix': False, 'suffix': False, 'exact': False,
-      'linked_papers_topics': False, 'linked_papers_ngrams': False}},
+      'prefix': 0, 'suffix': 0, 'exact': 0, 'linked_papers_topics': 0,
+      'linked_papers_ngrams': 0}},
     {'$unwind': '$bundles'},
     {'$match': {'bundles': {'$ne': 'nUSJrP'}}},
     {'$lookup': {
@@ -106,19 +106,20 @@ def _get_refauthors_pipeline(topn:int=None):
     {'$unwind': '$bun.authors'},
     {'$group': {
       '_id': '$bun.authors', 'cits': {'$addToSet': '$_id'},
-      'pubs': {'$addToSet': '$pub_id'},
-      'binds': {
-          '$addToSet': {
-            '_id': '$bun._id', 'total_cits': '$bun.total_cits',
-            'total_pubs': '$bun.total_pubs'}},
+      'cits_all': {'$sum': 1}, 'pubs': {'$addToSet': '$pub_id'},
+      'bunds_ids': {'$addToSet': '$bundles'},
+      'bunds': {
+        '$addToSet': {
+          '_id': '$bun._id', 'total_cits': '$bun.total_cits',
+          'total_pubs': '$bun.total_pubs'}},
       'pos_neg': {'$push': '$positive_negative'},
       'frags': {'$push': '$frag_num'}}},
     {'$project': {
-      '_id': False, 'author': '$_id', 'cits': {'$size': '$cits'},
-      'pubs': {'$size': '$pubs'}, 'total_cits': {'$sum': '$binds.total_cits'},
-      'total_pubs': {'$sum': '$binds.total_pubs'},
-      'pos_neg': True, 'frags': True}},
-    {'$sort': {'cits': -1, 'pubs': -1, 'author': 1}},
+      '_id': 0, 'author': '$_id', 'cits': {'$size': '$cits'},
+      'cits_all': '$cits_all', 'bunds_cnt': {'$size': '$bunds_ids'},
+      'pubs': {'$size': '$pubs'}, 'total_cits': {'$sum': '$bunds.total_cits'},
+      'total_pubs': {'$sum': '$bunds.total_pubs'}, 'pos_neg': 1, 'frags': 1}},
+    {'$sort': {'cits_all': -1, 'cits': -1, 'pubs': -1, 'author': 1}},
   ]
   if topn:
     pipeline += [{'$limit': topn}]
