@@ -9,11 +9,11 @@ import logging
 from operator import itemgetter
 
 from aiohttp import web
-from fastnumbers import fast_float
 from pymongo import ASCENDING
 from pymongo.collection import Collection
 
-from server_get_top import get_ngramm_filter, _get_topn_cocit_refs
+from server_get_top import (
+  get_ngramm_filter, _get_topn_cocit_refs, _get_refauthors_pipeline)
 from server_utils import (
   getreqarg_topn, json_response, getreqarg_probability,
   getreqarg_nka, getreqarg_ltype)
@@ -89,41 +89,6 @@ async def _req_top_refauthors(request: web.Request) -> web.StreamResponse:
     out.append(row)
 
   return json_response(out)
-
-
-def _get_refauthors_pipeline(topn:int=None):
-  pipeline = [
-    {'$match': {'exact': {'$exists': 1}}},
-    {'$project': {
-      'prefix': 0, 'suffix': 0, 'exact': 0, 'linked_papers_topics': 0,
-      'linked_papers_ngrams': 0}},
-    {'$unwind': '$bundles'},
-    {'$match': {'bundles': {'$ne': 'nUSJrP'}}},
-    {'$lookup': {
-      'from': 'bundles', 'localField': 'bundles', 'foreignField': '_id',
-      'as': 'bun'}},
-    {'$unwind': '$bun'},
-    {'$unwind': '$bun.authors'},
-    {'$group': {
-      '_id': '$bun.authors', 'cits': {'$addToSet': '$_id'},
-      'cits_all': {'$sum': 1}, 'pubs': {'$addToSet': '$pub_id'},
-      'bunds_ids': {'$addToSet': '$bundles'},
-      'bunds': {
-        '$addToSet': {
-          '_id': '$bun._id', 'total_cits': '$bun.total_cits',
-          'total_pubs': '$bun.total_pubs'}},
-      'pos_neg': {'$push': '$positive_negative'},
-      'frags': {'$push': '$frag_num'}}},
-    {'$project': {
-      '_id': 0, 'author': '$_id', 'cits': {'$size': '$cits'},
-      'cits_all': '$cits_all', 'bunds_cnt': {'$size': '$bunds_ids'},
-      'pubs': {'$size': '$pubs'}, 'total_cits': {'$sum': '$bunds.total_cits'},
-      'total_pubs': {'$sum': '$bunds.total_pubs'}, 'pos_neg': 1, 'frags': 1}},
-    {'$sort': {'cits_all': -1, 'cits': -1, 'pubs': -1, 'author': 1}},
-  ]
-  if topn:
-    pipeline += [{'$limit': topn}]
-  return pipeline
 
 
 async def _req_pubs_refauthors(request: web.Request) -> web.StreamResponse:
@@ -1222,5 +1187,68 @@ async def _req_top_cocitrefs2(
       cocitpair=tuple(cocitpair.values()),
       cont_cnt=len(cont_ids), pub_cnt=len(pub_ids),
       frags=dict(sorted(frags.items())), pub_ids=pub_ids, cont_ids=cont_ids))
+
+  return json_response(out)
+
+
+async def _req_top_detail_bund_refauthors(
+  request: web.Request
+) -> web.StreamResponse:
+  app = request.app
+  mdb = app['db']
+
+  topn = getreqarg_topn(request)
+
+  pipeline = [
+    {'$match': {'exact': {'$exists': 1}}},
+    {'$project': {
+      'prefix': 0, 'suffix': 0, 'exact': 0, 'linked_papers_topics': 0,
+      'linked_papers_ngrams': 0}},
+    {'$unwind': '$bundles'},
+    {'$match': {'bundles': {'$ne': 'nUSJrP'}}},
+    {'$lookup': {
+      'from': 'bundles', 'localField': 'bundles', 'foreignField': '_id',
+      'as': 'bun'}},
+    {'$unwind': '$bun'},
+    {'$unwind': '$bun.authors'},
+    {'$group': {
+      '_id': {'author': '$bun.authors', 'bund': '$bundles'},
+      'cits': {'$addToSet': '$_id'}, 'cits_all': {'$sum': 1},
+      'pubs': {'$addToSet': '$pub_id'},
+      'bunds': {'$addToSet': {
+        '_id': '$bun._id', 'total_cits': '$bun.total_cits',
+        'total_pubs': '$bun.total_pubs'}},}},
+    {'$unwind': '$bunds'},
+    {'$group': {
+      '_id': '$_id.author',
+      'cits_all': {'$sum': '$cits_all'},
+      'cits': {'$push': '$cits'}, 'pubs': {'$push': '$pubs'},
+      'bunds': {'$push': {
+        '_id': '$bunds._id', 'cnt': '$cits_all',
+        'total_cits': '$bunds.total_cits', 'total_pubs': '$bunds.total_pubs'}}, }},
+    {'$project': {
+      '_id': 0, 'author': '$_id', 'cits_all': '$cits_all',
+      'cits': {'$size': {'$reduce': {
+        'input': '$cits', 'initialValue': [],
+        'in': {'$setUnion': ['$$value', '$$this']}}}, },
+      'pubs': {'$size': {'$reduce': {
+        'input': '$pubs', 'initialValue': [],
+        'in': {'$setUnion': ['$$value', '$$this']}}}},
+      'bunds_cnt': {'$size': '$bunds'},
+      'total_cits': {'$sum': '$bunds.total_cits'},
+      'total_pubs': {'$sum': '$bunds.total_pubs'},
+      'bunds': {'$map': {
+        'input': '$bunds', 'as': 'b',
+        'in': {'bund': '$$b._id', 'cnt': '$$b.cnt'},}}, }},
+    {'$sort': {'cits_all': -1, 'cits': -1, 'bunds_cnt': -1, 'pubs': -1, 'author': 1}},
+  ]
+
+  if topn:
+    pipeline += [{'$limit': topn}]
+
+  contexts:Collection = mdb.contexts
+  out = []
+  async for row in contexts.aggregate(pipeline):
+    out.append(row)
 
   return json_response(out)

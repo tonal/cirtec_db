@@ -371,3 +371,9 @@ GET /cirtec_dev/top/cocitrefs/cocitrefs/
 ```http request
 GET /cirtec_dev/by_frags/ref_authors/
 ```
+
+### Топ N авторов бандлов с детализацией по бандлам
+```http request
+GET /cirtec_dev/top_detail_bund/ref_authors/
+```
+ 

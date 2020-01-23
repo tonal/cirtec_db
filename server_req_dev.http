@@ -118,3 +118,6 @@ GET http://localhost:8668/cirtec_dev/publ/publications/ngramms/?topn=5
 GET http://localhost:8668/cirtec_dev/by_frags/ref_authors/?topn=5
 
 ###
+GET http://localhost:8668/cirtec_dev/top_detail_bund/ref_authors/
+
+###
