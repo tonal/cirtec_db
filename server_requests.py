@@ -548,25 +548,19 @@ async def _req_frags_cocitauthors_ngramms(request: web.Request) -> web.StreamRes
       fnum = doc['frag_num']
       frags[fnum] += 1
       ngr_cnt = doc['linked_papers_ngrams']['cnt']
-      if ltype:
-        congr[ngr_title][fnum] += ngr_cnt
-      else:
-        congr[ngr_id][fnum] += ngr_cnt
-        titles[ngr_id] = ngr_title
-        types[ngr_id] = cont['type']
+      congr[ngr_id][fnum] += ngr_cnt
+      titles[ngr_id] = ngr_title
+      types[ngr_id] = cont['type']
 
-    crossgrams = {}
+    crossgrams = []
     out_dict[cocitauthor] = dict(sum=cnt, frags=frags, crossgrams=crossgrams)
 
     for j, (co, cnts) in enumerate(
       sorted(congr.items(), key=lambda kv: (-sum(kv[1].values()), kv[0])), 1
     ):
-      if titles:
-        ngr = dict(
-          title=titles[co], type=types[co], frags=cnts, sum=sum(cnts.values()))
-      else:
-        ngr = dict(frags=cnts, sum=sum(cnts.values()))
-      crossgrams[co] = ngr
+      ngr = dict(
+        title=titles[co], type=types[co], frags=cnts, sum=sum(cnts.values()))
+      crossgrams.append(ngr)
 
   return json_response(out_dict)
 

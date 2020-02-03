@@ -22,13 +22,13 @@ fastnumbers==3.0.0
 html-text==0.5.1
 idna==2.8                 # via requests, yarl
 joblib==0.14.1
-lxml==4.4.2
-more-itertools==8.1.0
+lxml==4.5.0
+more-itertools==8.2.0
 motor==2.1.0
 multidict==4.7.4          # via aiohttp, yarl
 numpy==1.18.1             # via pandas, scikit-learn, scipy
-packaging==20.0           # via pytest
-pandas==0.25.3
+packaging==20.1           # via pytest
+pandas==1.0.0
 parsel==1.5.2
 pluggy==0.13.1            # via pytest
 py==1.8.1                 # via pytest
@@ -40,7 +40,7 @@ pymorphy2-dicts==2.4.393442.3710985  # via pymorphy2
 pymorphy2==0.8
 pyparsing==2.4.6          # via packaging
 pytest-aiohttp==0.3.0
-pytest==5.3.4             # via pytest-aiohttp
+pytest==5.3.5             # via pytest-aiohttp
 python-dateutil==2.8.1    # via pandas
 python-snappy==0.5.4      # via pymongo
 pytz==2019.3              # via pandas

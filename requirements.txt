@@ -22,12 +22,12 @@ fastnumbers==3.0.0
 html-text==0.5.1
 idna==2.8                 # via requests, yarl
 joblib==0.14.1
-lxml==4.4.2
-more-itertools==8.1.0
+lxml==4.5.0
+more-itertools==8.2.0
 motor==2.1.0
 multidict==4.7.4          # via aiohttp, yarl
 numpy==1.18.1             # via pandas, scikit-learn, scipy
-pandas==0.25.3
+pandas==1.0.0
 parsel==1.5.2
 pycares==3.1.1            # via aiodns
 pycparser==2.19           # via cffi
