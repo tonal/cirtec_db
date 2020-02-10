@@ -318,7 +318,6 @@ async def _req_publ_publications_topics(request: web.Request) -> web.StreamRespo
       ]
       # _logger.debug('pipeline: %s', pipeline)
       async for doc in contexts.aggregate(pipeline):
-        # cont = doc['cont']
         ngr = doc['linked_papers_topics']['_id']
         cid = doc['_id']
         oconts.add(cid)
