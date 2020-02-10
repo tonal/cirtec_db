@@ -68,3 +68,8 @@ def getreqarg_nka(request) -> Optional[int]:
 def getreqarg_ltype(request) -> Optional[str]:
   ltype = getreqarg(request, 'ltype')
   return ltype
+
+
+def getreqarg_id(request: web.Request) -> Optional[str]:
+  id_ = getreqarg(request, 'id')
+  return id_

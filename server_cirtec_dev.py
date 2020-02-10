@@ -84,7 +84,6 @@ def create_srv():
   add_get(
     '/cirtec_dev/top_detail_bund/ref_authors/', _req_top_detail_bund_refauthors)
 
-
   app['conf'] = conf
   app['tasks'] = set()
   app.cleanup_ctx.append(_db_context)

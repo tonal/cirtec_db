@@ -11,7 +11,7 @@ attrs==19.3.0
 brotlipy==0.7.0           # via aiohttp
 cchardet==2.1.5           # via aiohttp
 certifi==2019.11.28       # via requests
-cffi==1.13.2              # via brotlipy, pycares
+cffi==1.14.0              # via brotlipy, pycares
 chardet==3.0.4            # via aiohttp, requests
 click==7.0
 cssselect==1.1.0          # via parsel
@@ -27,7 +27,7 @@ more-itertools==8.2.0
 motor==2.1.0
 multidict==4.7.4          # via aiohttp, yarl
 numpy==1.18.1             # via pandas, scikit-learn, scipy
-pandas==1.0.0
+pandas==1.0.1
 parsel==1.5.2
 pycares==3.1.1            # via aiodns
 pycparser==2.19           # via cffi

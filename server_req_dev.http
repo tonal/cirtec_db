@@ -37,6 +37,9 @@ GET http://localhost:8668/cirtec_dev/top/ngramms/publications/?ltype=lemmas
 GET http://localhost:8668/cirtec_dev/publications/
 
 ###
+GET http://localhost:8668/cirtec_dev/publications/?id=ranepa:rosa:doppubs:gai-wpaper-0096
+
+###
 GET http://localhost:8668/cirtec_dev/top/topics/
 
 ###

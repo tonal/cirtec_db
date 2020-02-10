@@ -15,8 +15,8 @@ from pymongo.collection import Collection
 from server_get_top import (
   get_ngramm_filter, _get_topn_cocit_refs, _get_refauthors_pipeline)
 from server_utils import (
-  getreqarg_topn, json_response, getreqarg_probability,
-  getreqarg_nka, getreqarg_ltype)
+  getreqarg_topn, json_response, getreqarg_probability, getreqarg_nka,
+  getreqarg_ltype, getreqarg_id)
 
 
 _logger = logging.getLogger('cirtec')
@@ -687,11 +687,16 @@ async def _req_publications(request: web.Request) -> web.StreamResponse:
   """Публикации"""
   app = request.app
   mdb = app['db']
+
+  pub_id = getreqarg_id(request)
+
   publications = mdb.publications
+  query = (
+    dict(_id=pub_id) if pub_id
+    else dict(uni_authors='Sergey-Sinelnikov-Murylev'))
   out = [
-    doc async for doc in publications.find(
-      {'uni_authors': 'Sergey-Sinelnikov-Murylev'}
-    ).sort([('year', ASCENDING), ('_id', ASCENDING)])]
+    doc async for doc in
+      publications.find(query).sort([('year', ASCENDING), ('_id', ASCENDING)])]
   return json_response(out)
 
 
