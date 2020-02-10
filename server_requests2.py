@@ -4,6 +4,7 @@
 """
 
 from collections import Counter
+from functools import partial
 from itertools import chain, groupby, islice
 import logging
 from operator import itemgetter
@@ -16,7 +17,7 @@ from server_get_top import (
   get_ngramm_filter, _get_topn_cocit_refs, _get_refauthors_pipeline)
 from server_utils import (
   getreqarg_topn, json_response, getreqarg_probability, getreqarg_nka,
-  getreqarg_ltype, getreqarg_id)
+  getreqarg_ltype, getreqarg_id, to_out_typed)
 
 
 _logger = logging.getLogger('cirtec')
@@ -694,9 +695,11 @@ async def _req_publications(request: web.Request) -> web.StreamResponse:
     dict(_id=pub_id) if pub_id
     else dict(uni_authors='Sergey-Sinelnikov-Murylev'))
 
+  to_out = partial(to_out_typed, type='publication')
+
   publications = mdb.publications
   out = [
-    doc async for doc in
+    to_out(**doc) async for doc in
       publications.find(query).sort([('year', ASCENDING), ('_id', ASCENDING)])]
   return json_response(out)
 
@@ -710,8 +713,10 @@ async def _req_contexts(request: web.Request) -> web.StreamResponse:
   if not cont_id:
     return json_response([])
 
+  to_out = partial(to_out_typed, type='context')
+
   contexts = mdb.contexts
-  out = [doc async for doc in (contexts.find(dict(_id=cont_id)))]
+  out = [to_out(**doc) async for doc in (contexts.find(dict(_id=cont_id)))]
   return json_response(out)
 
 
@@ -724,9 +729,26 @@ async def _req_bundles(request: web.Request) -> web.StreamResponse:
   if not bund_id:
     return json_response([])
 
+  to_out = partial(to_out_typed, type='bundle')
+
   bundles = mdb.bundles
-  out = [doc async for doc in (bundles.find(dict(_id=bund_id)))]
+  out = [to_out(**doc) async for doc in (bundles.find(dict(_id=bund_id)))]
   return json_response(out)
+
+
+async def _req_pub_cont_bund(request: web.Request) -> web.StreamResponse:
+  _id = getreqarg_id(request)
+
+  if not _id:
+    return json_response([])
+
+  if '@' in _id:
+    return await _req_contexts(request)
+
+  if ':' in _id:
+    return await _req_publications(request)
+
+  return await _req_bundles(request)
 
 
 async def _req_top_topics(request: web.Request) -> web.StreamResponse:
@@ -757,8 +779,8 @@ async def _req_top_topics(request: web.Request) -> web.StreamResponse:
   contexts = mdb.contexts
   curs = contexts.aggregate(pipeline)
   to_out = lambda _id, count, probability_avg, probability_stddev, conts: dict(
-    topic=_id, count=count, probability_avg=probability_avg,
-    probability_stddev=probability_stddev,
+    topic=_id, count=count, probability_avg=round(probability_avg, 2),
+    probability_stddev=round(probability_stddev),
     contects=conts)
 
   out = [to_out(**doc) async for doc in curs]
@@ -787,7 +809,8 @@ async def _req_top_topics_pubs(request: web.Request) -> web.StreamResponse:
       'pubs': {'$addToSet': '$pub_id'}, }},
     {'$project': {
       'count_pubs': {'$size': '$pubs'}, 'count_conts': '$count',
-      'probability_avg': 1, 'probability_stddev': 1, 'pubs': 1}},
+      'probability_avg': {'$round': ['$probability_avg', 2]},
+      'probability_stddev': {'$round': ['$probability_stddev', 2]}, 'pubs': 1}},
     {'$sort': {'count_pubs': -1, 'count_conts': -1, '_id': 1}}
   ]
   if topn:

@@ -73,3 +73,6 @@ def getreqarg_ltype(request) -> Optional[str]:
 def getreqarg_id(request: web.Request) -> Optional[str]:
   id_ = getreqarg(request, 'id')
   return id_
+
+def to_out_typed(_id, *, type:str, **kwds):
+  return dict(_id=_id, type=type, **kwds)

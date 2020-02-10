@@ -30,7 +30,7 @@ from server_requests2 import (
   _req_pos_neg_cocitauthors, _req_frags_pos_neg_contexts,
   _req_frags_pos_neg_cocitauthors2, _req_top_cocitrefs, _req_top_cocitrefs2,
   _req_by_frags_refauthors, _req_top_detail_bund_refauthors, _req_contexts,
-  _req_bundles)
+  _req_bundles, _req_pub_cont_bund)
 from server_utils import _init_logging
 from utils import load_config
 
@@ -87,6 +87,7 @@ def create_srv():
 
   add_get('/cirtec_dev/contexts/', _req_contexts)
   add_get('/cirtec_dev/bundles/', _req_bundles)
+  add_get('/cirtec_dev/pub_cont_bund/', _req_pub_cont_bund)
 
 
   app['conf'] = conf
