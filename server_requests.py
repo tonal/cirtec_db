@@ -283,59 +283,67 @@ async def _req_publ_publications_topics(request: web.Request) -> web.StreamRespo
   publications = mdb.publications
   pubs = {
     pdoc['_id']: pdoc['name']
-    async for pdoc in publications.find({'name': {'$exists': True}})
+    async for pdoc in publications.find(
+      {'name': {'$exists': True}, 'uni_authors': 'Sergey-Sinelnikov-Murylev'})
   }
 
   topics = mdb.topics
   contexts = mdb.contexts
 
-  out_pub_dict = {}
+  out_pubs = []
 
   for pub_id, pub_desc in pubs.items():
     topN = await _get_topn_topics(topics, topn=topn, pub_id=pub_id)
 
-    out_dict = {}
+    out_tops = []
     oconts = set()
 
     for i, (topic, cnt, conts) in enumerate(topN, 1):
       congr = defaultdict(set)
 
-      async for doc in contexts.aggregate([
+      pipeline = [
         {'$match': {'_id': {'$in': conts}, 'pub_id': pub_id}},
-        {'$project': {'prefix': False, 'suffix': False, 'exact': False}},
-        {'$lookup': {
-          'from': 'topics', 'localField': '_id',
-          'foreignField': 'linked_papers.cont_id', 'as': 'cont'}},
-        {'$unwind': '$cont'},
-        {'$unwind': '$cont.linked_papers'},
-        {'$match': {'$expr': {'$eq': ["$_id", "$cont.linked_papers.cont_id"]}}},
-        {'$project': {'cont.type': False}}, # 'cont.linked_papers': False,
+        {'$project': {
+          'prefix': 0, 'suffix': 0, 'exact': 0, 'linked_papers_ngrams': 0,
+          'bundles': 0, 'positive_negative': 0}},
+        # {'$lookup': {
+        #     'from': 'topics', 'localField': '_id',
+        #     'foreignField': 'linked_papers.cont_id', 'as': 'cont'}},
+        # {'$unwind': '$cont'},
+        # {'$unwind': '$cont.linked_papers'},
+        # {'$match': {'$expr': {'$eq': ["$_id", "$cont.linked_papers.cont_id"]}}},
+        # {'$project': {'cont.type': False}},  # 'cont.linked_papers': False,
         # {'$sort': {'frag_num': 1}},
-      ]):
-        cont = doc['cont']
-        ngr = cont['title']
-        cid = cont['linked_papers']['cont_id']
+        {'$unwind': '$linked_papers_topics'},
+      ]
+      # _logger.debug('pipeline: %s', pipeline)
+      async for doc in contexts.aggregate(pipeline):
+        # cont = doc['cont']
+        ngr = doc['linked_papers_topics']['_id']
+        cid = doc['_id']
         oconts.add(cid)
         congr[ngr].add(cid)
 
-      pubs = congr.pop(topic)
-      crosstopics = {}
+      pubs = congr.pop(topic, ())
+      crosstopics = []
 
       for j, (co, vals) in enumerate(
         sorted(congr.items(), key=lambda kv: (-len(kv[1]), kv[0])), 1
       ):
-        crosstopics[co] = dict(cnt=len(vals), topics=tuple(sorted(vals)))
+        crosstopics.append(dict(
+          topic=co, cnt=len(vals), topics=tuple(sorted(vals))))
 
-      out_dict[topic] = dict(
-        conts=tuple(sorted(pubs)), conts_len=len(pubs),
-        crosstopics=crosstopics, crosstopics_len=len(crosstopics))
+      out_tops.append(dict(
+        topic=topic, conts=tuple(sorted(pubs)), conts_len=len(pubs),
+        crosstopics=crosstopics, crosstopics_len=len(crosstopics)))
 
-    out_pub_dict[pub_id] = dict(
-      descr=pub_desc, topics_len=len(out_dict), topics=out_dict,
+    out_pubs.append(dict(
+      pub_id=pub_id,
+      descr=pub_desc, topics_len=len(out_tops), topics=out_tops,
       conts_len=len(oconts), conts=tuple(sorted(oconts)),
-      )
+    ))
 
-  return json_response(out_pub_dict)
+  return json_response(out_pubs)
 
 
 async def _req_frags_cocitauthors_cocitauthors(
