@@ -127,3 +127,6 @@ GET http://localhost:8668/cirtec_dev/top_detail_bund/ref_authors/
 GET http://localhost:8668/cirtec_dev/contexts/?id=repec:gai:ppaper:2@61885
 
 ###
+GET http://localhost:8668/cirtec_dev/bundles/?id=KRqlBG
+
+###

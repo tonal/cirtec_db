@@ -715,6 +715,19 @@ async def _req_contexts(request: web.Request) -> web.StreamResponse:
   return json_response(out)
 
 
+async def _req_bundles(request: web.Request) -> web.StreamResponse:
+  app = request.app
+  mdb = app['db']
+
+  bund_id = getreqarg_id(request)
+
+  if not bund_id:
+    return json_response([])
+
+  bundles = mdb.bundles
+  out = [doc async for doc in (bundles.find(dict(_id=bund_id)))]
+  return json_response(out)
+
 
 async def _req_top_topics(request: web.Request) -> web.StreamResponse:
   """Топ N топиков"""
