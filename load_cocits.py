@@ -99,7 +99,7 @@ def _update_cocits(mdb:Database, for_del:int, field:str, uri:str):
         # print('   ', k, pub_id, start)
         mcont_update(dict(_id=f'{pub_id}@{start}'),
           {'$addToSet': {f'{field}_new': {'$each': [author, coauthor]}},
-           '$set': {'pub_id': pub_id, 'start': start},})
+           '$set': {'pub_id': pub_id, 'start': int(start)},})
         try:
           if pub_id not in pubs:
             mpubs_insert(dict(_id=pub_id))

@@ -90,7 +90,7 @@ def update_ngramms(
           # print('  ', k, pub_id, ref_num, start, gcnt)
           cont_id = f'{pub_id}@{start}'
           mcont_update(dict(_id=cont_id), {
-            '$set': {'pub_id': pub_id, 'start': start},
+            '$set': {'pub_id': pub_id, 'start': int(start)},
             '$addToSet': {
               'linked_papers_ngrams_new': {'_id': ngr_id, 'cnt': gcnt}}})
           lp_cnt += gcnt

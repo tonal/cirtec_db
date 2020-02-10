@@ -690,14 +690,30 @@ async def _req_publications(request: web.Request) -> web.StreamResponse:
 
   pub_id = getreqarg_id(request)
 
-  publications = mdb.publications
   query = (
     dict(_id=pub_id) if pub_id
     else dict(uni_authors='Sergey-Sinelnikov-Murylev'))
+
+  publications = mdb.publications
   out = [
     doc async for doc in
       publications.find(query).sort([('year', ASCENDING), ('_id', ASCENDING)])]
   return json_response(out)
+
+
+async def _req_contexts(request: web.Request) -> web.StreamResponse:
+  app = request.app
+  mdb = app['db']
+
+  cont_id = getreqarg_id(request)
+
+  if not cont_id:
+    return json_response([])
+
+  contexts = mdb.contexts
+  out = [doc async for doc in (contexts.find(dict(_id=cont_id)))]
+  return json_response(out)
+
 
 
 async def _req_top_topics(request: web.Request) -> web.StreamResponse:
