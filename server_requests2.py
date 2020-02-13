@@ -780,7 +780,7 @@ async def _req_top_topics(request: web.Request) -> web.StreamResponse:
   curs = contexts.aggregate(pipeline)
   to_out = lambda _id, count, probability_avg, probability_stddev, conts: dict(
     topic=_id, count=count, probability_avg=round(probability_avg, 2),
-    probability_stddev=round(probability_stddev),
+    probability_stddev=round(probability_stddev, 2),
     contects=conts)
 
   out = [to_out(**doc) async for doc in curs]
