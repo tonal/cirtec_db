@@ -545,7 +545,7 @@ async def _req_frags_cocitauthors_ngramms(request: web.Request) -> web.StreamRes
       {'$match': {'frag_num': {'$gt': 0}, '_id': {'$in': conts}}},
     ] +  pipeline
 
-    _logger.debug('cocitauthor: "%s", cnt: %s, pipeline: %s', cocitauthor, cnt, work_pipeline)
+    # _logger.debug('cocitauthor: "%s", cnt: %s, pipeline: %s', cocitauthor, cnt, work_pipeline)
     async for doc in contexts.aggregate(work_pipeline):
       cont = doc['cont']
       ngr_title = cont['title']
@@ -1209,7 +1209,8 @@ async def _req_frags_topics_ngramms(request: web.Request) -> web.StreamResponse:
   if topn_gramm:
     n_gramms = mdb.n_gramms
 
-    top_ngramms = await _get_topn_ngramm(n_gramms, nka, ltype, topn_gramm)
+    top_ngramms = await _get_topn_ngramm(
+      n_gramms, nka, ltype, topn_gramm, title_always_id=True)
     exists = frozenset(t for t, _, _ in top_ngramms)
   else:
     exists = ()
