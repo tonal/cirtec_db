@@ -904,10 +904,11 @@ async def _req_frags_ngramms_cocitauthors(request: web.Request) -> web.StreamRes
   ltype:str = getreqarg(request, 'ltype')
 
   n_gramms = mdb.n_gramms
-  top_ngramms = await _get_topn_ngramm(n_gramms, nka, ltype, topn)
+  top_ngramms = await _get_topn_ngramm(
+    n_gramms, nka, ltype, topn, title_always_id=True, show_type=True)
 
-  out_dict = {}
-  for i, (ngramm, cnt, conts) in enumerate(top_ngramms, 1):
+  out_dict = []
+  for i, (ngramm, typ_, cnt, conts) in enumerate(top_ngramms, 1):
     frags = Counter()
     congr = defaultdict(Counter)
     cnt = 0
@@ -928,8 +929,11 @@ async def _req_frags_ngramms_cocitauthors(request: web.Request) -> web.StreamRes
 
     if cnt:
       crosscocitaith = {}
-      out_dict[ngramm] = dict(
-        sum=cnt, frags=frags, cocitaithors=crosscocitaith)
+      # out_dict[ngramm] = dict(
+      #   sum=cnt, frags=frags, cocitaithors=crosscocitaith)
+      out_dict.append(dict(
+        title=ngramm.split('_', 1)[-1], type=typ_,
+        sum=cnt, frags=frags, cocitaithors=crosscocitaith))
 
       for j, (co, cnts) in enumerate(
         sorted(congr.items(), key=lambda kv: (-sum(kv[1].values()), kv[0])), 1

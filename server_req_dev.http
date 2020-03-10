@@ -136,3 +136,6 @@ GET http://localhost:8668/cirtec_dev/pub_cont_bund/?id=KRqlBG
 GET http://localhost:8668/cirtec_dev/publ/publications/topics/
 
 ###
+GET http://localhost:8668/cirtec_dev/frags/ngramms/cocitauthors/
+
+###
