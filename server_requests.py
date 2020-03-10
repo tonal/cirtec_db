@@ -964,13 +964,14 @@ async def _req_frags_ngramms_topics(request: web.Request) -> web.StreamResponse:
   ltype:str = getreqarg_ltype(request)
 
   n_gramms = mdb.n_gramms
-  top_ngramms = await _get_topn_ngramm(n_gramms, nka, ltype, topn)
+  top_ngramms = await _get_topn_ngramm(
+    n_gramms, nka, ltype, topn, title_always_id=True, show_type=True)
 
   contexts = mdb.contexts
 
-  out_dict = {}
+  out_dict = []
   zerro_frags = {n: 0 for n in range(1, 6)}
-  for i, (ngrmm, cnt, conts) in enumerate(top_ngramms, 1):
+  for i, (ngrmm, typ_, cnt, conts) in enumerate(top_ngramms, 1):
     frags = Counter(zerro_frags)
     congr = defaultdict(partial(Counter, zerro_frags))
 
@@ -990,7 +991,9 @@ async def _req_frags_ngramms_topics(request: web.Request) -> web.StreamResponse:
       congr[topic][fnum] += 1
 
     crosstopics = {}
-    out_dict[ngrmm] = dict(sum=cnt, frags=frags, crosstopics=crosstopics)
+    out_dict.append(dict(
+      title=ngrmm.split('_', 1)[-1], type=typ_, sum=cnt, frags=frags,
+      crosstopics=crosstopics))
 
     for j, (co, cnts) in enumerate(
       sorted(congr.items(), key=lambda kv: (-sum(kv[1].values()), kv[0])), 1
