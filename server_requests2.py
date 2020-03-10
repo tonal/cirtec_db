@@ -638,7 +638,7 @@ async def _req_top_ngramm(request: web.Request) -> web.StreamResponse:
   ltype = getreqarg_ltype(request)
 
   if nka or ltype:
-    pipeline = [get_ngramm_filter(nka, ltype, 'ngrm')]
+    pipeline += [get_ngramm_filter(nka, ltype, 'ngrm')]
 
   if ltype:
     gident = '$ngrm.title'
@@ -660,26 +660,36 @@ async def _req_top_ngramm(request: web.Request) -> web.StreamResponse:
 
   contexts = mdb.contexts
   get_as_tuple = itemgetter('_id', 'count', 'count_cont', 'conts')
+  # _logger.info('pipeline: %s', pipeline)
   topN = [get_as_tuple(obj) async for obj in contexts.aggregate(pipeline)]
 
   get_pubs = itemgetter('cont_id', 'cnt')
+  key_sort = lambda kv: (-kv[-1], kv[0])
   if ltype:
-    out = {
-      name: dict(
+    out = [
+      dict(
+        title=name, type=ltype,
         all=cnt, count_cont=count_cont,
-        contects=Counter(
-          p for p, n in (get_pubs(co) for co in conts)
-          for _ in range(n)
-        ))
-      for name, cnt, count_cont, conts in topN}
+        contects=dict(
+          sorted(
+            Counter(
+              p for p, n in (get_pubs(co) for co in conts)
+              for _ in range(n)
+            ).most_common(),
+            key=key_sort)))
+      for name, cnt, count_cont, conts in topN]
   else:
     out = [
-      (name, dict(
+      dict(
+        title=name['title'], type=name['type'],
         all=cnt, count_cont=count_cont,
-        contects=Counter(
-          p for p, n in (get_pubs(co) for co in conts)
-          for _ in range(n)
-        )))
+        contects=dict(
+          sorted(
+            Counter(
+              p for p, n in (get_pubs(co) for co in conts)
+              for _ in range(n)
+            ).most_common(),
+          key=key_sort)))
       for name, cnt, count_cont, conts in topN]
   return json_response(out)
 

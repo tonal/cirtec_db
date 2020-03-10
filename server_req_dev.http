@@ -46,7 +46,10 @@ GET http://localhost:8668/cirtec_dev/top/topics/
 GET http://localhost:8668/cirtec_dev/top/topics/publications/
 
 ###
-GET http://localhost:8668/cirtec_dev/top/ngramms/
+GET http://localhost:8668/cirtec_dev/top/ngramms/?topn=50
+
+###
+GET http://localhost:8668/cirtec_dev/top/ngramms/?ltype=lemmas&topn=50
 
 ###
 GET http://localhost:8668/cirtec_dev/publ/cocitauthors/cocitauthors/
