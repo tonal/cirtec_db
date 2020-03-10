@@ -716,7 +716,13 @@ async def _req_contexts(request: web.Request) -> web.StreamResponse:
   to_out = partial(to_out_typed, type='context')
 
   contexts = mdb.contexts
-  out = [to_out(**doc) async for doc in (contexts.find(dict(_id=cont_id)))]
+  pipeline = [
+    {'$match': {'_id': cont_id}},
+    {'$lookup': {
+      'from': 'n_gramms', 'localField': 'linked_papers_ngrams._id',
+      'foreignField': '_id', 'as': 'linked_papers_ngrams'}},
+  ]
+  out = [to_out(**doc) async for doc in contexts.aggregate(pipeline)]
   return json_response(out)
 
 

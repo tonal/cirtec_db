@@ -5,54 +5,55 @@
 #    pip-compile requirements.test.in
 #
 aiodns==2.0.0             # via aiohttp
-aiohttp[speedups]==3.6.2
+aiohttp[speedups]==3.6.2  # via -r requirements.in, pytest-aiohttp
 async-timeout==3.0.1      # via aiohttp
-attrs==19.3.0
+attrs==19.3.0             # via -r requirements.in, aiohttp, pytest
 brotlipy==0.7.0           # via aiohttp
 cchardet==2.1.5           # via aiohttp
 certifi==2019.11.28       # via requests
-cffi==1.14.0              # via brotlipy, pycares
+cffi==1.14.0              # via brotlipy, pycares, zstandard
 chardet==3.0.4            # via aiohttp, requests
-click==7.0
+click==7.1.1              # via -r requirements.in
 cssselect==1.1.0          # via parsel
 dawg-python==0.7.2        # via pymorphy2
 dnspython==1.16.0         # via pymongo
 docopt==0.6.2             # via pymorphy2
-fastnumbers==3.0.0
-html-text==0.5.1
-idna==2.8                 # via requests, yarl
-joblib==0.14.1
-lxml==4.5.0
-more-itertools==8.2.0
-motor==2.1.0
-multidict==4.7.4          # via aiohttp, yarl
+fastnumbers==3.0.0        # via -r requirements.in
+html-text==0.5.1          # via -r requirements.in
+idna==2.9                 # via requests, yarl
+joblib==0.14.1            # via -r requirements.in, scikit-learn
+lxml==4.5.0               # via -r requirements.in, html-text, parsel
+more-itertools==8.2.0     # via -r requirements.in, pytest
+motor==2.1.0              # via -r requirements.in
+multidict==4.7.5          # via aiohttp, yarl
 numpy==1.18.1             # via pandas, scikit-learn, scipy
-packaging==20.1           # via pytest
-pandas==1.0.1
-parsel==1.5.2
+packaging==20.3           # via pytest
+pandas==1.0.1             # via -r requirements.in
+parsel==1.5.2             # via -r requirements.in
 pluggy==0.13.1            # via pytest
 py==1.8.1                 # via pytest
 pycares==3.1.1            # via aiodns
-pycparser==2.19           # via cffi
-pymongo[snappy,srv]==3.10.1
-pymorphy2-dicts-ru==2.4.404381.4453942
+pycparser==2.20           # via cffi
+pymongo[snappy,srv,zstd]==3.10.1  # via -r requirements.in, motor
+pymorphy2-dicts-ru==2.4.404381.4453942  # via -r requirements.in
 pymorphy2-dicts==2.4.393442.3710985  # via pymorphy2
-pymorphy2==0.8
+pymorphy2==0.8            # via -r requirements.in
 pyparsing==2.4.6          # via packaging
-pytest-aiohttp==0.3.0
+pytest-aiohttp==0.3.0     # via -r requirements.test.in
 pytest==5.3.5             # via pytest-aiohttp
 python-dateutil==2.8.1    # via pandas
 python-snappy==0.5.4      # via pymongo
 pytz==2019.3              # via pandas
-pyyaml==5.3
-requests==2.22.0
-scikit-learn==0.22.1      # via sklearn
+pyyaml==5.3               # via -r requirements.in
+requests==2.23.0          # via -r requirements.in
+scikit-learn==0.22.2.post1  # via sklearn
 scipy==1.4.1              # via scikit-learn
 six==1.14.0               # via packaging, parsel, python-dateutil, w3lib
-sklearn==0.0
+sklearn==0.0              # via -r requirements.in
 urllib3==1.25.8           # via requests
-uvloop==0.14.0
+uvloop==0.14.0            # via -r requirements.in
 w3lib==1.21.0             # via parsel
 wcwidth==0.1.8            # via pytest
-xlrd==1.2.0
+xlrd==1.2.0               # via -r requirements.in
 yarl==1.4.2               # via aiohttp
+zstandard==0.13.0         # via pymongo

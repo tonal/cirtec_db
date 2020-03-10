@@ -4,7 +4,7 @@ attrs
 html-text
 lxml
 parsel
-pymongo[srv, snappy]
+pymongo[srv, snappy, zstd]
 pyyaml
 requests
 fastnumbers
