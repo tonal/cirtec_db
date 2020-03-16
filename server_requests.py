@@ -741,8 +741,9 @@ async def _req_frags_ngramm_ngramm(request: web.Request) -> web.StreamResponse:
   ltype:str = getreqarg_ltype(request)
 
   n_gramms = mdb.n_gramms
-  topN = await _get_topn_ngramm(n_gramms, nka, ltype, topn)
-  exists = frozenset(t for t, _, _ in topN)
+  topN = await _get_topn_ngramm(
+    n_gramms, nka, ltype, topn, title_always_id=True, show_type=True)
+  exists = frozenset(t for t, *_ in topN)
 
   pipeline = [
     {'$project': {
@@ -762,10 +763,10 @@ async def _req_frags_ngramm_ngramm(request: web.Request) -> web.StreamResponse:
     {'$match': {'$expr': {'$eq': ['$linked_papers_ngrams._id', '$cont._id']}}},
   ]
 
-  out_dict = {}
+  out_list = []
   contexts = mdb.contexts
 
-  for i, (ngrmm, cnt, conts) in enumerate(topN, 1):
+  for i, (ngrmm, typ_, cnt, conts) in enumerate(topN, 1):
     congr = defaultdict(Counter)
     titles = {}
     types = {}
@@ -783,25 +784,33 @@ async def _req_frags_ngramm_ngramm(request: web.Request) -> web.StreamResponse:
       fnum = doc['frag_num']
       congr[ngr_id][fnum] += doc['linked_papers_ngrams']['cnt']
       titles[ngr_id] = cont['title']
-      if not ltype:
-        types[ngr_id] = cont['type']
+      # if not ltype:
+      types[ngr_id] = cont['type']
 
     frags = congr.pop(ngrmm)
-    crossgrams = {}
-    out_dict[ngrmm] = dict(sum=cnt, frags=frags, crossgrams=crossgrams)
-
+    crossgrams = []
+    otype = ltype if ltype else types[ngrmm]
+    # out_list[ngrmm] = dict(sum=cnt, frags=frags, crossgrams=crossgrams)
+    out_list.append(
+      dict(
+        title=titles[ngrmm], type=otype, sum=cnt, cnt_cross=len(congr),
+        frags=frags, crossgrams=crossgrams))
 
     enum_sort_out = enumerate(
       sorted(congr.items(), key=lambda kv: (-sum(kv[1].values()), kv[0])), 1)
-    if ltype:
-      for j, (co, cnts) in enum_sort_out:
-        crossgrams[titles[co]] = dict(frags=cnts, sum=sum(cnts.values()))
-    else:
-      for j, (co, cnts) in enum_sort_out:
-        crossgrams[co] = dict(
-          title=titles[co], type=types[co],frags=cnts, sum=sum(cnts.values()))
+    # if ltype:
+    #   for j, (co, cnts) in enum_sort_out:
+    #     crossgrams[titles[co]] = dict(frags=cnts, sum=sum(cnts.values()))
+    # else:
+    #   for j, (co, cnts) in enum_sort_out:
+    #     crossgrams[co] = dict(
+    #       title=titles[co], type=types[co],frags=cnts, sum=sum(cnts.values()))
+    for j, (co, cnts) in enum_sort_out:
+      crossgrams.append(
+        dict(
+          title=titles[co], type=types[co],frags=cnts, sum=sum(cnts.values())))
 
-  return json_response(out_dict)
+  return json_response(out_list)
 
 
 async def _req_publ_ngramm_ngramm(request: web.Request) -> web.StreamResponse:
