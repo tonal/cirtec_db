@@ -1138,7 +1138,8 @@ async def _req_publ_topics_topics(request: web.Request) -> web.StreamResponse:
     crosstopics = []
     out_list.append(
       dict(
-        topic=topic, cnt=len(pubs), pubs=tuple(sorted(pubs)),
+        topic=topic, cnt_pubs=len(pubs), cnt_cross=len(congr),
+        pubs=tuple(sorted(pubs)),
         crosstopics=crosstopics))
 
 
