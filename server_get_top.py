@@ -93,7 +93,7 @@ async def _get_topn_ngramm(
     pipeline = []
 
   pipeline += [
-    {'$match': {'linked_papers_ngrams': {'$exists': True}}},
+    {'$match': {'linked_papers_ngrams': {'$exists': 1}}},
     {'$project': {
       '_id': 1, 'pub_id': 1, 'linked_paper': '$linked_papers_ngrams'}},
     {'$unwind': '$linked_paper'},

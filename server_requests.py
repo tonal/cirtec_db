@@ -817,9 +817,10 @@ async def _req_publ_ngramm_ngramm(request: web.Request) -> web.StreamResponse:
   ltype:str = getreqarg_ltype(request)
 
   n_gramms = mdb.n_gramms
-  topN = await _get_topn_ngramm(n_gramms, nka, ltype, topn)
-  exists = frozenset(t for t, _, _ in topN)
-  out_dict = {}
+  topN = await _get_topn_ngramm(
+    n_gramms, nka, ltype, topn, title_always_id=True, show_type=True)
+  exists = frozenset(t for t, *_ in topN)
+  out_list = []
   contexts = mdb.contexts
 
   pipeline = [
@@ -838,7 +839,7 @@ async def _req_publ_ngramm_ngramm(request: web.Request) -> web.StreamResponse:
     {'$unwind': '$linked_papers_ngrams'},
     {'$match': {'$expr': {'$eq': ['$linked_papers_ngrams._id', '$cont._id']}}},
   ]
-  for i, (ngrmm, cnt, conts) in enumerate(topN, 1):
+  for i, (ngrmm, typ_, cnt, conts) in enumerate(topN, 1):
     congr = defaultdict(set)
     titles = {}
     types = {}
@@ -857,29 +858,29 @@ async def _req_publ_ngramm_ngramm(request: web.Request) -> web.StreamResponse:
       pub_id = doc['pub_id']
       congr[ngr_id].add(pub_id)
       titles[ngr_id] = cont['title']
-      if not ltype:
-        types[ngr_id] = cont['type']
+      types[ngr_id] = cont['type']
 
-    pubs = congr.pop(ngrmm)
-    crossgrams = {}
-    if ltype:
-      out_dict[titles[ngrmm]] = dict(
-        pubs=tuple(sorted(pubs)), crossgrams=crossgrams)
-    else:
-      out_dict[ngrmm] = dict(
-        title=titles[ngrmm], type=types[ngrmm],
-        pubs=tuple(sorted(pubs)), crossgrams=crossgrams)
+    pubs = congr.pop(ngrmm, None)
+    if not pubs:
+      continue
+
+    crossgrams = []
+    oltype = ltype if ltype else types[ngrmm]
+
+    out_list.append(
+      dict(
+        title=titles[ngrmm], type=oltype, pubs=tuple(sorted(pubs)),
+        crossgrams=crossgrams, cnt_pubs=len(pubs), cnt_cross=len(congr)))
 
     enum_sort = enumerate(
       sorted(congr.items(), key=lambda kv: (-len(kv[1]), kv[0])), 1)
-    if ltype:
-      for j, (co, vals) in enum_sort:
-        crossgrams[titles[co]] = tuple(sorted(vals))
-    else:
-      for j, (co, vals) in enum_sort:
-        crossgrams[co] = tuple(sorted(vals))
+    for j, (co, vals) in enum_sort:
+      crossgrams.append(
+        dict(
+          title=titles[co], type=types[co], cnt=len(vals),
+          pubs=tuple(sorted(vals))))
 
-  return json_response(out_dict)
+  return json_response(out_list)
 
 
 async def _req_frags_ngramms_cocitauthors(request: web.Request) -> web.StreamResponse:
