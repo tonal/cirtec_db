@@ -796,19 +796,13 @@ async def _req_frags_ngramm_ngramm(request: web.Request) -> web.StreamResponse:
         title=titles[ngrmm], type=otype, sum=cnt, cnt_cross=len(congr),
         frags=frags, crossgrams=crossgrams))
 
-    enum_sort_out = enumerate(
-      sorted(congr.items(), key=lambda kv: (-sum(kv[1].values()), kv[0])), 1)
-    # if ltype:
-    #   for j, (co, cnts) in enum_sort_out:
-    #     crossgrams[titles[co]] = dict(frags=cnts, sum=sum(cnts.values()))
-    # else:
-    #   for j, (co, cnts) in enum_sort_out:
-    #     crossgrams[co] = dict(
-    #       title=titles[co], type=types[co],frags=cnts, sum=sum(cnts.values()))
-    for j, (co, cnts) in enum_sort_out:
+    for j, (co, cnts) in enumerate(
+      sorted(congr.items(), key=lambda kv: (-sum(kv[1].values()), kv[0])),
+      1
+    ):
       crossgrams.append(
         dict(
-          title=titles[co], type=types[co],frags=cnts, sum=sum(cnts.values())))
+          title=titles[co], type=types[co], frags=cnts, sum=sum(cnts.values())))
 
   return json_response(out_list)
 
