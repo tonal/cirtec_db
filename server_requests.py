@@ -1113,14 +1113,14 @@ async def _req_publ_topics_topics(request: web.Request) -> web.StreamResponse:
   ]
 
   contexts = mdb.contexts
-  out_dict = {}
+  out_list = []
   for i, (topic, cnt, conts) in enumerate(topN, 1):
     congr = defaultdict(set)
 
     work_pipeline = [
       {'$match': {'frag_num': {'$gt': 0}, '_id': {'$in': conts}}},
     ] + pipeline
-    _logger.debug('topic: "%s", cnt: %s, pipeline: %s', topic, cnt, work_pipeline)
+    # _logger.debug('topic: "%s", cnt: %s, pipeline: %s', topic, cnt, work_pipeline)
     async for doc in contexts.aggregate(work_pipeline):
       cont = doc['cont']
       ngr = cont['title']
@@ -1128,16 +1128,20 @@ async def _req_publ_topics_topics(request: web.Request) -> web.StreamResponse:
       congr[ngr].add(pub_id)
 
     pubs = congr.pop(topic)
-    crosstopics = {}
-    out_dict[topic] = dict(pubs=tuple(sorted(pubs)), crosstopics=crosstopics)
+    crosstopics = []
+    out_list.append(
+      dict(
+        topic=topic, cnt=len(pubs), pubs=tuple(sorted(pubs)),
+        crosstopics=crosstopics))
 
 
     for j, (co, vals) in enumerate(
       sorted(congr.items(), key=lambda kv: (-len(kv[1]), kv[0])), 1
     ):
-      crosstopics[co] = tuple(sorted(vals))
+      crosstopics.append(
+        dict(title=co, cnt=len(vals), pubs=tuple(sorted(vals))))
 
-  return json_response(out_dict)
+  return json_response(out_list)
 
 
 async def _req_frags_topics_cocitauthors(
