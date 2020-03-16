@@ -451,7 +451,7 @@ async def _req_publ_cocitauthors_cocitauthors(
       topNa = await _get_topn_cocit_authors(contexts, topn_cocitauthors)
       exists = frozenset(map(itemgetter(0), topNa))
 
-  out_dict = {}
+  out_list = []
   for i, (cocitauthor, _) in enumerate(topN, 1):
     cnt = 0
     pubs = set()
@@ -478,16 +478,19 @@ async def _req_publ_cocitauthors_cocitauthors(
     if not coaut:
       continue
 
-    out_cocitauthors = {}
-    out_dict[cocitauthor] = dict(
-      pubs=tuple(sorted(pubs)), cocitauthors=out_cocitauthors)
+    out_cocitauthors = []
+    out_list.append(
+      dict(
+        title=cocitauthor, cnt_pubs=len(pubs), cnt_cross=len(coaut),
+        pubs=tuple(sorted(pubs)), cocitauthors=out_cocitauthors))
 
     for j, (co, vals) in enumerate(
       sorted(coaut.items(), key=lambda kv: (-len(kv[1]), kv[0])), 1
     ):
-      out_cocitauthors[co] = tuple(sorted(vals))
+      out_cocitauthors.append(
+        dict(title=co, cnt_pubs=len(vals), pubs=tuple(sorted(vals))))
 
-  return json_response(out_dict)
+  return json_response(out_list)
 
 
 async def _req_frags_cocitauthors_ngramms(request: web.Request) -> web.StreamResponse:
