@@ -27,7 +27,7 @@ more-itertools==8.2.0     # via -r requirements.in
 motor==2.1.0              # via -r requirements.in
 multidict==4.7.5          # via aiohttp, yarl
 numpy==1.18.1             # via pandas, scikit-learn, scipy
-pandas==1.0.1             # via -r requirements.in
+pandas==1.0.2             # via -r requirements.in
 parsel==1.5.2             # via -r requirements.in
 pycares==3.1.1            # via aiodns
 pycparser==2.20           # via cffi

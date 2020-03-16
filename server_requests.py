@@ -642,7 +642,7 @@ async def _req_top_cocitauthors(request: web.Request) -> web.StreamResponse:
 
   contexts = mdb.contexts
   topN = await _get_topn_cocit_authors(contexts, topn, include_conts=True)
-  out = tuple(dict(title=n, contects=conts) for n, _, conts in topN)
+  out = tuple(dict(title=n, cnt=cnt, contects=conts) for n, cnt, conts in topN)
 
   return json_response(out)
 

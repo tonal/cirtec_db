@@ -666,31 +666,25 @@ async def _req_top_ngramm(request: web.Request) -> web.StreamResponse:
   get_pubs = itemgetter('cont_id', 'cnt')
   key_sort = lambda kv: (-kv[-1], kv[0])
   if ltype:
-    out = [
-      dict(
-        title=name, type=ltype,
-        all=cnt, count_cont=count_cont,
-        contects=dict(
-          sorted(
-            Counter(
-              p for p, n in (get_pubs(co) for co in conts)
-              for _ in range(n)
-            ).most_common(),
-            key=key_sort)))
-      for name, cnt, count_cont, conts in topN]
+    get_name = lambda n: n
+    get_ltype = lambda _: ltype
   else:
-    out = [
-      dict(
-        title=name['title'], type=name['type'],
-        all=cnt, count_cont=count_cont,
-        contects=dict(
-          sorted(
-            Counter(
-              p for p, n in (get_pubs(co) for co in conts)
-              for _ in range(n)
-            ).most_common(),
+    get_name = itemgetter('title') # lambda name: name['title']
+    get_ltype = itemgetter('type') # lambda name: name['type']
+
+  out = [
+    dict(
+      title=get_name(name), type=get_ltype(name),
+      all=cnt, count_cont=count_cont,
+      contects=dict(
+        sorted(
+          Counter(
+            p for p, n in (get_pubs(co) for co in conts)
+            for _ in range(n)
+          ).most_common(),
           key=key_sort)))
-      for name, cnt, count_cont, conts in topN]
+    for name, cnt, count_cont, conts in topN]
+
   return json_response(out)
 
 
