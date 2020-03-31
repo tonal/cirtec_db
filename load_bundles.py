@@ -69,6 +69,7 @@ def update_bundles(mdb:Database, for_del:int, bundles:str) -> Tuple[Collection]:
 
   cache_pubs = set()
   cache_conts = set()
+  bund_in_cont = set()
   i = 0
   for i, (pub_id, p_doc) in enumerate(topics.items(), 1):
     if pub_id in {'sum_cits', 'sum_pubs'}:
@@ -113,10 +114,13 @@ def update_bundles(mdb:Database, for_del:int, bundles:str) -> Tuple[Collection]:
             dict(_id=iref),
             {'$set': {'start': fast_int(rstart), '$unset': {'for_del': 1}}})
         elif bundle:
-          mcont_update(
-            dict(_id=iref), {
-            '$set': {'pub_id': rpub_id, 'start': fast_int(rstart)},
-            '$addToSet': {'bundles_new': bundle}, '$unset': {'for_del': 1}})
+          if (bundle, iref) not in bund_in_cont:
+            bund_in_cont.add((bundle, iref))
+            mcont_update(
+              dict(_id=iref), {
+              '$set': {'pub_id': rpub_id, 'start': fast_int(rstart)},
+              '$addToSet': {'bundles_new': bundle}, '$unset': {'for_del': 1}})
+
         cache_conts.add(iref)
 
     mpubs_update(

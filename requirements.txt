@@ -9,7 +9,7 @@ aiohttp[speedups]==3.6.2  # via -r requirements.in
 async-timeout==3.0.1      # via aiohttp
 attrs==19.3.0             # via -r requirements.in, aiohttp
 brotlipy==0.7.0           # via aiohttp
-cchardet==2.1.5           # via aiohttp
+cchardet==2.1.6           # via aiohttp
 certifi==2019.11.28       # via requests
 cffi==1.14.0              # via brotlipy, pycares, zstandard
 chardet==3.0.4            # via aiohttp, requests
@@ -26,8 +26,8 @@ lxml==4.5.0               # via -r requirements.in, html-text, parsel
 more-itertools==8.2.0     # via -r requirements.in
 motor==2.1.0              # via -r requirements.in
 multidict==4.7.5          # via aiohttp, yarl
-numpy==1.18.1             # via pandas, scikit-learn, scipy
-pandas==1.0.2             # via -r requirements.in
+numpy==1.18.2             # via pandas, scikit-learn, scipy
+pandas==1.0.3             # via -r requirements.in
 parsel==1.5.2             # via -r requirements.in
 pycares==3.1.1            # via aiodns
 pycparser==2.20           # via cffi
@@ -38,7 +38,7 @@ pymorphy2==0.8            # via -r requirements.in
 python-dateutil==2.8.1    # via pandas
 python-snappy==0.5.4      # via pymongo
 pytz==2019.3              # via pandas
-pyyaml==5.3               # via -r requirements.in
+pyyaml==5.3.1             # via -r requirements.in
 requests==2.23.0          # via -r requirements.in
 scikit-learn==0.22.2.post1  # via sklearn
 scipy==1.4.1              # via scikit-learn

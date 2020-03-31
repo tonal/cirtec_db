@@ -43,30 +43,27 @@ async def _req_top_refbundles(request: web.Request) -> web.StreamResponse:
 
 def _get_refbindles_pipeline(topn:int=None):
   pipeline = [
-    {'$match': {'exact': {'$exists': True}}},
+    {'$match': {'exact': {'$exists': 1}}},
     {'$project': {
-      'prefix': False, 'suffix': False, 'exact': False,
-      'linked_papers_topics': False, 'linked_papers_ngrams': False}},
+      'prefix': 0, 'suffix': 0, 'exact': 0, 'linked_papers_topics': 0,
+      'linked_papers_ngrams': 0}},
     {'$unwind': '$bundles'},
     {'$match': {'bundles': {'$ne': 'nUSJrP'}}},  ##
     {'$group': {
       '_id': '$bundles', 'cits': {'$sum': 1}, 'pubs': {'$addToSet': '$pub_id'},
       'pos_neg': {'$push': '$positive_negative'},
       'frags': {'$push': '$frag_num'}, }},
-    {'$unwind': '$pubs'},
-    {'$group': {
-      '_id': '$_id', 'cits': {'$first': '$cits'}, 'pubs': {'$sum': 1},
-      'pos_neg': {'$first': '$pos_neg'}, 'frags': {'$first': '$frags'}, }},
-    # 'pubs_ids': {'$addToSet': '$pubs'}, }},
+    {'$project': {
+        'cits': 1, 'pubs': {'$size': '$pubs'}, 'pos_neg': 1, 'frags': 1}},
     {'$lookup': {
       'from': 'bundles', 'localField': '_id', 'foreignField': '_id',
       'as': 'bundle'}},
     {'$unwind': '$bundle'},
     {'$project': {
-      'cits': True, 'pubs': True, 'pubs_ids': True,
+      'cits': 1, 'pubs': 1, 'pubs_ids': 1,
       'total_cits': '$bundle.total_cits', 'total_pubs': '$bundle.total_pubs',
       'year': '$bundle.year', 'authors': '$bundle.authors',
-      'title': '$bundle.title', 'pos_neg': True, 'frags': True, }},
+      'title': '$bundle.title', 'pos_neg': 1, 'frags': 1, }},
     {'$sort': {'cits': -1, 'pubs': -1, 'title': 1}}, # {$count: 'cnt'}
   ]
   if topn:
