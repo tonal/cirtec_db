@@ -143,7 +143,10 @@ def update_bundles(mdb:Database, for_del:int, bundles:str) -> Tuple[Collection]:
     # 'ss'.isu
     bibs = bundle['bibs']
     best = max(bibs, key=bkey)
-    if bibs[-1] != best:
+    real_bib = {
+      k: v for k, v in bundle.items()
+      if v and k in {'title', 'authors', 'year'}}
+    if real_bib != best:
       mbnds_update(dict(_id=bundle['_id']), {'$set': best})
 
   rename_new_field(mbnds, 'bibs')
