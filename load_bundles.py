@@ -6,7 +6,7 @@
 from datetime import datetime
 from functools import partial, reduce
 import json
-from typing import Tuple
+from typing import Tuple, Dict, Any
 from urllib.request import urlopen
 
 from fastnumbers import fast_int
@@ -23,11 +23,14 @@ BUNDLES:str = 'http://onir2.ranepa.ru:8081/groups/authors/Sergey-Sinelnikov-Mury
 
 
 def main():
-  start = datetime.now()
+  now = datetime.now
+  start = now()
   conf = load_config()
   conf_mongo = conf['dev']['mongodb']
   bundles:str = BUNDLES
   for_del: int = reduce(lambda x, y: x * 100 + y, start.timetuple()[:6])
+
+  print(now(), 'start')
 
   with MongoClient(conf_mongo['uri'], compressors='snappy') as client:
     mdb = client[conf_mongo['db']] # 'cirtec'
@@ -35,11 +38,13 @@ def main():
     mbnds, = update_bundles(mdb, for_del, bundles)
 
     r = mbnds.delete_many({'for_del': for_del})
-    print(f'delete {mbnds.name}:', r.deleted_count)
+    print(now(), f'delete {mbnds.name}:', r.deleted_count)
 
 
 def update_bundles(mdb:Database, for_del:int, bundles:str) -> Tuple[Collection]:
   """Обновление коллекции bundles и дополнение в публикации и контексты"""
+  now = datetime.now
+
   mbnds = mdb['bundles']
   mbnds_update = partial(mbnds.update_one, upsert=True)
   mcont = mdb['contexts']
@@ -54,19 +59,6 @@ def update_bundles(mdb:Database, for_del:int, bundles:str) -> Tuple[Collection]:
 
   mbnds.update_many({}, {'$set': {'for_del': for_del}})
 
-  def bib2bib(a, y, t):
-    res = {}
-    title = norm_spaces(t)
-    if title:
-      res.update(title=title)
-    authors = a.strip()
-    if authors:
-      res.update(authors=authors.split())
-    year = norm_spaces(y)
-    if year:
-      res.update(year=year)
-    return res
-
   cache_pubs = set()
   cache_conts = set()
   bund_in_cont = set()
@@ -76,6 +68,7 @@ def update_bundles(mdb:Database, for_del:int, bundles:str) -> Tuple[Collection]:
       break
     refs = p_doc.pop('refs')
     doc_refs = []
+    j = bcnt = 0
     for j, (ref_id, ref_cont) in enumerate(refs.items(), 1):
       num, rpub_id = ref_id.split('@', 1)
       assert pub_id == rpub_id
@@ -89,6 +82,7 @@ def update_bundles(mdb:Database, for_del:int, bundles:str) -> Tuple[Collection]:
       bib_bib = bib2bib(**bib)
       ref_doc = dict(num=j, **bib_bib)
       if bundle:
+        bcnt += 1
         ref_doc.update(bundle=bundle)
         bundle_doc = dict(**bib_bib)
         if total_cits:
@@ -126,12 +120,52 @@ def update_bundles(mdb:Database, for_del:int, bundles:str) -> Tuple[Collection]:
     mpubs_update(
       dict(_id=pub_id), {'$set': dict(refs=doc_refs), '$unset': {'for_del': 1}})
 
-    print(pub_id, len(doc_refs))
+    print(now(), i, pub_id, bcnt, len(doc_refs))
+
+  # Интеллектуальное заполнение выходных данных из имеющихся
+  def bkey(b:Dict[str, Any]) -> Tuple[int, int, int, str, int, int, dict]:
+    lb = len(b)
+    if title := b.get('title'):
+      tu = 1 if title[0].isupper() else 0
+      tl = len(title)
+    else:
+      tu, tl = -1, 0
+    if authors := b.get('authors'):
+      al = len(authors)
+      aa = sum(len(a) for a in authors)
+    else:
+      al = aa = 0
+    return lb, tu, tl, title, al, aa, b
+  for bundle in mbnds.find(
+    # Выбираем обновлённые, у которых массив выходных длиннее 1
+    {'for_del': {'$exists': 0},  'bibs_new.1': {'$exists': 1}}
+  ):
+    # 'ss'.isu
+    bibs = bundle['bibs']
+    best = max(bibs, key=bkey)
+    if bibs[-1] != best:
+      mbnds_update(dict(_id=bundle['_id']), {'$set': best})
 
   rename_new_field(mbnds, 'bibs')
   rename_new_field(mcont, 'bundles')
 
   return (mbnds,)
+
+
+def bib2bib(a:str, y:str, t:str):
+  res = {}
+  title = norm_spaces(t)
+  if title:
+    res.update(title=title)
+  authors = a.strip()
+  if authors:
+    res.update(authors=authors.split())
+  if y:
+    # Только первый год из возможных
+    year = y.strip()[:4].strip()
+    if year:
+      res.update(year=year)
+  return res
 
 
 if __name__ == '__main__':
