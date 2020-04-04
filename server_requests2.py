@@ -11,7 +11,8 @@ from operator import itemgetter
 
 from aiohttp import web
 from pymongo import ASCENDING
-from pymongo.collection import Collection
+# from pymongo.collection import Collection
+from motor.motor_asyncio import AsyncIOMotorCollection as Collection
 
 from server_get_top import (
   get_ngramm_filter, _get_topn_cocit_refs, _get_refauthors_pipeline)
@@ -738,8 +739,11 @@ async def _req_bundles(request: web.Request) -> web.StreamResponse:
 
   to_out = partial(to_out_typed, type='bundle')
 
-  bundles = mdb.bundles
-  out = [to_out(**doc) async for doc in (bundles.find(dict(_id=bund_id)))]
+  bundles:Collection = mdb.bundles
+  bundle:dict = await bundles.find_one(dict(_id=bund_id))
+  if not bundle:
+    return json_response([])
+  out = [to_out(**bundle)]
   return json_response(out)
 
 
