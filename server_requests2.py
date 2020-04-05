@@ -800,7 +800,7 @@ async def _req_bundles(request: web.Request) -> web.StreamResponse:
       'total_cits': {'$first': '$total_cits'},
       'total_pubs': {'$first': '$total_pubs'},
       'refs': {'$push': {
-        'pub_id': '$pub._id', 'num': '$pub.refs.num',
+        'pubid': '$pub._id', 'num': '$pub.refs.num',
         'title': '$pub.refs.title', 'authors': '$pub.refs.authors',
         'year': '$pub.refs.year'}}, }},
   ]
