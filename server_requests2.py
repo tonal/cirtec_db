@@ -686,6 +686,22 @@ async def _req_top_ngramm(request: web.Request) -> web.StreamResponse:
   return json_response(out)
 
 
+async def _req_db_publication(request: web.Request) -> web.StreamResponse:
+  """Публикации"""
+  app = request.app
+  mdb = app['db']
+
+  pub_id = getreqarg_id(request)
+  if not pub_id:
+    return json_response({})
+
+  publications:Collection = mdb.publications
+  doc = await publications.find_one({'_id': pub_id})
+  if not doc:
+    return json_response({})
+  return json_response(doc)
+
+
 async def _req_publications(request: web.Request) -> web.StreamResponse:
   """Публикации"""
   app = request.app
@@ -706,12 +722,26 @@ async def _req_publications(request: web.Request) -> web.StreamResponse:
   return json_response(out)
 
 
+async def _req_db_context(request: web.Request) -> web.StreamResponse:
+  app = request.app
+  mdb = app['db']
+
+  cont_id = getreqarg_id(request)
+  if not cont_id:
+    return json_response({})
+
+  contexts:Collection = mdb.contexts
+  doc = await contexts.find_one({'_id': cont_id})
+  if not doc:
+    return json_response({})
+  return json_response(doc)
+
+
 async def _req_contexts(request: web.Request) -> web.StreamResponse:
   app = request.app
   mdb = app['db']
 
   cont_id = getreqarg_id(request)
-
   if not cont_id:
     return json_response([])
 
@@ -728,23 +758,86 @@ async def _req_contexts(request: web.Request) -> web.StreamResponse:
   return json_response(out)
 
 
+async def _req_db_bundle(request: web.Request) -> web.StreamResponse:
+  app = request.app
+  mdb = app['db']
+
+  bund_id = getreqarg_id(request)
+  if not bund_id:
+    return json_response({})
+
+  bundles:Collection = mdb.bundles
+  doc:dict = await bundles.find_one(dict(_id=bund_id))
+  if not doc:
+    return json_response({})
+  return json_response(doc)
+
+
 async def _req_bundles(request: web.Request) -> web.StreamResponse:
   app = request.app
   mdb = app['db']
 
   bund_id = getreqarg_id(request)
-
   if not bund_id:
     return json_response([])
 
   to_out = partial(to_out_typed, type='bundle')
 
   bundles:Collection = mdb.bundles
-  bundle:dict = await bundles.find_one(dict(_id=bund_id))
-  if not bundle:
-    return json_response([])
-  out = [to_out(**bundle)]
-  return json_response(out)
+  pipeline = [
+    {'$match': {'_id': bund_id}},
+    {'$lookup': {
+      'from': 'publications', 'localField': '_id',
+      'foreignField': 'refs.bundle', 'as': 'pub'}},
+    {'$unwind': '$pub'},
+    {'$unwind': '$pub.refs'},
+    {'$match': {'$expr': {'$eq': ['$_id', '$pub.refs.bundle']}}},
+    {'$project': {'pub.refs.bundle': 0}},
+    {'$sort': {'pub.year': 1, 'pub._id': 1, 'pub.refs.num': 1}},
+    {'$group': {
+      '_id': '$_id', 'authors': {'$first': '$authors'},
+      'title': {'$first': '$title'}, 'year': {'$first': '$year'},
+      'total_cits': {'$first': '$total_cits'},
+      'total_pubs': {'$first': '$total_pubs'},
+      'refs': {'$push': {
+        'pub_id': '$pub._id', 'num': '$pub.refs.num',
+        'title': '$pub.refs.title', 'authors': '$pub.refs.authors',
+        'year': '$pub.refs.year'}}, }},
+  ]
+  async for doc in bundles.aggregate(pipeline):
+    out = to_out_typed(type='bundle', **doc)
+    return json_response(out)
+  return json_response([])
+
+
+async def _req_db_topic(request: web.Request) -> web.StreamResponse:
+  app = request.app
+  mdb = app['db']
+
+  topic_id = getreqarg_id(request)
+  if not topic_id:
+    return json_response({})
+
+  topics:Collection = mdb.topics
+  doc:dict = await topics.find_one(dict(_id=topic_id))
+  if not doc:
+    return json_response({})
+  return json_response(doc)
+
+
+async def _req_db_ngramm(request: web.Request) -> web.StreamResponse:
+  app = request.app
+  mdb = app['db']
+
+  oid = getreqarg_id(request)
+  if not oid:
+    return json_response({})
+
+  n_gramms:Collection = mdb.n_gramms
+  doc:dict = await n_gramms.find_one(dict(_id=oid))
+  if not doc:
+    return json_response({})
+  return json_response(doc)
 
 
 async def _req_pub_cont_bund(request: web.Request) -> web.StreamResponse:

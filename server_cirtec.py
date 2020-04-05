@@ -30,7 +30,8 @@ from server_requests2 import (
   _req_pos_neg_cocitauthors, _req_frags_pos_neg_contexts,
   _req_frags_pos_neg_cocitauthors2, _req_top_cocitrefs, _req_top_cocitrefs2,
   _req_by_frags_refauthors, _req_top_detail_bund_refauthors, _req_contexts,
-  _req_bundles, _req_pub_cont_bund)
+  _req_bundles, _req_pub_cont_bund, _req_db_bundle, _req_db_context,
+  _req_db_publication, _req_db_topic, _req_db_ngramm)
 from server_utils import _init_logging
 from utils import load_config
 
@@ -88,6 +89,12 @@ def create_srv():
   add_get('/cirtec/contexts/', _req_contexts)
   add_get('/cirtec/bundles/', _req_bundles)
   add_get('/cirtec/pub_cont_bund/', _req_pub_cont_bund)
+
+  add_get('/cirtec/db/bundle/', _req_db_bundle)
+  add_get('/cirtec/db/context/', _req_db_context)
+  add_get('/cirtec/db/publication/', _req_db_publication)
+  add_get('/cirtec/db/topic/', _req_db_topic)
+  add_get('/cirtec/db/ngramm/', _req_db_ngramm)
 
   app['conf'] = conf
   app['tasks'] = set()

@@ -142,7 +142,7 @@ GET http://localhost:8668/cirtec_dev/top_detail_bund/ref_authors/
 GET http://localhost:8668/cirtec_dev/contexts/?id=repec:gai:ppaper:2@61885
 
 ###
-GET http://localhost:8668/cirtec_dev/bundles/?id=KRqlBG
+GET http://localhost:8668/cirtec_dev/bundles/?id=G63mJe
 
 ###
 GET http://localhost:8668/cirtec_dev/pub_cont_bund/?id=KRqlBG
@@ -152,5 +152,20 @@ GET http://localhost:8668/cirtec_dev/publ/publications/topics/
 
 ###
 GET http://localhost:8668/cirtec_dev/frags/ngramms/cocitauthors/
+
+###
+GET http://localhost:8668/cirtec_dev/db/bundle/?id=G63mJe
+
+###
+GET http://localhost:8668/cirtec_dev/db/context/?id=repec:gai:ppaper:2@61885
+
+###
+GET http://localhost:8668/cirtec_dev/db/publication/?id=ranepa:rosa:doppubs:gai-wpaper-0096
+
+###
+GET http://localhost:8668/cirtec_dev/db/topic/?id=работа, оценка, экономический, налоговый, фильтр
+
+###
+GET http://localhost:8668/cirtec_dev/db/ngramm/?id=lemmas_производственный функция
 
 ###
