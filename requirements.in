@@ -13,6 +13,11 @@ aiohttp[speedups]
 motor
 uvloop
 
+fastapi
+orjson
+ujson
+uvicorn
+
 pymorphy2
 pymorphy2-dicts-ru
 more_itertools
