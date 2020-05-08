@@ -20,8 +20,16 @@ from load_utils import rename_new_field
 from utils import load_config
 
 # COCITS_FILE:str = 'linked_papers_cocits_aunas.json'
-COCITS_AUTHORS:str = 'http://onir2.ranepa.ru:8081/groups/authors/Sergey-Sinelnikov-Murylev/linked_papers_cocits_aunas.json'
-COCITS_REFS:str = 'http://onir2.ranepa.ru:8081/groups/authors/Sergey-Sinelnikov-Murylev/linked_papers_cocits_bunshids.json'
+COCITS_AUTHORS = (
+  'http://onir2.ranepa.ru:8081/groups/authors/Sergey-Sinelnikov-Murylev/linked_papers_cocits_aunas.json',
+  'http://onir2.ranepa.ru:8081/groups/authors/Sergey-Sinelnikov-Murylev/cited_papers_cocits_aunas.json',
+  'http://onir2.ranepa.ru:8081/groups/authors/Sergey-Sinelnikov-Murylev/citing_papers_cocits_aunas.json',
+)
+COCITS_REFS = (
+  'http://onir2.ranepa.ru:8081/groups/authors/Sergey-Sinelnikov-Murylev/linked_papers_cocits_bunshids.json',
+  'http://onir2.ranepa.ru:8081/groups/authors/Sergey-Sinelnikov-Murylev/cited_papers_cocits_bunshids.json',
+  'http://onir2.ranepa.ru:8081/groups/authors/Sergey-Sinelnikov-Murylev/citing_papers_cocits_bunshids.json',
+)
 
 def main():
   start = datetime.now()
@@ -38,37 +46,42 @@ def main():
     # get_no_base(mdb, get_conames(COCITS_REFS))
 
 
-def update_cocits_authors(mdb:Database, for_del:int, url:str):
+def update_cocits_authors(mdb:Database, for_del:int, urls):
   """Загрузка файла со-цитированных авторов"""
-  return _update_cocits(mdb, for_del, 'cocit_authors', url)
+  return _update_cocits(mdb, for_del, 'cocit_authors', urls)
 
 
-def update_cocits_refs(mdb:Database, for_del:int, url:str):
+def update_cocits_refs(mdb:Database, for_del:int, urls):
   """Загрузка файла со-цитированных референсов"""
-  return _update_cocits(mdb, for_del, 'cocit_refs', url)
+  return _update_cocits(mdb, for_del, 'cocit_refs', urls)
 
 
-def _update_cocits(mdb:Database, for_del:int, field:str, uri:str):
+def _update_cocits(mdb:Database, for_del:int, field:str, uris):
   """Загрузка файла со-цитирований"""
 
-  now = datetime.now
   mpubs = mdb['publications']
   mpubs_insert = mpubs.insert_one
   # mpubs_insert = partial(mpubs.update_one, upsert=True)
   mcont = mdb['contexts']
   mcont_update = partial(mcont.update_one, upsert=True)
 
-  cnt = i = j = k = 0
+  pubs = set()
+
+  for uri in uris:
+    load_json(mcont_update, mpubs_insert, field, uri, pubs)
+
+  rename_new_field(mcont, field)
+  return ()
+
+
+def load_json(mcont_update, mpubs_insert, field, uri, pubs):
+  now = datetime.now
   cnts = Counter()
   cont = author = coauthor = ''
-
   # cocits = json.load(open(fcocits, encoding='utf-8'))
   with urlopen(uri) as f:
     cocits = json.load(f)
-
-  i = j = k = 0
-  pubs = set()
-
+  i = j = k = cnt = 0
   for i, (author, values) in enumerate(cocits.items(), 1):
     # print(i, author)
     if author == 'null':
@@ -97,59 +110,20 @@ def _update_cocits(mdb:Database, for_del:int, field:str, uri:str):
         cnt += 1
         pub_id, start = cont.split('@')
         # print('   ', k, pub_id, start)
-        mcont_update(dict(_id=f'{pub_id}@{start}'),
-          {'$addToSet': {f'{field}_new': {'$each': [author, coauthor]}},
-           '$set': {'pub_id': pub_id, 'start': int(start)},})
+        mcont_update(dict(_id=f'{pub_id}@{start}'), {
+          '$addToSet': {f'{field}_new': {'$each': [author, coauthor]}},
+          '$set': {'pub_id': pub_id, 'start': int(start)}, })
         try:
           if pub_id not in pubs:
             mpubs_insert(dict(_id=pub_id))
-            pubs.add(pub_id)
         except DuplicateKeyError:
           pass
+        pubs.add(pub_id)
 
         if cnt % 100 == 0:
           print(now(), cnt, i, j, k, cont, author, coauthor)
-
   print(now(), cnt, i, j, k, cont, author, coauthor)
   print(now(), cnt, len(cnts))
-
-  rename_new_field(mcont, field)
-  return ()
-
-
-def get_conames(uri:str):
-  with urlopen(uri) as f:
-    cocits = json.load(f)
-
-  conames = Counter()
-  for i, (author, values) in enumerate(cocits.items(), 1):
-    # print(i, author)
-    try:
-      cocits2 = values['co']
-    except KeyError:
-      if author == 'TOTALS':
-        break
-      print('!!!', author, values)
-      raise
-
-    conames[author] += 1
-    for j, (coauthor, conts) in enumerate(cocits2.items(), 1):
-      conames[coauthor] += 1
-
-  for i, (n, c) in enumerate(conames.most_common(), 1):
-    print(i, n, c)
-
-  pprint(list(map(itemgetter(0), conames.most_common())), indent=2, compact=True)
-
-  return tuple(conames.keys())
-
-
-def get_no_base(mdb:Database, bundles_name:Sequence):
-  bundles = mdb.bundles
-  curs = bundles.find({'_id': {'$in': tuple(bundles_name)}})
-
-  bd_bndl = frozenset(map(itemgetter('_id'), curs))
-  print(frozenset(bundles_name) - bd_bndl)
 
 
 if __name__ == '__main__':
