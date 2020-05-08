@@ -14,6 +14,7 @@ start =
             attribute refs { xsd:integer },
             element reference {
                 attribute author { text },
+                attribute bundle { text },
                 attribute cor_cnt { xsd:integer },
                 attribute doi { text }?,
                 attribute end { xsd:integer },
@@ -24,7 +25,10 @@ start =
                 attribute title { text },
                 attribute url { xsd:anyURI }?,
                 attribute year { text },
-                element from_pdf { text }
+                element from_pdf { text },
+                element all_intext_ref {
+                    element intext_ref { text }+
+                }?
             }+,
             element intextref {
                 element Prefix { text },
@@ -38,11 +42,11 @@ start =
                     attribute start { xsd:integer },
                     xsd:integer
                 }+
-            }+,
+            }*,
             element citer {
                 element author { text }+,
                 element title { text }+,
-                element year { xsd:integer }?
+                element year { xsd:integer }
             }
         }+
     }

@@ -32,7 +32,7 @@ multidict==4.7.5          # via aiohttp, yarl
 numpy==1.18.2             # via pandas, scikit-learn, scipy
 orjson==2.6.3             # via -r requirements.in
 pandas==1.0.3             # via -r requirements.in
-parsel==1.5.2             # via -r requirements.in
+parsel==1.6.0             # via -r requirements.in
 pycares==3.1.1            # via aiodns
 pycparser==2.20           # via cffi
 pydantic==1.4             # via fastapi

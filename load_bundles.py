@@ -6,7 +6,7 @@
 from datetime import datetime
 from functools import partial, reduce
 import json
-from typing import Tuple, Dict, Any
+from typing import Tuple
 from urllib.request import urlopen
 
 from fastnumbers import fast_int
@@ -15,8 +15,8 @@ from pymongo.collection import Collection
 from pymongo.database import Database
 from pymongo.errors import DuplicateKeyError
 
-from load_utils import rename_new_field
-from utils import load_config, norm_spaces
+from load_utils import best_bibs, bib2bib, rename_new_field
+from utils import load_config
 
 # BUNDLES:str = 'linked_papers_base.json'
 BUNDLES:str = 'http://onir2.ranepa.ru:8081/groups/authors/Sergey-Sinelnikov-Murylev/linked_papers_base.json'
@@ -123,52 +123,12 @@ def update_bundles(mdb:Database, for_del:int, bundles:str) -> Tuple[Collection]:
     print(now(), i, pub_id, bcnt, len(doc_refs))
 
   # Интеллектуальное заполнение выходных данных из имеющихся
-  def bkey(b:Dict[str, Any]) -> Tuple[int, int, int, str, int, int, dict]:
-    lb = len(b)
-    if title := b.get('title'):
-      tu = 1 if title[0].isupper() else 0
-      tl = len(title)
-    else:
-      tu, tl = -1, 0
-    if authors := b.get('authors'):
-      al = len(authors)
-      aa = sum(len(a) for a in authors)
-    else:
-      al = aa = 0
-    return lb, tu, tl, title, al, aa, b
-  for bundle in mbnds.find(
-    # Выбираем обновлённые, у которых массив выходных длиннее 1
-    {'for_del': {'$exists': 0},  'bibs_new.1': {'$exists': 1}}
-  ):
-    # 'ss'.isu
-    bibs = bundle['bibs']
-    best = max(bibs, key=bkey)
-    real_bib = {
-      k: v for k, v in bundle.items()
-      if v and k in {'title', 'authors', 'year'}}
-    if real_bib != best:
-      mbnds_update(dict(_id=bundle['_id']), {'$set': best})
+  best_bibs(mbnds, mbnds_update)
 
   rename_new_field(mbnds, 'bibs')
   rename_new_field(mcont, 'bundles')
 
   return (mbnds,)
-
-
-def bib2bib(a:str, y:str, t:str):
-  res = {}
-  title = norm_spaces(t)
-  if title:
-    res.update(title=title)
-  authors = a.strip()
-  if authors:
-    res.update(authors=authors.split())
-  if y:
-    # Только первый год из возможных
-    year = y.strip()[:4].strip()
-    if year:
-      res.update(year=year)
-  return res
 
 
 if __name__ == '__main__':
