@@ -1,0 +1,171 @@
+GET http://localhost:8668/cirtec_dev/top/ref_bundles/
+
+###
+GET http://localhost:8668/cirtec_dev/top/ref_authors/
+
+###
+GET http://localhost:8668/cirtec_dev/pubs/ref_authors/
+
+###
+GET http://localhost:8668/cirtec_dev/ref_auth_bund4ngramm_tops/
+
+###
+GET http://localhost:8668/cirtec_dev/ref_bund4ngramm_tops/
+
+###
+GET http://localhost:8668/cirtec_dev/ref_auth4ngramm_tops/?topn=5
+
+###
+GET http://localhost:8668/cirtec_dev/pos_neg/pubs/
+
+###
+GET http://localhost:8668/cirtec_dev/pos_neg/ref_bundles/
+
+###
+GET http://localhost:8668/cirtec_dev/pos_neg/ref_authors/
+
+###
+GET http://localhost:8668/cirtec_dev/frags/ref_bundles/
+
+###
+GET http://localhost:8668/cirtec_dev/frags/ref_authors/
+
+###
+GET http://localhost:8668/cirtec_dev/top/ngramms/publications/?ltype=lemmas
+
+###
+GET http://localhost:8668/cirtec_dev/publications/
+
+###
+GET http://localhost:8668/cirtec_dev/publications/?id=ranepa:rosa:doppubs:gai-wpaper-0096
+
+###
+GET http://localhost:8668/cirtec_dev/top/topics/
+
+###
+GET http://localhost:8668/cirtec_dev/top/topics/publications/
+
+###
+GET http://localhost:8668/cirtec_dev/top/ngramms/?topn=50
+
+###
+GET http://localhost:8668/cirtec_dev/top/ngramms/?ltype=lemmas&topn=50
+
+###
+GET http://localhost:8668/cirtec_dev/publ/cocitauthors/cocitauthors/
+
+###
+GET http://localhost:8668/cirtec_dev/pos_neg/contexts/
+
+###
+GET http://localhost:8668/cirtec_dev/pos_neg/ngramms/
+
+###
+GET http://localhost:8668/cirtec_dev/pos_neg/topics/
+
+###
+GET http://localhost:8668/cirtec_dev/pos_neg/cocitauthors/
+
+###
+GET http://localhost:8668/cirtec_dev/frags/pos_neg/contexts/
+
+###
+GET http://localhost:8668/cirtec_dev/frags/pos_neg/cocitauthors/cocitauthors/
+
+###
+GET http://localhost:8668/cirtec_dev/frags/topics/topics/
+
+###
+GET http://localhost:8668/cirtec_dev/frags/cocitauthors/cocitauthors/
+
+###
+GET http://localhost:8668/cirtec_dev/frags/topics/
+
+###
+GET http://localhost:8668/cirtec_dev/frags/ngramms/
+
+###
+GET http://localhost:8668/cirtec_dev/frags/ngramms/?ltype=lemmas
+
+###
+GET http://localhost:8668/cirtec_dev/frags/topics/ngramms/
+
+###
+GET http://localhost:8668/cirtec_dev/frags/topics/ngramms/?ltype=lemmas
+
+###
+GET http://localhost:8668/cirtec_dev/frags/ngramms/topics/
+
+###
+GET http://localhost:8668/cirtec_dev/frags/cocitauthors/ngramms/
+
+###
+GET http://localhost:8668/cirtec_dev/frags/cocitauthors/ngramms/?ltype=lemmas
+
+###
+GET http://localhost:8668/cirtec_dev/frags/cocitauthors/topics/
+
+###
+GET http://localhost:8668/cirtec_dev/top/cocitauthors/
+
+###
+GET http://localhost:8668/cirtec_dev/frags/ngramms/ngramms/
+
+###
+GET http://localhost:8668/cirtec_dev/frags/ngramms/ngramms/?ltype=lemmas
+
+###
+GET http://localhost:8668/cirtec_dev/publ/ngramms/ngramms/
+
+###
+GET http://localhost:8668/cirtec_dev/publ/ngramms/ngramms/?ltype=lemmas
+
+###
+GET http://localhost:8668/cirtec_dev/publ/topics/topics/
+
+###
+GET http://localhost:8668/cirtec_dev/top/cocitrefs/
+
+###
+GET http://localhost:8668/cirtec_dev/top/cocitrefs/cocitrefs/
+
+###
+GET http://localhost:8668/cirtec_dev/publ/publications/ngramms/?topn=5
+
+###
+GET http://localhost:8668/cirtec_dev/by_frags/ref_authors/?topn=5
+
+###
+GET http://localhost:8668/cirtec_dev/top_detail_bund/ref_authors/
+
+###
+GET http://localhost:8668/cirtec_dev/contexts/?id=repec:gai:ppaper:2@61885
+
+###
+GET http://localhost:8668/cirtec_dev/bundles/?id=G63mJe
+
+###
+GET http://localhost:8668/cirtec_dev/pub_cont_bund/?id=KRqlBG
+
+###
+GET http://localhost:8668/cirtec_dev/publ/publications/topics/
+
+###
+GET http://localhost:8668/cirtec_dev/frags/ngramms/cocitauthors/
+
+###
+GET http://localhost:8668/cirtec_dev/db/bundle/?id=G63mJe
+
+###
+GET http://localhost:8668/cirtec_dev/db/context/?id=repec:gai:ppaper:2@61885
+
+###
+GET http://localhost:8668/cirtec_dev/db/publication/?id=ranepa:rosa:doppubs:gai-wpaper-0096
+
+###
+GET http://localhost:8668/cirtec_dev/db/topic/?id=работа, оценка, экономический, налоговый, фильтр
+
+###
+GET http://localhost:8668/cirtec_dev/db/ngramm/?id=lemmas_производственный функция
+
+###
