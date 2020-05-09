@@ -45,24 +45,39 @@ def get_refbindles_pipeline(
   return pipeline
 
 
-def _filter_by_pubs_acc(author, cited, citing):
+def _filter_by_pubs_acc(
+  author:Optional[str]=None, cited:Optional[str]=None,
+  citing:Optional[str]=None,
+):
   if not any([author, cited, citing]):
     return []
-  match = {key: val for key, val in
-    (('authors', author), ('cited', cited), ('citing', citing)) if val}
+  match = _filter_acc_dict(author, cited, citing)
   pipeline = [
     {'$lookup': {
       'from': 'publications', 'localField': 'pubid', 'foreignField': '_id',
       'as': 'pub'}},
+    {'$unwind': '$pub'},
     # {'$match': {'pub.uni_authors': {'$exists': 1}}},
-    {'$match': {f'pub.uni_{key}': val for key, val in match.items()}}
+    {'$match': {f'pub.uni_{key}': val for key, val in match.items()}},
   ]
   return pipeline
 
 
-def get_refauthors_pipeline(topn: Optional[int] = None,
-  author: Optional[str] = None, cited: Optional[str] = None,
-  citing: Optional[str] = None
+def _filter_acc_dict(
+  author:Optional[str]=None, cited:Optional[str]=None,
+  citing:Optional[str]=None,
+):
+  if not any([author, cited, citing]):
+    return {}
+  match = {
+    f'uni_{key}': val for key, val in
+      (('authors', author), ('cited', cited), ('citing', citing)) if val}
+  return match
+
+
+def get_refauthors_pipeline(
+  topn: Optional[int]=None, author:Optional[str]=None, cited:Optional[str]=None,
+  citing:Optional[str]=None
 ):
   pipeline = [
     {'$match': {'exact': {'$exists': 1}}},
@@ -100,4 +115,33 @@ def get_refauthors_pipeline(topn: Optional[int] = None,
   ]
   if topn:
     pipeline += [{'$limit': topn}]
+  return pipeline
+
+
+def get_frag_publications(
+  author: Optional[str] = None, cited: Optional[str] = None,
+  citing: Optional[str] = None
+):
+  pipeline = [
+    {'$match': {'name': {'$exists': 1}}},
+  ]
+
+  if filter := _filter_acc_dict(author, cited, citing):
+    pipeline += [{'$match': filter},]
+
+  pipeline += [
+    {'$lookup': {
+      'from': 'contexts', 'localField': '_id', 'foreignField': 'pubid',
+      'as': 'cont'}},
+    {'$unwind': {'path': '$cont', 'preserveNullAndEmptyArrays': True}},
+    {'$group': {
+      '_id': {'pubid': '$_id', 'fn': '$cont.frag_num'}, 'count': {'$sum': 1},
+      'title': {'$first': '$name'}}},
+    {'$sort': {'_id': 1}},
+    {'$group': {
+      '_id': '$_id.pubid',
+      'frags': {'$push': {'fn': '$_id.fn', 'count': '$count'}},
+      'sum': {'$sum': '$count'}, 'descr': {'$first': '$title'}}},
+    {'$sort': {'sum': -1, '_id': 1}},
+  ]
   return pipeline

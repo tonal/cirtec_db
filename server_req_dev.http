@@ -169,3 +169,4 @@ GET http://localhost:8668/cirtec_dev/db/topic/?id=работа, оценка, э
 GET http://localhost:8668/cirtec_dev/db/ngramm/?id=lemmas_производственный функция
 
 ###
+GET http://localhost:8668/cirtec_dev/frags/publications/

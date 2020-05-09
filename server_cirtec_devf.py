@@ -1,10 +1,10 @@
 #! /usr/bin/env python3
 # -*- codong: utf-8 -*-
-import asyncio
 from dataclasses import dataclass
 from functools import partial
 import logging
-from typing import Union, Optional
+from operator import itemgetter
+from typing import Optional
 
 from fastapi import APIRouter, FastAPI
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -12,7 +12,8 @@ from pymongo.collection import Collection
 from pymongo.database import Database
 import uvicorn
 
-from server_dbquery import get_refauthors_pipeline, get_refbindles_pipeline
+from server_dbquery import (
+  get_frag_publications, get_refauthors_pipeline, get_refbindles_pipeline)
 from utils import load_config
 
 
@@ -142,9 +143,10 @@ async def _top_ref_bundles(
 
 @router.get('/top/ref_authors/',  # response_model=List[str],
   summary='Топ N авторов бандлов')
-async def _top_ref_bundles(topn: Optional[int] = None,
-  author: Optional[str] = None, cited: Optional[str] = None,
-  citing: Optional[str] = None, _add_pipeline: bool = False
+async def _top_ref_bundles(
+  topn: Optional[int] = None,  author: Optional[str] = None,
+  cited: Optional[str] = None, citing: Optional[str] = None,
+  _add_pipeline: bool = False
 ):
 
   coll: Collection = slot.mdb.contexts
@@ -154,6 +156,35 @@ async def _top_ref_bundles(topn: Optional[int] = None,
     doc.pop('pos_neg', None)
     doc.pop('frags', None)
     out.append(doc)
+  if not _add_pipeline:
+    return out
+
+  return dict(pipeline=pipeline, items=out)
+
+
+@router.get('/frags/publications/',  # response_model=List[str],
+  summary='Распределение цитирований по 5-ти фрагментам для отдельных публикаций.')
+async def _req_frags_pubs(
+  author: Optional[str] = None, cited: Optional[str] = None,
+  citing: Optional[str] = None,
+  _add_pipeline: bool = False
+):
+  pass
+
+  publications = slot.mdb.publications
+  pipeline = get_frag_publications(author, cited, citing)
+
+  to_tuple = itemgetter('_id', 'descr', 'sum', 'frags')
+  out = []
+  async for doc in publications.aggregate(pipeline):
+    pubid, descr, sum, frags = to_tuple(doc)
+
+    if len(frags) == 1 and 'fn' not in frags[0]:
+      frags = {}
+    else:
+      frags = dict(map(itemgetter('fn', 'count'), frags))
+    out.append(dict(pubid=pubid, descr=descr, sum=sum, frags=frags))
+
   if not _add_pipeline:
     return out
 

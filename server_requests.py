@@ -55,7 +55,7 @@ async def _req_frags_pubs(
   async for doc in contexts.aggregate([
     {'$match': {'frag_num': {'$gt': 0}}},
     {'$group': {
-      '_id': {'fn': '$frag_num', 'pub_id': '$pub_id'}, 'count': {'$sum': 1}}},
+      '_id': {'fn': '$frag_num', 'pub_id': '$pubid'}, 'count': {'$sum': 1}}},
     {'$sort': {'_id': 1}}
   ]):
     did = doc['_id']
