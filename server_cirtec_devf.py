@@ -12,7 +12,7 @@ from pymongo.collection import Collection
 from pymongo.database import Database
 import uvicorn
 
-from server_dbquery import _get_refbindles_pipeline
+from server_dbquery import get_refauthors_pipeline, get_refbindles_pipeline
 from utils import load_config
 
 
@@ -124,34 +124,40 @@ async def _db_topic(id: str):
   summary='Топ N бандлов')
 async def _top_ref_bundles(
   topn:Optional[int]=None, author:Optional[str]=None, cited:Optional[str]=None,
-  citing:Optional[str]=None, add_pipeline:bool=False
+  citing:Optional[str]=None, _add_pipeline:bool=False
 ):
 
   coll: Collection = slot.mdb.contexts
-  pipeline = _get_refbindles_pipeline(topn, author, cited, citing)
+  pipeline = get_refbindles_pipeline(topn, author, cited, citing)
   out = []
   async for doc in coll.aggregate(pipeline):
     doc.pop('pos_neg', None)
     doc.pop('frags', None)
     out.append(doc)
-  if not add_pipeline:
+  if not _add_pipeline:
     return out
 
   return dict(pipeline=pipeline, items=out)
 
 
-# @router.get('/top/ref_authors/',  # response_model=List[str],
-#   summary='Топ N авторов бандлов')
-# async def _top_ref_bundles(topn: int):
-#
-#   coll: Collection = slot.mdb.contexts
-#   pipeline = _get_refauthors_pipeline(topn)
-#   out = []
-#   async for doc in coll.aggregate(pipeline):
-#     doc.pop('pos_neg', None)
-#     doc.pop('frags', None)
-#     out.append(doc)
-#   return out
+@router.get('/top/ref_authors/',  # response_model=List[str],
+  summary='Топ N авторов бандлов')
+async def _top_ref_bundles(topn: Optional[int] = None,
+  author: Optional[str] = None, cited: Optional[str] = None,
+  citing: Optional[str] = None, _add_pipeline: bool = False
+):
+
+  coll: Collection = slot.mdb.contexts
+  pipeline = get_refauthors_pipeline(topn, author, cited, citing)
+  out = []
+  async for doc in coll.aggregate(pipeline):
+    doc.pop('pos_neg', None)
+    doc.pop('frags', None)
+    out.append(doc)
+  if not _add_pipeline:
+    return out
+
+  return dict(pipeline=pipeline, items=out)
 
 
 if __name__ == '__main__':
