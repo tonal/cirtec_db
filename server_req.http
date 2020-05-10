@@ -163,7 +163,12 @@ GET http://localhost:7667/cirtec/ref_auth4ngramm_tops/?topn=5
 GET http://localhost:7667/cirtec/ref_bund4ngramm_tops/?topn=5
 
 ###
-# /publications/
 GET http://localhost:7667/cirtec/publications/
+
+###
+GET http://localhost:7667/cirtec/frags/cocitauthors/
+
+###
+GET http://localhost:7667/cirtec/frags/ref_authors/
 
 ###

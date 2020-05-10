@@ -370,25 +370,51 @@ def get_ref_bund4ngramm_tops_pipeline(
   topn:Optional[int], author:Optional[str], cited:Optional[str],
   citing:Optional[str]
 ):
-  pipeline = [{'$match': {'exact': {'$exists': True}}}, {
-    '$project': {'prefix': False, 'suffix': False, 'exact': False, }},
-    {'$unwind': '$bundles'}, {'$match': {'bundles': {'$ne': 'nUSJrP'}}}, {
-      '$group': {
-        '_id': '$bundles', 'cits': {'$sum': 1},
-        'pubs': {'$addToSet': '$pub_id'}, 'conts': {
-          '$addToSet': {
-            'cid': '$_id', 'topics': '$linked_papers_topics',
-            'ngrams': '$linked_papers_ngrams'}}}}, {
-      '$lookup': {
-        'from': 'bundles', 'localField': '_id', 'foreignField': '_id',
-        'as': 'bundle'}}, {'$unwind': '$bundle'}, {
-      '$project': {
-        '_id': False, 'bundle': '$_id', 'cits': True,
-        'pubs': {'$size': '$pubs'}, 'pubs_ids': '$pubs', 'conts': True,
-        'total_cits': '$bundle.total_cits', 'total_pubs': '$bundle.total_pubs',
-        'year': '$bundle.year', 'authors': '$bundle.authors',
-        'title': '$bundle.title', }},
+  pipeline = [
+    {'$match': {'exact': {'$exists': True}}},
+    {'$project': {'prefix': False, 'suffix': False, 'exact': False, }},]
+
+  pipeline += filter_by_pubs_acc(author, cited, citing)
+  pipeline += [
+    {'$unwind': '$bundles'},
+    {'$match': {'bundles': {'$ne': 'nUSJrP'}}},
+    {'$group': {
+      '_id': '$bundles', 'cits': {'$sum': 1},
+      'pubs': {'$addToSet': '$pub_id'}, 'conts': {
+        '$addToSet': {
+          'cid': '$_id', 'topics': '$linked_papers_topics',
+          'ngrams': '$linked_papers_ngrams'}}}},
+    {'$lookup': {
+      'from': 'bundles', 'localField': '_id', 'foreignField': '_id',
+      'as': 'bundle'}},
+    {'$unwind': '$bundle'},
+    {'$project': {
+      '_id': False, 'bundle': '$_id', 'cits': True,
+      'pubs': {'$size': '$pubs'}, 'pubs_ids': '$pubs', 'conts': True,
+      'total_cits': '$bundle.total_cits', 'total_pubs': '$bundle.total_pubs',
+      'year': '$bundle.year', 'authors': '$bundle.authors',
+      'title': '$bundle.title', }},
     {'$sort': {'cits': -1, 'pubs': -1, 'title': 1}}, ]
   if topn:
     pipeline += [{'$limit': topn}]
+  return pipeline
+
+
+def get_frags_cocitauthors_pipeline(
+  topn:Optional[int], author:Optional[str], cited:Optional[str],
+  citing:Optional[str]
+):
+  pipeline = [
+    {'$match': {'frag_num': {'$gt': 0}, 'cocit_authors': {'$exists': True}}},
+    {'$project': {'prefix': False, 'suffix': False, 'exact': False}},]
+  pipeline += filter_by_pubs_acc(author, cited, citing)
+  pipeline += [
+    {'$unwind': '$cocit_authors'},
+    {'$group': {
+        '_id': '$cocit_authors', 'count': {'$sum': 1},
+        'frags': {'$push': '$frag_num'}}},
+    {'$sort': {'count': -1, '_id': 1}},
+  ]
+  if topn:
+    pipeline += [{'$limit': topn},]
   return pipeline

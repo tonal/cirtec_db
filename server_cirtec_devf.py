@@ -17,10 +17,11 @@ import uvicorn
 
 from server_dbquery import (
   LType, filter_acc_dict, get_frag_publications,
-  get_ref_auth4ngramm_tops_pipeline, get_ref_bund4ngramm_tops_pipeline,
-  get_refauthors_part_pipeline, get_refauthors_pipeline,
-  get_refbindles_pipeline, get_top_cocitauthors_pipeline,
-  get_top_cocitrefs_pipeline, get_top_ngramms_pipeline, get_top_topics_pipeline)
+  get_frags_cocitauthors_pipeline, get_ref_auth4ngramm_tops_pipeline,
+  get_ref_bund4ngramm_tops_pipeline, get_refauthors_part_pipeline,
+  get_refauthors_pipeline, get_refbindles_pipeline,
+  get_top_cocitauthors_pipeline, get_top_cocitrefs_pipeline,
+  get_top_ngramms_pipeline, get_top_topics_pipeline)
 from server_utils import to_out_typed
 from utils import load_config
 
@@ -271,7 +272,6 @@ async def _req_top_cocitauthors(
   topn:Optional[int]=None, author:Optional[str]=None, cited:Optional[str]=None,
   citing:Optional[str]=None, _add_pipeline:bool=False
 ):
-  pass
   coll: Collection = slot.mdb.contexts
   pipeline = get_top_cocitrefs_pipeline(topn, author, cited, citing)
 
@@ -290,6 +290,26 @@ async def _req_top_cocitauthors(
   return dict(pipeline=pipeline, items=out)
 
 
+@router.get('/frags/cocitauthors/',
+  summary='Распределение «со-цитируемые авторы» по 5-ти фрагментам')
+async def _req_frags_cocitauthors(
+  topn:Optional[int]=None, author:Optional[str]=None, cited:Optional[str]=None,
+  citing:Optional[str]=None, _add_pipeline:bool=False
+):
+  coll: Collection = slot.mdb.contexts
+  pipeline = get_frags_cocitauthors_pipeline(topn, author, cited, citing)
+  out = []
+  async for doc in coll.aggregate(pipeline):
+    frags = Counter(doc['frags'])
+    out_dict = dict(name=doc['_id'], count=doc['count'], frags=frags)
+    out.append(out_dict)
+
+  if not _add_pipeline:
+    return out
+
+  return dict(pipeline=pipeline, items=out)
+
+
 @router.get('/frags/publications/',
   summary='Распределение цитирований по 5-ти фрагментам для отдельных публикаций.')
 async def _req_frags_pubs(
@@ -297,8 +317,6 @@ async def _req_frags_pubs(
   citing: Optional[str] = None,
   _add_pipeline: bool = False
 ):
-  pass
-
   publications = slot.mdb.publications
   pipeline = get_frag_publications(author, cited, citing)
 
