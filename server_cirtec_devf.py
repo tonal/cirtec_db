@@ -13,7 +13,8 @@ from pymongo.database import Database
 import uvicorn
 
 from server_dbquery import (
-  get_frag_publications, get_refauthors_pipeline, get_refbindles_pipeline)
+  get_frag_publications, get_refauthors_pipeline, get_refbindles_pipeline,
+  get_top_topics_pipeline)
 from utils import load_config
 
 
@@ -185,6 +186,26 @@ async def _req_frags_pubs(
       frags = dict(map(itemgetter('fn', 'count'), frags))
     out.append(dict(pubid=pubid, descr=descr, sum=sum, frags=frags))
 
+  if not _add_pipeline:
+    return out
+
+  return dict(pipeline=pipeline, items=out)
+
+
+@router.get('/top/topics/',  # response_model=List[str],
+  summary='Топ N топиков')
+async def _req_top_topics(
+  topn:Optional[int]=None, author:Optional[str]=None, cited:Optional[str]=None,
+  citing:Optional[str]=None, probability:Optional[float]=.5,
+  _add_pipeline:bool=False
+):
+  coll: Collection = slot.mdb.contexts
+  pipeline = get_top_topics_pipeline(topn, author, cited, citing, probability)
+  out = []
+  async for doc in coll.aggregate(pipeline):
+    doc.pop('pos_neg', None)
+    doc.pop('frags', None)
+    out.append(doc)
   if not _add_pipeline:
     return out
 

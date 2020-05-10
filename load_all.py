@@ -15,7 +15,6 @@ import requests
 
 from load_classif_pos_neg import update_class_pos_neg
 from load_pubs import update_pubs_conts, SOURCE_XML
-from load_bundles import update_bundles, BUNDLES
 from load_cocits import (
   update_cocits_authors, COCITS_AUTHORS, update_cocits_refs, COCITS_REFS)
 from load_ngrams import update_ngramms, NGRAM_ROOT

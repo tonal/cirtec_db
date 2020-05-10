@@ -7,8 +7,8 @@ _logger = logging.getLogger('cirtec')
 
 
 def get_refbindles_pipeline(
-  topn:Optional[int]=None, author:Optional[str]=None, cited:Optional[str]=None,
-  citing:Optional[str]=None
+  topn:Optional[int], author:Optional[str], cited:Optional[str],
+  citing:Optional[str]
 ):
   pipeline = [
     {'$match': {'exact': {'$exists': 1}}},
@@ -17,7 +17,7 @@ def get_refbindles_pipeline(
       'linked_papers_ngrams': 0}},
   ]
 
-  pipeline = _filter_by_pubs_acc(author, cited, citing)
+  pipeline += _filter_by_pubs_acc(author, cited, citing)
 
   pipeline += [
     {'$unwind': '$bundles'},
@@ -46,8 +46,7 @@ def get_refbindles_pipeline(
 
 
 def _filter_by_pubs_acc(
-  author:Optional[str]=None, cited:Optional[str]=None,
-  citing:Optional[str]=None,
+  author:Optional[str], cited:Optional[str], citing:Optional[str],
 ):
   if not any([author, cited, citing]):
     return []
@@ -58,14 +57,13 @@ def _filter_by_pubs_acc(
       'as': 'pub'}},
     {'$unwind': '$pub'},
     # {'$match': {'pub.uni_authors': {'$exists': 1}}},
-    {'$match': {f'pub.uni_{key}': val for key, val in match.items()}},
+    {'$match': {f'pub.{key}': val for key, val in match.items()}},
   ]
   return pipeline
 
 
 def _filter_acc_dict(
-  author:Optional[str]=None, cited:Optional[str]=None,
-  citing:Optional[str]=None,
+  author:Optional[str], cited:Optional[str], citing:Optional[str],
 ):
   if not any([author, cited, citing]):
     return {}
@@ -76,8 +74,8 @@ def _filter_acc_dict(
 
 
 def get_refauthors_pipeline(
-  topn: Optional[int]=None, author:Optional[str]=None, cited:Optional[str]=None,
-  citing:Optional[str]=None
+  topn: Optional[int], author:Optional[str], cited:Optional[str],
+  citing:Optional[str]
 ):
   pipeline = [
     {'$match': {'exact': {'$exists': 1}}},
@@ -87,7 +85,7 @@ def get_refauthors_pipeline(
     {'$unwind': '$bundles'},
   ]
 
-  pipeline = _filter_by_pubs_acc(author, cited, citing)
+  pipeline += _filter_by_pubs_acc(author, cited, citing)
 
   pipeline += [
     {'$match': {'bundles': {'$ne': 'nUSJrP'}}},
@@ -119,8 +117,7 @@ def get_refauthors_pipeline(
 
 
 def get_frag_publications(
-  author: Optional[str] = None, cited: Optional[str] = None,
-  citing: Optional[str] = None
+  author: Optional[str], cited: Optional[str], citing: Optional[str]
 ):
   pipeline = [
     {'$match': {'name': {'$exists': 1}}},
@@ -144,4 +141,37 @@ def get_frag_publications(
       'sum': {'$sum': '$count'}, 'descr': {'$first': '$title'}}},
     {'$sort': {'sum': -1, '_id': 1}},
   ]
+  return pipeline
+
+
+def get_top_topics_pipeline(
+  topn:Optional[int], author:Optional[str], cited:Optional[str],
+  citing:Optional[str], probability:Optional[float]
+):
+  pipeline = [
+    {'$match': {'exact': {'$exists': 1}}},
+    {'$project': {
+      'prefix': False, 'suffix': False, 'exact': False,
+      'linked_papers_ngrams': False}},
+  ]
+  pipeline += _filter_by_pubs_acc(author, cited, citing)
+
+  pipeline += [
+    {'$unwind': '$linked_papers_topics'},
+  ]
+  if probability :
+    pipeline += [
+      {'$match': {'linked_papers_topics.probability': {'$gte': probability}}},]
+
+  pipeline += [
+    {'$group': {
+      '_id': '$linked_papers_topics._id', 'count': {'$sum': 1},
+      'probability_avg': {'$avg': '$linked_papers_topics.probability'},
+      'probability_stddev': {'$stdDevPop': '$linked_papers_topics.probability'},
+      'conts': {'$addToSet': '$_id'}, }},
+    {'$sort': {'count': -1, '_id': 1}}
+  ]
+  if topn:
+    pipeline += [{'$limit': topn}]
+
   return pipeline
