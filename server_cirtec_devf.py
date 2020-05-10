@@ -16,7 +16,7 @@ import uvicorn
 from server_dbquery import (
   LType, get_frag_publications, get_refauthors_pipeline,
   get_refbindles_pipeline, get_top_cocitauthors_pipeline,
-  get_top_ngramms_pipeline, get_top_topics_pipeline)
+  get_top_cocitrefs_pipeline, get_top_ngramms_pipeline, get_top_topics_pipeline)
 from utils import load_config
 
 
@@ -271,6 +271,29 @@ async def _req_top_cocitauthors(
 
 
 # /top/cocitrefs/
+@router.get('/top/cocitrefs/',  # response_model=List[str],
+  summary='Топ N со-цитируемых референсов')
+async def _req_top_cocitauthors(
+  topn:Optional[int]=None, author:Optional[str]=None, cited:Optional[str]=None,
+  citing:Optional[str]=None, _add_pipeline:bool=False
+):
+  pass
+  coll: Collection = slot.mdb.contexts
+  pipeline = get_top_cocitrefs_pipeline(topn, author, cited, citing)
+
+  def repack(_id, count, conts, bundles):
+    authors = bundles.get('authors')
+    title = bundles['title']
+    year = bundles.get('year', '?')
+    descr = f'{" ".join(authors) if authors else "?"} ({year}) {title}'
+    return dict(bid=_id, descr=descr, contects=conts)
+
+  out = [repack(**doc) async for doc in coll.aggregate(pipeline)]
+
+  if not _add_pipeline:
+    return out
+
+  return dict(pipeline=pipeline, items=out)
 
 
 if __name__ == '__main__':

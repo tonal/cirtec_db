@@ -259,3 +259,33 @@ def get_top_cocitauthors_pipeline(
   if topn:
     pipeline += [{'$limit': topn}]
   return pipeline
+
+
+def get_top_cocitrefs_pipeline(
+  topn:Optional[int], author:Optional[str], cited:Optional[str],
+  citing:Optional[str]
+):
+  pipeline = [
+    {'$match': {'frag_num': {'$gt': 0}, 'cocit_refs': {'$exists': 1}}},
+    {'$project': {
+      'prefix': 0, 'suffix': 0, 'exact': 0, 'positive_negative': 0,
+      'bundles': 0, 'linked_papers_ngrams': 0, 'linked_papers_topics': 0}},]
+
+  pipeline += _filter_by_pubs_acc(author, cited, citing)
+  pipeline += [
+    {'$unwind': '$cocit_refs'},
+    {'$group': {
+        '_id': '$cocit_refs', 'count': {'$sum': 1},
+        'conts': {'$addToSet': '$_id'}}},
+    {'$sort': {'count': -1, '_id': 1}},
+  ]
+  if topn:
+    pipeline += [{'$limit': topn}]
+
+  pipeline += [
+    {'$lookup': {
+      'from': 'bundles', 'localField': '_id', 'foreignField': '_id',
+      'as': 'bundles'}},
+    {'$unwind': '$bundles'},
+  ]
+  return pipeline
