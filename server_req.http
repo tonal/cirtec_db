@@ -154,3 +154,4 @@ GET http://localhost:7667/cirtec/cnt/ngramms/
 GET http://localhost:7667/cirtec/by_frags/ref_authors/?topn=5
 
 ###
+GET http://localhost:7667/cirtec/pubs/ref_authors/?topn=5

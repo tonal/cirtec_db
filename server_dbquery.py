@@ -56,7 +56,7 @@ def _filter_by_pubs_acc(
 ):
   if not any([author, cited, citing]):
     return []
-  match = _filter_acc_dict(author, cited, citing)
+  match = filter_acc_dict(author, cited, citing)
   pipeline = [
     {'$lookup': {
       'from': 'publications', 'localField': 'pubid', 'foreignField': '_id',
@@ -68,9 +68,10 @@ def _filter_by_pubs_acc(
   return pipeline
 
 
-def _filter_acc_dict(
+def filter_acc_dict(
   author:Optional[str], cited:Optional[str], citing:Optional[str],
 ):
+  """Фильтр по author, cited, citing"""
   if not any([author, cited, citing]):
     return {}
   match = {
@@ -129,7 +130,7 @@ def get_frag_publications(
     {'$match': {'name': {'$exists': 1}}},
   ]
 
-  if filter := _filter_acc_dict(author, cited, citing):
+  if filter := filter_acc_dict(author, cited, citing):
     pipeline += [{'$match': filter},]
 
   pipeline += [
@@ -288,4 +289,39 @@ def get_top_cocitrefs_pipeline(
       'as': 'bundles'}},
     {'$unwind': '$bundles'},
   ]
+  return pipeline
+
+
+def get_refauthors_pipeline(topn:int=None):
+  pipeline = [
+    {'$match': {'exact': {'$exists': 1}}},
+    {'$project': {
+      'prefix': 0, 'suffix': 0, 'exact': 0, 'linked_papers_topics': 0,
+      'linked_papers_ngrams': 0}},
+    {'$unwind': '$bundles'},
+    {'$match': {'bundles': {'$ne': 'nUSJrP'}}},
+    {'$lookup': {
+      'from': 'bundles', 'localField': 'bundles', 'foreignField': '_id',
+      'as': 'bun'}},
+    {'$unwind': '$bun'},
+    {'$unwind': '$bun.authors'},
+    {'$group': {
+      '_id': '$bun.authors', 'cits': {'$addToSet': '$_id'},
+      'cits_all': {'$sum': 1}, 'pubs': {'$addToSet': '$pub_id'},
+      'bunds_ids': {'$addToSet': '$bundles'},
+      'bunds': {
+        '$addToSet': {
+          '_id': '$bun._id', 'total_cits': '$bun.total_cits',
+          'total_pubs': '$bun.total_pubs'}},
+      'pos_neg': {'$push': '$positive_negative'},
+      'frags': {'$push': '$frag_num'}}},
+    {'$project': {
+      '_id': 0, 'author': '$_id', 'cits': {'$size': '$cits'},
+      'cits_all': '$cits_all', 'bunds_cnt': {'$size': '$bunds_ids'},
+      'pubs': {'$size': '$pubs'}, 'total_cits': {'$sum': '$bunds.total_cits'},
+      'total_pubs': {'$sum': '$bunds.total_pubs'}, 'pos_neg': 1, 'frags': 1}},
+    {'$sort': {'cits_all': -1, 'cits': -1, 'pubs': -1, 'author': 1}},
+  ]
+  if topn:
+    pipeline += [{'$limit': topn}]
   return pipeline
