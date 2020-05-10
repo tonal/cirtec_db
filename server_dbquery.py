@@ -206,8 +206,6 @@ def get_top_ngramms_pipeline(
   if nka or ltype:
     pipeline += [get_ngramm_filter(nka, ltype, 'ngrm')]
 
-  gident = {'title': '$ngrm.title', 'type': '$ngrm.type'}
-
   pipeline += [
   {'$group': {
       '_id': {'title': '$ngrm.title', 'type': '$ngrm.type'},
@@ -223,6 +221,7 @@ def get_top_ngramms_pipeline(
 
   return pipeline
 
+
 def get_ngramm_filter(
   nka: Optional[int], ltype:Optional[LType], ngrm_field:Optional[str]=None
 ):
@@ -236,3 +235,27 @@ def get_ngramm_filter(
     '$match': {
       f'{ngrm_field}.{f}': v
       for f, v in (('nka', nka), ('type', ltype_str)) if v}}
+
+
+def get_top_cocitauthors_pipeline(
+  topn:Optional[int], author:Optional[str], cited:Optional[str],
+  citing:Optional[str]
+):
+  pipeline = [
+    {'$match': {'frag_num': {'$gt': 0}, 'cocit_authors': {'$exists': 1}}},
+    {'$project': {
+      'prefix': 0, 'suffix': 0, 'exact': 0, 'positive_negative': 0,
+      'bundles': 0, 'linked_papers_ngrams': 0, 'linked_papers_topics': 0}},]
+
+  pipeline += _filter_by_pubs_acc(author, cited, citing)
+
+  pipeline += [
+    {'$unwind': '$cocit_authors'},
+    {'$group': {
+      '_id': '$cocit_authors', 'count': {'$sum': 1},
+      'conts': {'$addToSet': '$_id'}}},
+    {'$sort': {'count': -1, '_id': 1}},
+  ]
+  if topn:
+    pipeline += [{'$limit': topn}]
+  return pipeline

@@ -15,7 +15,8 @@ import uvicorn
 
 from server_dbquery import (
   LType, get_frag_publications, get_refauthors_pipeline,
-  get_refbindles_pipeline, get_top_ngramms_pipeline, get_top_topics_pipeline)
+  get_refbindles_pipeline, get_top_cocitauthors_pipeline,
+  get_top_ngramms_pipeline, get_top_topics_pipeline)
 from utils import load_config
 
 
@@ -150,7 +151,6 @@ async def _top_ref_bundles(
   cited: Optional[str] = None, citing: Optional[str] = None,
   _add_pipeline: bool = False
 ):
-
   coll: Collection = slot.mdb.contexts
   pipeline = get_refauthors_pipeline(topn, author, cited, citing)
   out = []
@@ -213,7 +213,6 @@ async def _req_top_topics(
   return dict(pipeline=pipeline, items=out)
 
 
-#  /top/ngramms/
 @router.get('/top/ngramms/',  # response_model=List[str],
   summary='Топ N фраз по публикациям')
 async def _req_top_topics(
@@ -249,6 +248,29 @@ async def _req_top_topics(
     return out
 
   return dict(pipeline=pipeline, items=out)
+
+
+@router.get('/top/cocitauthors/',  # response_model=List[str],
+  summary='Топ N со-цитируемых авторов')
+async def _req_top_cocitauthors(
+  topn:Optional[int]=None, author:Optional[str]=None, cited:Optional[str]=None,
+  citing:Optional[str]=None, _add_pipeline:bool=False
+):
+  pass
+  coll: Collection = slot.mdb.contexts
+  pipeline = get_top_cocitauthors_pipeline(topn, author, cited, citing)
+
+  out = []
+  async for doc in coll.aggregate(pipeline):
+    title = doc.pop('_id')
+    out.append(dict(title=title, **doc))
+  if not _add_pipeline:
+    return out
+
+  return dict(pipeline=pipeline, items=out)
+
+
+# /top/cocitrefs/
 
 
 if __name__ == '__main__':
