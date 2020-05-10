@@ -456,3 +456,34 @@ def get_frags_ngramms_pipeline(
   if topn:
     pipeline += [{'$limit': topn}]
   return pipeline
+
+
+def get_frags_topics_pipeline(
+  topn:Optional[int], author:Optional[str], cited:Optional[str],
+  citing:Optional[str], probability:Optional[float]
+):
+  pipeline = [
+    {'$match': {
+      'frag_num': {'$exists': 1}, 'linked_papers_topics': {'$exists': 1}}},
+    {'$project': {
+      '_id': 1, 'frag_num': 1, 'linked_paper': '$linked_papers_topics'}},]
+  pipeline += filter_by_pubs_acc(author, cited, citing)
+  pipeline += [
+    {'$unwind': '$linked_paper'},
+  ]
+  if probability :
+    pipeline += [
+      {'$match': {'linked_paper.probability': {'$gte': probability}}},]
+
+  pipeline += [
+    {'$group': {
+      '_id': {'_id': '$linked_paper._id', 'frag_num': '$frag_num'},
+      'count': {'$sum': 1,}}},
+    {'$group': {
+      '_id': '$_id._id', 'count': {'$sum': '$count'},
+      'frags': {'$push': {'frag_num': '$_id.frag_num', 'count': '$count',}},}},
+    {'$sort': {'count': -1, '_id': 1}},
+  ]
+  if topn:
+    pipeline += [{'$limit': topn}]
+  return pipeline
