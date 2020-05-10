@@ -517,14 +517,11 @@ def get_pos_neg_cocitauthors_pipeline(
       '_id': False, 'class_pos_neg': '$_id',
       'cocitauthors': {'$slice': ['$cocitauthor', topn]}}},
     {'$sort': {'class_pos_neg': -1}}, ]
-  if topn:
-    pipeline += [{'$limit': topn}]
   return pipeline
 
 
 def get_pos_neg_contexts_pipeline(
-  topn:Optional[int], author:Optional[str], cited:Optional[str],
-  citing:Optional[str]
+  author:Optional[str], cited:Optional[str], citing:Optional[str]
 ):
   pipeline = [
     {'$match': {'positive_negative': {'$exists': True}}},
@@ -544,6 +541,48 @@ def get_pos_neg_contexts_pipeline(
       'pubids': '$pubids', 'contids': '$contids'}},
     {'$sort': {'class_pos_neg': -1}},
   ]
-  if topn:
-    pipeline += [{'$limit': topn}]
+  return pipeline
+
+
+def get_pos_neg_ngramms_pipeline(
+  topn: Optional[int], author: Optional[str], cited: Optional[str],
+  citing: Optional[str], nka:Optional[int], ltype:Optional[LType]
+):
+  pipeline = [
+    {'$match': {
+      'positive_negative': {'$exists': True},
+      'linked_papers_ngrams': {'$exists': True},}},
+    {'$project': {
+      'pubid': True, 'positive_negative': True, 'linked_papers_ngrams': True}},]
+  pipeline += filter_by_pubs_acc(author, cited, citing)
+
+  pipeline += [
+    {'$unwind': '$linked_papers_ngrams'},
+    {'$lookup': {
+      'from': 'n_gramms', 'localField': 'linked_papers_ngrams._id',
+      'foreignField': '_id', 'as': 'ngrm'}},
+    {'$unwind': '$ngrm'},]
+  if nka or ltype:
+    pipeline += [get_ngramm_filter(nka, ltype, 'ngrm')]
+  pipeline += [
+    {'$group': {
+      '_id': {
+        'pos_neg': {
+          '$arrayElemAt': [
+            ['neutral', 'positive', 'positive', 'negative', 'negative'],
+            '$positive_negative.val']},
+        'title': '$ngrm.title', 'nka': '$ngrm.nka', 'ltype': '$ngrm.type'},
+      'ngrm_cnt': {'$sum': '$linked_papers_ngrams.cnt'}}},
+    {'$sort': {'ngrm_cnt': -1, '_id.title': 1}},
+    {'$group': {
+      '_id': '$_id.pos_neg',
+      'ngramms': {
+        '$push': {
+          'title': '$_id.title', 'nka': '$_id.nka', 'ltype': '$_id.ltype',
+          'count': '$ngrm_cnt'}},}},
+    {'$project': {
+      '_id': False, 'class_pos_neg': '$_id',
+      'ngramms': {'$slice': ['$ngramms', topn]},}},
+    {'$sort': {'class_pos_neg': -1}},
+  ]
   return pipeline
