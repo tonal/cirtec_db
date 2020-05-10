@@ -17,9 +17,10 @@ import uvicorn
 
 from server_dbquery import (
   LType, filter_acc_dict, get_frag_publications,
-  get_ref_auth4ngramm_tops_pipeline, get_refauthors_pipeline,
-  get_refbindles_pipeline, get_top_cocitauthors_pipeline,
-  get_top_cocitrefs_pipeline, get_top_ngramms_pipeline, get_top_topics_pipeline)
+  get_ref_auth4ngramm_tops_pipeline, get_ref_bund4ngramm_tops_pipeline,
+  get_refauthors_pipeline, get_refbindles_pipeline,
+  get_top_cocitauthors_pipeline, get_top_cocitrefs_pipeline,
+  get_top_ngramms_pipeline, get_top_topics_pipeline)
 from utils import load_config
 
 
@@ -330,7 +331,6 @@ async def _req_pubs_refauthors(
   return dict(pipeline=pipeline, items=out)
 
 
-# /ref_auth4ngramm_tops/
 @router.get('/ref_auth4ngramm_tops/',) # summary='Топ N со-цитируемых референсов')
 async def _ref_auth4ngramm_tops(
   topn:Optional[int]=None, author:Optional[str]=None, cited:Optional[str]=None,
@@ -382,6 +382,65 @@ async def _ref_auth4ngramm_tops(
     out_bund.append(cont)
 
   out = out_bund
+  if not _add_pipeline:
+    return out
+
+  return dict(pipeline=pipeline, items=out)
+
+
+@router.get('/ref_bund4ngramm_tops/',) # summary='Топ N со-цитируемых референсов')
+async def _req_bund4ngramm_tops(
+  topn:Optional[int]=None, author: Optional[str]=None,
+  cited: Optional[str]=None, citing: Optional[str]=None,
+  probability: Optional[float]=.5,
+  _add_pipeline: bool = False
+):
+  contexts: Collection = slot.mdb.contexts
+
+  out_bund = []
+  pipeline = get_ref_bund4ngramm_tops_pipeline(topn, author, cited, citing)
+
+  get_probab = itemgetter('probability')
+  get_first = itemgetter(0)
+  get_second = itemgetter(1)
+  get_topic = itemgetter('_id', 'probability')
+
+  def topic_stat(it_tp):
+    it_tp = tuple(it_tp)
+    probabs = tuple(map(get_second, it_tp))
+    return dict(count=len(
+      it_tp), )  # probability_avg=mean(probabs),  # probability_pstdev=pstdev(probabs))
+
+  get_topics = lambda cont: cont.get('topics') or ()
+  get_count = itemgetter('count')
+  get_ngrs = lambda cont: cont.get('ngrams') or ()
+  get_ngr = itemgetter('_id', 'cnt')
+  async for cont in contexts.aggregate(pipeline):
+    conts = cont.pop('conts')
+
+    cont_ids = map(itemgetter('cid'), conts)
+
+    topics = chain.from_iterable(map(get_topics, conts))
+    # удалять топики < 0.5
+    topics = ((t, p) for t, p in map(get_topic, topics) if p >= probability)
+    topics = (dict(topic=t, **topic_stat(it_tp)) for t, it_tp in
+    groupby(sorted(topics, key=get_first), key=get_first))
+    topics = sorted(topics, key=get_count, reverse=True)
+
+    ngrams = chain.from_iterable(map(get_ngrs, conts))
+    # только 2-grams и lemmas
+    ngrams = ((n.split('_', 1)[-1].split(), c) for n, c in map(get_ngr, ngrams)
+    if n.startswith('lemmas_'))
+    ngrams = ((' '.join(n), c) for n, c in ngrams if len(n) == 2)
+    ngrams = (dict(ngramm=n, count=sum(map(get_second, it_nc))) for n, it_nc in
+    groupby(sorted(ngrams, key=get_first), key=get_first))
+    ngrams = sorted(ngrams, key=get_count, reverse=True)
+    ngrams = islice(ngrams, 10)
+    cont.update(cont_ids=tuple(cont_ids), topics=tuple(topics),
+      ngrams=tuple(ngrams))
+    out_bund.append(cont)
+  out = out_bund
+
   if not _add_pipeline:
     return out
 
