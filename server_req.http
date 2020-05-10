@@ -178,3 +178,7 @@ GET http://localhost:7667/cirtec/frags/ref_bundles/
 GET http://localhost:7667/cirtec/pos_neg/cocitauthors/
 
 ###
+# /pos_neg/contexts/
+GET http://localhost:7667/cirtec/pos_neg/contexts/
+
+###

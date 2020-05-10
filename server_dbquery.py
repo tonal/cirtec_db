@@ -520,3 +520,30 @@ def get_pos_neg_cocitauthors_pipeline(
   if topn:
     pipeline += [{'$limit': topn}]
   return pipeline
+
+
+def get_pos_neg_contexts_pipeline(
+  topn:Optional[int], author:Optional[str], cited:Optional[str],
+  citing:Optional[str]
+):
+  pipeline = [
+    {'$match': {'positive_negative': {'$exists': True}}},
+    {'$project': {'pubid': True, 'positive_negative': True}},]
+  pipeline += filter_by_pubs_acc(author, cited, citing)
+  pipeline += [
+    {'$group': {
+      '_id': {
+        '$arrayElemAt': [
+          ['neutral', 'positive', 'positive', 'negative', 'negative'],
+          '$positive_negative.val']},
+      'pubids': {'$addToSet': '$pubid'},
+      'contids': {'$addToSet': '$_id'}}},
+    {'$project': {
+      '_id': False, 'class_pos_neg': '$_id',
+      'cont_cnt': {'$size': '$contids'}, 'pub_cnt': {'$size': '$pubids'},
+      'pubids': '$pubids', 'contids': '$contids'}},
+    {'$sort': {'class_pos_neg': -1}},
+  ]
+  if topn:
+    pipeline += [{'$limit': topn}]
+  return pipeline
