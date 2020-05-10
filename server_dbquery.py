@@ -1,9 +1,15 @@
 # -*- codong: utf-8 -*-
+import enum
 import logging
 from typing import Optional
 
 
 _logger = logging.getLogger('cirtec')
+
+
+class LType(enum.Enum):
+  lemmas = 'lemmas'
+  nolemmas = 'nolemmas'
 
 
 def get_refbindles_pipeline(
@@ -175,3 +181,58 @@ def get_top_topics_pipeline(
     pipeline += [{'$limit': topn}]
 
   return pipeline
+
+
+def get_top_ngramms_pipeline(
+  topn:Optional[int], author:Optional[str], cited:Optional[str],
+  citing:Optional[str], nka:Optional[int], ltype:Optional[LType]
+):
+  pipeline = [
+    {'$match': {'linked_papers_ngrams._id': {'$exists': True}}},
+    {'$project': {
+      'prefix': False, 'suffix': False, 'exact': False,
+      'linked_papers_topics': False}},
+  ]
+  pipeline += _filter_by_pubs_acc(author, cited, citing)
+
+  pipeline += [
+    {'$unwind': '$linked_papers_ngrams'},
+    {'$lookup': {
+      'from': 'n_gramms', 'localField': 'linked_papers_ngrams._id',
+      'foreignField': '_id', 'as': 'ngrm'}},
+    {'$unwind': '$ngrm'},
+  ]
+
+  if nka or ltype:
+    pipeline += [get_ngramm_filter(nka, ltype, 'ngrm')]
+
+  gident = {'title': '$ngrm.title', 'type': '$ngrm.type'}
+
+  pipeline += [
+  {'$group': {
+      '_id': {'title': '$ngrm.title', 'type': '$ngrm.type'},
+      'count': {'$sum': '$linked_papers_ngrams.cnt'},
+      'count_cont': {'$sum': 1},
+      'conts': {
+        '$push': {'cont_id': '$_id', 'cnt': '$linked_papers_ngrams.cnt'}}}},
+    {'$sort': {'count': -1, '_id': 1}},
+  ]
+
+  if topn:
+    pipeline += [{'$limit': topn}]
+
+  return pipeline
+
+def get_ngramm_filter(
+  nka: Optional[int], ltype:Optional[LType], ngrm_field:Optional[str]=None
+):
+  ltype_str:str = ltype.value if ltype is not None else ''
+
+  if not ngrm_field:
+    return {
+      '$match': {f: v for f, v in (('nka', nka), ('type', ltype_str)) if v}}
+
+  return {
+    '$match': {
+      f'{ngrm_field}.{f}': v
+      for f, v in (('nka', nka), ('type', ltype_str)) if v}}

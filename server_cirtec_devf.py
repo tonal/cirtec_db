@@ -1,20 +1,21 @@
 #! /usr/bin/env python3
 # -*- codong: utf-8 -*-
+from collections import Counter
 from dataclasses import dataclass
 from functools import partial
 import logging
 from operator import itemgetter
 from typing import Optional
 
-from fastapi import APIRouter, FastAPI
+from fastapi import APIRouter, FastAPI, Query
 from motor.motor_asyncio import AsyncIOMotorClient
 from pymongo.collection import Collection
 from pymongo.database import Database
 import uvicorn
 
 from server_dbquery import (
-  get_frag_publications, get_refauthors_pipeline, get_refbindles_pipeline,
-  get_top_topics_pipeline)
+  LType, get_frag_publications, get_refauthors_pipeline,
+  get_refbindles_pipeline, get_top_ngramms_pipeline, get_top_topics_pipeline)
 from utils import load_config
 
 
@@ -206,6 +207,44 @@ async def _req_top_topics(
     doc.pop('pos_neg', None)
     doc.pop('frags', None)
     out.append(doc)
+  if not _add_pipeline:
+    return out
+
+  return dict(pipeline=pipeline, items=out)
+
+
+#  /top/ngramms/
+@router.get('/top/ngramms/',  # response_model=List[str],
+  summary='Топ N фраз по публикациям')
+async def _req_top_topics(
+  topn:Optional[int]=None, author:Optional[str]=None, cited:Optional[str]=None,
+  citing:Optional[str]=None,
+  nka:Optional[int]=Query(None, ge=0, le=6),
+  ltype:Optional[LType]=Query(None, title='Тип фразы'), #, description='Может быть одно из значений "lemmas", "nolemmas" или пустой'),
+  _add_pipeline:bool=False
+):
+  coll: Collection = slot.mdb.contexts
+  pipeline = get_top_ngramms_pipeline(topn, author, cited, citing, nka, ltype)
+  out = []
+  get_as_tuple = itemgetter('_id', 'count', 'count_cont', 'conts')
+  get_pubs = itemgetter('cont_id', 'cnt')
+  key_sort = lambda kv: (-kv[-1], kv[0])
+  get_name = itemgetter('title')
+  get_ltype = itemgetter('type')
+
+  async for doc in coll.aggregate(pipeline):
+    nid, cnt, count_cont, conts = get_as_tuple(doc)
+    odoc = dict(
+      title=get_name(nid), type=get_ltype(nid),
+      all=cnt, count_cont=count_cont,
+      contects=dict(
+        sorted(
+          Counter(
+            p for p, n in (get_pubs(co) for co in conts)
+            for _ in range(n)
+          ).most_common(),
+          key=key_sort)))
+    out.append(odoc)
   if not _add_pipeline:
     return out
 
