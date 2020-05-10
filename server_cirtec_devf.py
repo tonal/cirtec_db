@@ -21,6 +21,7 @@ from server_dbquery import (
   get_refauthors_part_pipeline, get_refauthors_pipeline,
   get_refbindles_pipeline, get_top_cocitauthors_pipeline,
   get_top_cocitrefs_pipeline, get_top_ngramms_pipeline, get_top_topics_pipeline)
+from server_utils import to_out_typed
 from utils import load_config
 
 
@@ -125,6 +126,26 @@ async def _db_topic(id: str):
   coll: Collection = slot.mdb.n_gramms
   doc: dict = await coll.find_one(dict(_id=id))
   return doc
+
+
+@router.get('/publications/',
+  summary='Публикации')
+async def _req_publications(
+  author:Optional[str]=None, cited:Optional[str]=None,
+  citing:Optional[str]=None
+):
+  query = {
+    'name': {'$exists': 1},
+    **filter_acc_dict(author, cited, citing)}
+
+  to_out = partial(to_out_typed, type='publication')
+
+  publications = slot.mdb.publications
+  out = [
+    to_out(**doc) async for doc in
+      publications.find(query).sort([('year', ASCENDING), ('_id', ASCENDING)])]
+
+  return out
 
 
 @router.get('/top/ref_bundles/',
