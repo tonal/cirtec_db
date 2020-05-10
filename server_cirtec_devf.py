@@ -374,7 +374,26 @@ async def _req_frags_refauthors(
     doc.pop('pos_neg', None)
     frags = Counter(doc.pop('frags', ()))
     doc.update(frags=frags)
+    out.append(doc)
 
+  if not _add_pipeline:
+    return out
+
+  return dict(pipeline=pipeline, items=out)
+
+
+@router.get('/frags/ref_bundles/',) # summary='')
+async def _req_frags_refbundles(
+  topn:Optional[int]=None, author:Optional[str]=None, cited:Optional[str]=None,
+  citing:Optional[str]=None, _add_pipeline:bool=False
+):
+  coll: Collection = slot.mdb.contexts
+  pipeline = get_refbindles_pipeline(topn, author, cited, citing)
+  out = []
+  async for doc in coll.aggregate(pipeline):
+    doc.pop('pos_neg', None)
+    frags = Counter(doc.pop('frags', ()))
+    doc.update(frags=frags)
     out.append(doc)
 
   if not _add_pipeline:
