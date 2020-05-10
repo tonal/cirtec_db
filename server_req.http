@@ -172,7 +172,9 @@ GET http://localhost:7667/cirtec/frags/cocitauthors/
 GET http://localhost:7667/cirtec/frags/ref_authors/
 
 ###
-# /frags/ref_bundles/
 GET http://localhost:7667/cirtec/frags/ref_bundles/
+
+###
+GET http://localhost:7667/cirtec/pos_neg/cocitauthors/
 
 ###

@@ -18,11 +18,11 @@ import uvicorn
 from server_dbquery import (
   LType, filter_acc_dict, get_frag_publications,
   get_frags_cocitauthors_pipeline, get_frags_ngramms_pipeline,
-  get_frags_topics_pipeline, get_ref_auth4ngramm_tops_pipeline,
-  get_ref_bund4ngramm_tops_pipeline, get_refauthors_part_pipeline,
-  get_refauthors_pipeline, get_refbindles_pipeline,
-  get_top_cocitauthors_pipeline, get_top_cocitrefs_pipeline,
-  get_top_ngramms_pipeline, get_top_topics_pipeline)
+  get_frags_topics_pipeline, get_pos_neg_cocitauthors_pipeline,
+  get_ref_auth4ngramm_tops_pipeline, get_ref_bund4ngramm_tops_pipeline,
+  get_refauthors_part_pipeline, get_refauthors_pipeline,
+  get_refbindles_pipeline, get_top_cocitauthors_pipeline,
+  get_top_cocitrefs_pipeline, get_top_ngramms_pipeline, get_top_topics_pipeline)
 from server_utils import to_out_typed
 from utils import load_config
 
@@ -418,6 +418,22 @@ async def _req_frags_topics(
     out_dict = dict(name=doc['_id'], count=doc['count'], frags=frags)
     out.append(out_dict)
 
+  if not _add_pipeline:
+    return out
+
+  return dict(pipeline=pipeline, items=out)
+
+
+@router.get('/pos_neg/cocitauthors/',
+  summary='для каждого класса тональности привести топ со-цитируемых авторов')
+async def _req_pos_neg_cocitauthors(
+  topn:Optional[int]=None, author:Optional[str]=None, cited:Optional[str]=None,
+  citing:Optional[str]=None, _add_pipeline:bool=False
+):
+  contexts = slot.mdb.contexts
+  pipeline = get_pos_neg_cocitauthors_pipeline(topn, author, cited, citing)
+  curs = contexts.aggregate(pipeline)
+  out = [doc async for doc in curs]
   if not _add_pipeline:
     return out
 

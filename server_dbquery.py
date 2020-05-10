@@ -487,3 +487,36 @@ def get_frags_topics_pipeline(
   if topn:
     pipeline += [{'$limit': topn}]
   return pipeline
+
+
+def get_pos_neg_cocitauthors_pipeline(
+  topn:Optional[int], author:Optional[str], cited:Optional[str],
+  citing:Optional[str]
+):
+  pipeline = [
+    {'$match': {
+      'positive_negative': {'$exists': True},
+      'cocit_authors': {'$exists': True}}},
+    {'$project': {
+      'pubid': True, 'positive_negative': True, 'cocit_authors': True}},]
+  pipeline += filter_by_pubs_acc(author, cited, citing)
+  pipeline += [
+    {'$unwind': '$cocit_authors'},
+    {'$group': {
+      '_id': {
+        'pos_neg': {
+          '$arrayElemAt': [
+            ['neutral', 'positive', 'positive', 'negative', 'negative'],
+            '$positive_negative.val']}, 'title': '$cocit_authors'},
+      'coauthor_cnt': {'$sum': 1}}},
+    {'$sort': {'coauthor_cnt': -1, '_id.title': 1}},
+    {'$group': {
+      '_id': '$_id.pos_neg', 'cocitauthor': {
+        '$push': {'author': '$_id.title', 'count': '$coauthor_cnt'}}, }},
+    {'$project': {
+      '_id': False, 'class_pos_neg': '$_id',
+      'cocitauthors': {'$slice': ['$cocitauthor', topn]}}},
+    {'$sort': {'class_pos_neg': -1}}, ]
+  if topn:
+    pipeline += [{'$limit': topn}]
+  return pipeline
