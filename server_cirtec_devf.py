@@ -18,9 +18,9 @@ import uvicorn
 from server_dbquery import (
   LType, filter_acc_dict, get_frag_publications,
   get_ref_auth4ngramm_tops_pipeline, get_ref_bund4ngramm_tops_pipeline,
-  get_refauthors_pipeline, get_refbindles_pipeline,
-  get_top_cocitauthors_pipeline, get_top_cocitrefs_pipeline,
-  get_top_ngramms_pipeline, get_top_topics_pipeline)
+  get_refauthors_part_pipeline, get_refauthors_pipeline,
+  get_refbindles_pipeline, get_top_cocitauthors_pipeline,
+  get_top_cocitrefs_pipeline, get_top_ngramms_pipeline, get_top_topics_pipeline)
 from utils import load_config
 
 
@@ -306,7 +306,7 @@ async def _req_pubs_refauthors(
   publications: Collection = slot.mdb.publications
   contexts: Collection = slot.mdb.contexts
 
-  pipeline = get_refauthors_pipeline(top_auth)
+  pipeline = get_refauthors_part_pipeline(top_auth, None, None, None)
 
   out = []
   async for pub in publications.find(
@@ -440,6 +440,33 @@ async def _req_bund4ngramm_tops(
       ngrams=tuple(ngrams))
     out_bund.append(cont)
   out = out_bund
+
+  if not _add_pipeline:
+    return out
+
+  return dict(pipeline=pipeline, items=out)
+
+
+@router.get('/by_frags/ref_authors/',) # summary='Топ N со-цитируемых референсов')
+async def _req_by_frags_refauthors(
+  topn:Optional[int]=None, author: Optional[str]=None,
+  cited: Optional[str]=None, citing: Optional[str]=None,
+  _add_pipeline: bool = False
+):
+  contexts: Collection = slot.mdb.contexts
+  pipeline = get_refauthors_part_pipeline(topn, author, cited, citing)
+  out = []
+  for fnum in range(1, 6):
+    out_frag = []
+    work_pipe = [
+      {'$match': {'frag_num': fnum}}
+    ] + pipeline
+    async for row in contexts.aggregate(work_pipe):
+      row.pop('pos_neg', None)
+      row.pop('frags', None)
+      out_frag.append(row)
+
+    out.append(dict(frag_num=fnum, refauthors=out_frag))
 
   if not _add_pipeline:
     return out

@@ -292,12 +292,16 @@ def get_top_cocitrefs_pipeline(
   return pipeline
 
 
-def get_refauthors_pipeline(topn:int):
+def get_refauthors_part_pipeline(
+  topn:int, author:Optional[str], cited:Optional[str], citing:Optional[str]
+):
   pipeline = [
     {'$match': {'exact': {'$exists': 1}}},
     {'$project': {
       'prefix': 0, 'suffix': 0, 'exact': 0, 'linked_papers_topics': 0,
-      'linked_papers_ngrams': 0}},
+      'linked_papers_ngrams': 0}},]
+  pipeline += filter_by_pubs_acc(author, cited, citing)
+  pipeline += [
     {'$unwind': '$bundles'},
     {'$match': {'bundles': {'$ne': 'nUSJrP'}}},
     {'$lookup': {
