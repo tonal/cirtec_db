@@ -23,7 +23,7 @@ def get_refbindles_pipeline(
       'linked_papers_ngrams': 0}},
   ]
 
-  pipeline += _filter_by_pubs_acc(author, cited, citing)
+  pipeline += filter_by_pubs_acc(author, cited, citing)
 
   pipeline += [
     {'$unwind': '$bundles'},
@@ -51,7 +51,7 @@ def get_refbindles_pipeline(
   return pipeline
 
 
-def _filter_by_pubs_acc(
+def filter_by_pubs_acc(
   author:Optional[str], cited:Optional[str], citing:Optional[str],
 ):
   if not any([author, cited, citing]):
@@ -92,7 +92,7 @@ def get_refauthors_pipeline(
     {'$unwind': '$bundles'},
   ]
 
-  pipeline += _filter_by_pubs_acc(author, cited, citing)
+  pipeline += filter_by_pubs_acc(author, cited, citing)
 
   pipeline += [
     {'$match': {'bundles': {'$ne': 'nUSJrP'}}},
@@ -161,7 +161,7 @@ def get_top_topics_pipeline(
       'prefix': False, 'suffix': False, 'exact': False,
       'linked_papers_ngrams': False}},
   ]
-  pipeline += _filter_by_pubs_acc(author, cited, citing)
+  pipeline += filter_by_pubs_acc(author, cited, citing)
 
   pipeline += [
     {'$unwind': '$linked_papers_topics'},
@@ -194,7 +194,7 @@ def get_top_ngramms_pipeline(
       'prefix': False, 'suffix': False, 'exact': False,
       'linked_papers_topics': False}},
   ]
-  pipeline += _filter_by_pubs_acc(author, cited, citing)
+  pipeline += filter_by_pubs_acc(author, cited, citing)
 
   pipeline += [
     {'$unwind': '$linked_papers_ngrams'},
@@ -248,7 +248,7 @@ def get_top_cocitauthors_pipeline(
       'prefix': 0, 'suffix': 0, 'exact': 0, 'positive_negative': 0,
       'bundles': 0, 'linked_papers_ngrams': 0, 'linked_papers_topics': 0}},]
 
-  pipeline += _filter_by_pubs_acc(author, cited, citing)
+  pipeline += filter_by_pubs_acc(author, cited, citing)
 
   pipeline += [
     {'$unwind': '$cocit_authors'},
@@ -272,7 +272,7 @@ def get_top_cocitrefs_pipeline(
       'prefix': 0, 'suffix': 0, 'exact': 0, 'positive_negative': 0,
       'bundles': 0, 'linked_papers_ngrams': 0, 'linked_papers_topics': 0}},]
 
-  pipeline += _filter_by_pubs_acc(author, cited, citing)
+  pipeline += filter_by_pubs_acc(author, cited, citing)
   pipeline += [
     {'$unwind': '$cocit_refs'},
     {'$group': {
@@ -292,7 +292,7 @@ def get_top_cocitrefs_pipeline(
   return pipeline
 
 
-def get_refauthors_pipeline(topn:int=None):
+def get_refauthors_pipeline(topn:int):
   pipeline = [
     {'$match': {'exact': {'$exists': 1}}},
     {'$project': {
@@ -321,6 +321,41 @@ def get_refauthors_pipeline(topn:int=None):
       'pubs': {'$size': '$pubs'}, 'total_cits': {'$sum': '$bunds.total_cits'},
       'total_pubs': {'$sum': '$bunds.total_pubs'}, 'pos_neg': 1, 'frags': 1}},
     {'$sort': {'cits_all': -1, 'cits': -1, 'pubs': -1, 'author': 1}},
+  ]
+  if topn:
+    pipeline += [{'$limit': topn}]
+  return pipeline
+
+
+def get_ref_auth4ngramm_tops_pipeline(
+  topn:Optional[int], author:Optional[str], cited:Optional[str],
+  citing:Optional[str]
+):
+  pipeline = [
+    {'$match': {'exact': {'$exists': True}}},
+    {'$project': {'prefix': False, 'suffix': False, 'exact': False, }},]
+
+  pipeline += filter_by_pubs_acc(author, cited, citing)
+  pipeline += [
+    {'$unwind': '$bundles'},
+    {'$match': {'bundles': {'$ne': 'nUSJrP'}}},
+    {'$lookup': {
+        'from': 'bundles', 'localField': 'bundles', 'foreignField': '_id',
+        'as': 'bundle'}},
+    {'$unwind': '$bundle'},
+    {'$unwind': '$bundle.authors'},
+    {'$group': {
+        '_id': '$bundle.authors', 'pubs': {'$addToSet': '$pub_id'}, 'conts': {
+          '$addToSet': {
+            'cid': '$_id', 'topics': '$linked_papers_topics',
+            'ngrams': '$linked_papers_ngrams'}}}},
+    {'$project': {
+        '_id': False, 'aurhor': '$_id', 'cits': {'$size': '$conts'},
+        'pubs': {'$size': '$pubs'}, 'pubs_ids': '$pubs', 'conts': '$conts',
+        'total_cits': '$bundle.total_cits', 'total_pubs': '$bundle.total_pubs',
+        'year': '$bundle.year', 'authors': '$bundle.authors',
+        'title': '$bundle.title', }},
+    {'$sort': {'cits': -1, 'pubs': -1, 'title': 1}},
   ]
   if topn:
     pipeline += [{'$limit': topn}]
