@@ -627,6 +627,59 @@ def get_frags_ngramms_pipeline(
   return pipeline
 
 
+def get_frags_ngramms_cocitauthors_pipeline(
+  topn: Optional[int], author: Optional[str], cited: Optional[str],
+  citing: Optional[str], nka: Optional[int], ltype: Optional[LType]
+):
+  pipeline = [
+    {"$match": {
+      "cocit_authors": {"$exists": 1}, "frag_num": {"$exists": 1},
+      "linked_papers_ngrams": {'$exists': 1}}},
+    {"$project": {
+      "pubid": 1, "cocit_authors": 1, "frag_num": 1,
+      "linked_papers_ngrams": 1}},]
+  pipeline += filter_by_pubs_acc(author, cited, citing)
+  pipeline += [
+    {"$unwind": "$cocit_authors"},
+    {"$unwind": "$linked_papers_ngrams"},
+    {'$lookup': {
+      'from': 'n_gramms', 'localField': 'linked_papers_ngrams._id',
+      'foreignField': '_id', 'as': 'ngrm'}},
+    {'$unwind': '$ngrm'},]
+  if nka or ltype:
+    pipeline += [get_ngramm_filter(nka, ltype, 'ngrm')]
+  pipeline += [
+    {"$group": {
+      "_id": {
+        "ngram": "$linked_papers_ngrams._id", "cocit_authors": "$cocit_authors",
+        "cont_id": "$_id"},
+      "cont": {"$first": {"pubid": "$pubid", "frag_num": "$frag_num"}},
+      'count': {'$sum': "$linked_papers_ngrams.cnt"},
+      'ngrm': {'$first': "$ngrm"},}},
+    {"$sort": {"_id": 1}},
+    {"$group": {
+      "_id": {
+        "ngram": "$_id.ngram", "cocit_authors": "$_id.cocit_authors"},
+      "count": {"$sum": "$count"},
+      "frags": {'$push': {"fn": "$cont.frag_num", "cnt": "$count"}},
+      'ngrm': {'$first': "$ngrm"},}},
+    {'$group': {
+      "_id": "$_id.ngram",
+      "title": {"$first": "$ngrm.title"},
+      "type": {"$first": "$ngrm.type"},
+      "nka": {"$first": "$ngrm.nka"},
+      "count": {"$sum": "$count"},
+      "auths": {
+        "$push": {
+          "auth": "$_id.cocit_authors", "count": "$count", "frags": "$frags"}},}},
+    {"$project": {"_id": 0,}},
+    {"$sort": {"count": -1, "title": 1, 'type': 1}},
+  ]
+  if topn:
+    pipeline += [{'$limit': topn}]
+  return pipeline
+
+
 def get_frags_topics_pipeline(
   topn:Optional[int], author:Optional[str], cited:Optional[str],
   citing:Optional[str], probability:Optional[float]

@@ -2,7 +2,7 @@
 # -*- codong: utf-8 -*-
 from collections import Counter
 from dataclasses import dataclass
-from functools import partial
+from functools import partial, reduce
 from itertools import chain, groupby, islice
 import logging
 from operator import itemgetter
@@ -19,7 +19,8 @@ from server_dbquery import (
   LType, filter_acc_dict, get_frag_publications,
   get_frags_cocitauthors_cocitauthors_pipeline,
   get_frags_cocitauthors_ngramms_pipeline, get_frags_cocitauthors_pipeline,
-  get_frags_cocitauthors_topics_pipeline, get_frags_ngramms_pipeline,
+  get_frags_cocitauthors_topics_pipeline,
+  get_frags_ngramms_cocitauthors_pipeline, get_frags_ngramms_pipeline,
   get_frags_topics_pipeline, get_pos_neg_cocitauthors_pipeline,
   get_pos_neg_contexts_pipeline, get_pos_neg_ngramms_pipeline,
   get_pos_neg_pubs_pipeline, get_pos_neg_topics_pipeline,
@@ -445,6 +446,49 @@ async def _req_frags_cocitauthors(
       frags=frags)
     out.append(out_dict)
 
+  if not _add_pipeline:
+    return out
+
+  return dict(pipeline=pipeline, items=out)
+
+
+@router.get('/frags/ngramms/cocitauthors/',
+  summary='Кросс-распределение «фразы» - «со-цитирования»')
+async def _req_frags_ngramms_cocitauthors(
+  topn: Optional[int] = None, author: Optional[str] = None,
+  cited: Optional[str] = None, citing: Optional[str] = None,
+  nka: Optional[int] = Query(None, ge=0, le=6),
+  ltype: Optional[LType] = Query(None, title='Тип фразы'),
+  topn_cocitauthors: Optional[int] = None, _add_pipeline: bool = False
+):
+  pipeline = get_frags_ngramms_cocitauthors_pipeline(
+    topn, author, cited, citing, nka, ltype)
+  contexts = slot.mdb.contexts
+  curs = contexts.aggregate(pipeline)
+  # out = [doc async for doc in curs]
+  out = []
+  get_frags = itemgetter('frags')
+  get_fn_cnt = itemgetter('fn', 'cnt')
+  key_first = itemgetter(0)
+  key_last = itemgetter(-1)
+  auth2tuple = itemgetter('auth', 'count', "frags")
+  key_auth_sort = lambda v: (-v[1], v[0])
+  async for doc in curs:
+    cocitaithors = tuple(
+      dict(
+        cocit_author=title, count=cnt,
+        frags=dict(
+          (fn, sum(map(key_last, cnts)))
+          for fn, cnts in groupby(sorted(map(get_fn_cnt, fr)), key=key_first)))
+        for title, cnt, fr in sorted(
+          map(auth2tuple, doc['auths']), key=key_auth_sort))
+    frags = reduce(
+      lambda a, b: a+b,  map(Counter, map(get_frags, cocitaithors)))
+    if topn_cocitauthors:
+      cocitaithors = cocitaithors[:topn_cocitauthors]
+    out.append(dict(
+      title=doc['title'], type=doc['type'], nka=doc['nka'], count=doc['count'],
+      frags=dict(sorted(frags.items())), cocitaithors=cocitaithors))
   if not _add_pipeline:
     return out
 
