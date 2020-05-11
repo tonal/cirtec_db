@@ -420,6 +420,63 @@ def get_frags_cocitauthors_pipeline(
   return pipeline
 
 
+def get_frags_cocitauthors_cocitauthors_pipeline(
+  topn:Optional[int], author:Optional[str], cited:Optional[str],
+  citing:Optional[str]
+):
+  pipeline = [
+    {'$match': {
+      'cocit_authors': {'$exists': 1}, 'frag_num': {'$exists': 1},}},
+    {'$project': {'pubid': 1, 'cocit_authors': 1, 'frag_num': 1}},]
+  if filter_pipiline := filter_by_pubs_acc(author, cited, citing):
+    pipeline += filter_pipiline
+    pipeline += [{'$project': {'pub': 0}},]
+  pipeline += [
+    {"$unwind": "$cocit_authors"},
+    {"$lookup": {
+      "from": "contexts", "localField": "_id", "foreignField": "_id",
+      "as": "cont"}},
+    {"$project": {
+      "pubid": 1,"cocit_authors": 1,"frag_num": 1,"cont.cocit_authors": 1}},
+    {"$unwind": "$cont"},
+    {"$unwind": "$cont.cocit_authors"},
+    {"$match": {"$expr": {"$ne": ["$cocit_authors", "$cont.cocit_authors"]}}},
+    {"$group": {
+      "_id": {
+        "cocitauthor1": {
+          "$cond": [
+            {"$gte": ["$cocit_authors", "$cont.cocit_authors"]},
+            "$cont.cocit_authors", "$cocit_authors"]},
+        "cocitauthor2": {
+          "$cond": [
+            {"$gte": ["$cocit_authors", "$cont.cocit_authors"]},
+            "$cocit_authors", "$cont.cocit_authors"]},
+        "cont_id": "$_id"},
+      "cont": {"$first": {"pubid": "$pubid", "frag_num": "$frag_num"}}}
+    },
+    {"$sort": {"_id": 1}},
+    {"$group": {
+      "_id": {
+        "cocitauthor1": "$_id.cocitauthor1",
+        "cocitauthor2": "$_id.cocitauthor2"},
+      "count": {"$sum": 1},
+      "conts": {
+        "$push": {
+          "cont_id": "$_id.cont_id", "pubid": "$cont.pubid",
+          "frag_num": "$cont.frag_num"}}}},
+    {"$sort": {"count": -1, "_id": 1}},
+    {"$project": {
+        "_id": 1,
+        "cocitpair": {
+          "author1": "$_id.cocitauthor1",
+          "author2": "$_id.cocitauthor2"},
+        "count": "$count", "conts": "$conts"}},
+  ]
+  if topn:
+    pipeline += [{'$limit': topn}]
+  return pipeline
+
+
 def get_frags_ngramms_pipeline(
   topn:Optional[int], author:Optional[str], cited:Optional[str],
   citing:Optional[str], nka:Optional[int], ltype:Optional[LType]

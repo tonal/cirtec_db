@@ -17,14 +17,15 @@ import uvicorn
 
 from server_dbquery import (
   LType, filter_acc_dict, get_frag_publications,
-  get_frags_cocitauthors_pipeline, get_frags_ngramms_pipeline,
-  get_frags_topics_pipeline, get_pos_neg_cocitauthors_pipeline,
-  get_pos_neg_contexts_pipeline, get_pos_neg_ngramms_pipeline,
-  get_pos_neg_pubs_pipeline, get_pos_neg_topics_pipeline,
-  get_ref_auth4ngramm_tops_pipeline, get_ref_bund4ngramm_tops_pipeline,
-  get_refauthors_part_pipeline, get_refauthors_pipeline,
-  get_refbindles_pipeline, get_top_cocitauthors_pipeline,
-  get_top_cocitrefs_pipeline, get_top_ngramms_pipeline, get_top_topics_pipeline)
+  get_frags_cocitauthors_cocitauthors_pipeline, get_frags_cocitauthors_pipeline,
+  get_frags_ngramms_pipeline, get_frags_topics_pipeline,
+  get_pos_neg_cocitauthors_pipeline, get_pos_neg_contexts_pipeline,
+  get_pos_neg_ngramms_pipeline, get_pos_neg_pubs_pipeline,
+  get_pos_neg_topics_pipeline, get_ref_auth4ngramm_tops_pipeline,
+  get_ref_bund4ngramm_tops_pipeline, get_refauthors_part_pipeline,
+  get_refauthors_pipeline, get_refbindles_pipeline,
+  get_top_cocitauthors_pipeline, get_top_cocitrefs_pipeline,
+  get_top_ngramms_pipeline, get_top_topics_pipeline)
 from server_utils import to_out_typed
 from utils import load_config
 
@@ -307,6 +308,34 @@ async def _req_frags_cocitauthors(
     out_dict = dict(name=doc['_id'], count=doc['count'], frags=frags)
     out.append(out_dict)
 
+  if not _add_pipeline:
+    return out
+
+  return dict(pipeline=pipeline, items=out)
+
+
+@router.get('/frags/cocitauthors/cocitauthors/',
+  summary='Кросс-распределение «5 фрагментов» - «со-цитируемые авторы»')
+async def _req_frags_cocitauthors_cocitauthors(
+  topn:Optional[int]=None, author:Optional[str]=None, cited:Optional[str]=None,
+  citing:Optional[str]=None, _add_pipeline:bool=False
+):
+  pipeline = get_frags_cocitauthors_cocitauthors_pipeline(
+    topn, author, cited, citing)
+  contexts = slot.mdb.contexts
+  curs = contexts.aggregate(pipeline)
+  out = []
+
+  async for doc in curs:
+    cocitpair = doc['cocitpair']
+    conts = doc['conts']
+    pubids = tuple(frozenset(map(itemgetter('pubid'), conts)))
+    contids = tuple(map(itemgetter('cont_id'), conts))
+    frags = Counter(map(itemgetter('frag_num'), conts))
+    out.append(dict(
+      cocitpair=tuple(cocitpair.values()),
+      intxtid_cnt=len(contids), pub_cnt=len(pubids),
+      frags=dict(sorted(frags.items())), pubids=pubids, intxtids=contids))
   if not _add_pipeline:
     return out
 
