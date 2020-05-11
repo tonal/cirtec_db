@@ -1095,7 +1095,10 @@ def get_pos_neg_pubs_pipeline(
   return pipeline
 
 
-def get_pos_neg_topics_pipeline(author, cited, citing, probability):
+def get_pos_neg_topics_pipeline(
+  author: Optional[str], cited: Optional[str], citing: Optional[str],
+  probability:Optional[float]
+):
   pipeline = [
     {'$match': {
       'positive_negative': {'$exists': 1},
@@ -1125,4 +1128,66 @@ def get_pos_neg_topics_pipeline(author, cited, citing, probability):
       'topic_cnt': {'$size': '$topics'}, 'topics': '$topics'}},
     {'$sort': {'class_pos_neg': -1}},
   ]
+  return pipeline
+
+
+def get_top_detail_bund_refauthors(
+  topn: Optional[int], author: Optional[str], cited: Optional[str],
+  citing: Optional[str]
+):
+  pipeline = [
+    {'$match': {'exact': {'$exists': 1}, 'bundles': {'$exists': 1}}},]
+  if filter_pipeline := filter_by_pubs_acc(author, cited, citing):
+    pipeline += filter_pipeline
+
+  pipeline += [
+    {'$project': {
+      'prefix': 0, 'suffix': 0, 'exact': 0, 'linked_papers_topics': 0,
+      'linked_papers_ngrams': 0}},
+    {'$unwind': '$bundles'},
+    {'$match': {'bundles': {'$ne': 'nUSJrP'}}},
+    {'$lookup': {
+      'from': 'bundles', 'localField': 'bundles', 'foreignField': '_id',
+      'as': 'bun'}},
+    {'$unwind': '$bun'},
+    {'$unwind': '$bun.authors'},
+    {'$group': {
+      '_id': {'author': '$bun.authors', 'bund': '$bundles'},
+      'cits': {'$addToSet': '$_id'}, 'cits_all': {'$sum': 1},
+      'pubs': {'$addToSet': '$pub_id'}, 'bunds': {
+        '$addToSet': {
+          '_id': '$bun._id', 'total_cits': '$bun.total_cits',
+          'total_pubs': '$bun.total_pubs'}}, }},
+    {'$unwind': '$bunds'},
+    {'$group': {
+      '_id': '$_id.author', 'cits_all': {'$sum': '$cits_all'},
+      'cits': {'$push': '$cits'}, 'pubs': {'$push': '$pubs'},
+      'bunds': {
+        '$push': {
+          '_id': '$bunds._id', 'cnt': '$cits_all',
+          'total_cits': '$bunds.total_cits',
+          'total_pubs': '$bunds.total_pubs'}}, }},
+    {'$project': {
+      '_id': 0, 'author': '$_id', 'cits_all': '$cits_all',
+      'cits': {
+        '$size': {
+          '$reduce': {
+            'input': '$cits', 'initialValue': [],
+            'in': {'$setUnion': ['$$value', '$$this']}}}, }, 'pubs': {
+        '$size': {
+          '$reduce': {
+            'input': '$pubs', 'initialValue': [],
+            'in': {'$setUnion': ['$$value', '$$this']}}}},
+      'bunds_cnt': {'$size': '$bunds'},
+      'total_cits': {'$sum': '$bunds.total_cits'},
+      'total_pubs': {'$sum': '$bunds.total_pubs'},
+      'bunds': {
+        '$map': {
+          'input': '$bunds', 'as': 'b',
+          'in': {'bund': '$$b._id', 'cnt': '$$b.cnt'}, }}, }},
+    {'$sort': {
+      'cits_all': -1, 'cits': -1, 'bunds_cnt': -1, 'pubs': -1, 'author': 1}}, ]
+
+  if topn:
+    pipeline += [{'$limit': topn}]
   return pipeline

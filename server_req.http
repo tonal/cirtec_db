@@ -202,3 +202,7 @@ GET http://localhost:7667/cirtec/frags/pos_neg/contexts/
 GET http://localhost:7667/cirtec/frags/pos_neg/cocitauthors/cocitauthors/
 
 ###
+# /top_detail_bund/ref_authors/
+GET http://localhost:7667/cirtec/top_detail_bund/ref_authors/
+
+###
