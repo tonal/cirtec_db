@@ -16,7 +16,8 @@ from pymongo.database import Database
 import uvicorn
 
 from server_dbquery import (
-  LType, filter_acc_dict, get_frag_pos_neg_contexts, get_frag_publications,
+  LType, filter_acc_dict, get_frag_pos_neg_cocitauthors2,
+  get_frag_pos_neg_contexts, get_frag_publications,
   get_frags_cocitauthors_cocitauthors_pipeline,
   get_frags_cocitauthors_ngramms_pipeline, get_frags_cocitauthors_pipeline,
   get_frags_cocitauthors_topics_pipeline,
@@ -598,6 +599,39 @@ async def _req_frags_ngramms_topics(topn: Optional[int] = None,
     out.append(dict(
       title=doc['title'], type=doc['type'], nka=doc['nka'], count=doc['count'],
       frags=dict(sorted(frags.items())), cocitaithors=cocitaithors))
+  if not _add_pipeline:
+    return out
+
+  return dict(pipeline=pipeline, items=out)
+
+
+@router.get('/frags/pos_neg/cocitauthors/cocitauthors/',
+  summary='Со-цитируемые авторы, распределение тональности их со-цитирований и распределение по 5-ти фрагментам')
+async def _req_frags_pos_neg_cocitauthors2(
+  topn:Optional[int]=None, author: Optional[str] = None,
+  cited:Optional[str]=None, citing:Optional[str]=None,
+  _add_pipeline: bool = False
+):
+  pipeline = get_frag_pos_neg_cocitauthors2(topn, author, cited, citing)
+  contexts = slot.mdb.contexts
+  curs = contexts.aggregate(pipeline)
+  # out = [doc async for doc in curs]
+  out = []
+  async for doc in curs:
+    cocitpair = doc['cocitpair']
+    conts = doc['conts']
+    pubids = tuple(frozenset(map(itemgetter('pubid'), conts)))
+    intxtids = tuple(map(itemgetter('cont_id'), conts))
+    frags = Counter(map(itemgetter('frag_num'), conts))
+    classif = tuple(map(itemgetter('positive_negative'), conts))
+    neutral = sum(1 for v in classif  if v['val'] == 0)
+    positive = sum(1 for v in classif if v['val'] > 0)
+    negative = sum(1 for v in classif if v['val'] < 0)
+    out.append(dict(
+      cocitpair=tuple(cocitpair.values()),
+      cont_cnt=len(intxtids), pub_cnt=len(pubids),
+      frags=dict(sorted(frags.items())), neutral=neutral, positive=positive,
+      negative=negative, pubids=pubids, intxtids=intxtids))
   if not _add_pipeline:
     return out
 

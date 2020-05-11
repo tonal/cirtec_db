@@ -799,6 +799,62 @@ def get_frags_ngramms_topics_pipeline(
   return pipeline
 
 
+def get_frag_pos_neg_cocitauthors2(
+  topn: Optional[int], author: Optional[str],
+  cited: Optional[str], citing: Optional[str]
+):
+  pipeline = [
+    {'$match': {
+      'positive_negative': {'$exists': 1}, 'cocit_authors': {'$exists': 1}}},
+    {'$project': {
+      'pubid': 1, 'positive_negative': 1, 'cocit_authors': 1, 'frag_num': 1}},]
+  pipeline += filter_by_pubs_acc(author, cited, citing)
+  pipeline += [
+    {'$project': {'pub': 0}},
+    {'$unwind': '$cocit_authors'},
+    {'$lookup': {
+      'from': 'contexts', 'localField': '_id', 'foreignField': '_id',
+      'as': 'cont'}},
+    {'$project': {
+      'pubid': 1, 'positive_negative': 1, 'cocit_authors': 1, 'frag_num': 1,
+      'cont.cocit_authors': 1}},
+    {'$unwind': '$cont'},
+    {'$unwind': '$cont.cocit_authors'},
+    {'$match': {'$expr': {'$ne': ['$cocit_authors', '$cont.cocit_authors']}}},
+    {'$group': {
+      '_id': {
+        'cocitauthor1': {'$cond': [
+          {'$gte': ['$cocit_authors', '$cont.cocit_authors'],},
+          '$cont.cocit_authors', '$cocit_authors']},
+        'cocitauthor2': {'$cond': [
+          {'$gte': ['$cocit_authors', '$cont.cocit_authors'],},
+          '$cocit_authors', '$cont.cocit_authors']},
+        'cont_id': '$_id'},
+      'cont': {'$first': {
+        'pubid': '$pubid', 'frag_num': '$frag_num',
+        'positive_negative': '$positive_negative'}},}},
+    {'$sort': {'_id': 1}},
+    {'$group': {
+      '_id': {
+        'cocitauthor1': '$_id.cocitauthor1',
+        'cocitauthor2': '$_id.cocitauthor2'},
+      'count': {'$sum': 1},
+      'conts': {'$push': {
+        'cont_id': '$_id.cont_id', 'pubid': '$cont.pubid',
+        'frag_num': '$cont.frag_num',
+        'positive_negative': '$cont.positive_negative',},},}},
+    {'$sort': {'count': -1, '_id': 1}},
+    {'$project': {
+      '_id': False,
+      'cocitpair': {
+        'author1': '$_id.cocitauthor1', 'author2': '$_id.cocitauthor2'},
+      'count': '$count', 'conts': '$conts', }},
+  ]
+  if topn:
+    pipeline += [{'$limit': topn}]
+  return pipeline
+
+
 def get_frag_pos_neg_contexts(
   author:Optional[str], cited:Optional[str],
   citing:Optional[str]
