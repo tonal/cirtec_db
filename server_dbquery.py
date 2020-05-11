@@ -611,3 +611,36 @@ def get_pos_neg_pubs_pipeline(
   pipeline += [
     {'$project': {'pos_neg': True, 'pub.name': True}}]
   return pipeline
+
+
+def get_pos_neg_topics_pipeline(author, cited, citing, probability):
+  pipeline = [
+    {'$match': {
+      'positive_negative': {'$exists': 1},
+      'linked_papers_topics': {'$exists': 1}}},
+    {'$project': {
+      'pubid': 1, 'positive_negative': 1, 'linked_papers_topics': 1}},]
+  if filter_pipeline := filter_by_pubs_acc(author, cited, citing):
+    pipeline += filter_pipeline
+
+  pipeline += [
+    {'$unwind': '$linked_papers_topics'},
+    {'$match': {'linked_papers_topics.probability': {'$gte': probability}}},
+    {'$group': {
+      '_id': {
+        'pos_neg': {
+          '$arrayElemAt': [
+            ['neutral', 'positive', 'positive', 'negative', 'negative'],
+            '$positive_negative.val']},
+        'topic': '$linked_papers_topics._id'},
+      'topic_cnt': {'$sum': 1}}},
+    {'$sort': {'topic_cnt': -1}},
+    {'$group': {
+      '_id': '$_id.pos_neg',
+      'topics': {'$push': {'topic': '$_id.topic', 'count': '$topic_cnt'}},}},
+    {'$project': {
+      '_id': 1, 'class_pos_neg': '$_id',
+      'topic_cnt': {'$size': '$topics'}, 'topics': '$topics'}},
+    {'$sort': {'class_pos_neg': -1}},
+  ]
+  return pipeline
