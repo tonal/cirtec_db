@@ -528,6 +528,33 @@ async def _req_pos_neg_refauthors(
   return dict(pipeline=pipeline, items=out)
 
 
+@router.get('/pos_neg/ref_bundles/',) # summary='Топ N со-цитируемых референсов')
+async def _req_pos_neg_refbundles(
+  topn:Optional[int]=None, author:Optional[str]=None, cited:Optional[str]=None,
+  citing:Optional[str]=None, _add_pipeline: bool = False
+):
+  pipeline = get_refbindles_pipeline(topn, author, cited, citing)
+
+  contexts:Collection = slot.mdb.contexts
+  out = []
+  async for doc in contexts.aggregate(pipeline):
+    doc.pop('frags', None)
+    classify = doc.pop('pos_neg', None)
+    if classify:
+      neutral = sum(1 for v in classify if v['val'] == 0)
+      positive = sum(1 for v in classify if v['val'] > 0)
+      negative = sum(1 for v in classify if v['val'] < 0)
+      doc.update(
+        class_pos_neg=dict(
+          neutral=neutral, positive=positive, negative=negative))
+    out.append(doc)
+  if not _add_pipeline:
+    return out
+
+  return dict(pipeline=pipeline, items=out)
+
+
+
 @router.get('/pubs/ref_authors/',) # summary='Топ N со-цитируемых референсов')
 async def _req_pubs_refauthors(
   top_auth:Optional[int]=3, author:Optional[str]=None, cited:Optional[str]=None,
