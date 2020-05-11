@@ -23,13 +23,14 @@ from server_dbquery import (
   get_frags_ngramms_cocitauthors_pipeline,
   get_frags_ngramms_ngramms_branch_pipeline,
   get_frags_ngramms_ngramms_branch_root, get_frags_ngramms_pipeline,
-  get_frags_topics_pipeline, get_pos_neg_cocitauthors_pipeline,
-  get_pos_neg_contexts_pipeline, get_pos_neg_ngramms_pipeline,
-  get_pos_neg_pubs_pipeline, get_pos_neg_topics_pipeline,
-  get_ref_auth4ngramm_tops_pipeline, get_ref_bund4ngramm_tops_pipeline,
-  get_refauthors_part_pipeline, get_refauthors_pipeline,
-  get_refbindles_pipeline, get_top_cocitauthors_pipeline,
-  get_top_cocitrefs_pipeline, get_top_ngramms_pipeline, get_top_topics_pipeline)
+  get_frags_ngramms_topics_pipeline, get_frags_topics_pipeline,
+  get_pos_neg_cocitauthors_pipeline, get_pos_neg_contexts_pipeline,
+  get_pos_neg_ngramms_pipeline, get_pos_neg_pubs_pipeline,
+  get_pos_neg_topics_pipeline, get_ref_auth4ngramm_tops_pipeline,
+  get_ref_bund4ngramm_tops_pipeline, get_refauthors_part_pipeline,
+  get_refauthors_pipeline, get_refbindles_pipeline,
+  get_top_cocitauthors_pipeline, get_top_cocitrefs_pipeline,
+  get_top_ngramms_pipeline, get_top_topics_pipeline)
 from server_utils import to_out_typed
 from utils import load_config
 
@@ -557,6 +558,46 @@ async def _req_frags_ngramm_ngramm(
         cnt_cross=len(congr), frags=frags, crossgrams=crossgrams))
 
   out = out_list
+  if not _add_pipeline:
+    return out
+
+  return dict(pipeline=pipeline, items=out)
+
+
+@router.get('/frags/ngramms/topics/',
+  summary='Кросс-распределение «фразы» - «топики контекстов цитирований»')
+async def _req_frags_ngramms_topics(topn: Optional[int] = None,
+  author: Optional[str] = None, cited: Optional[str] = None,
+  citing: Optional[str] = None, nka: Optional[int] = Query(None, ge=0, le=6),
+  ltype: Optional[LType] = Query(None, title='Тип фразы'),
+  probability: Optional[float] = .5, _add_pipeline: bool = False
+):
+  pipeline = get_frags_ngramms_topics_pipeline(
+    topn, author, cited, citing, nka, ltype, probability)
+  contexts = slot.mdb.contexts
+  curs = contexts.aggregate(pipeline)
+  # out = [doc async for doc in curs]
+  out = []
+  get_frags = itemgetter('frags')
+  get_fn_cnt = itemgetter('fn', 'cnt')
+  key_first = itemgetter(0)
+  key_last = itemgetter(-1)
+  auth2tuple = itemgetter('topic', 'count', "frags")
+  key_auth_sort = lambda v: (-v[1], v[0])
+  async for doc in curs:
+    cocitaithors = tuple(
+      dict(
+        cocit_author=title, count=cnt,
+        frags=dict(
+          (fn, sum(map(key_last, cnts)))
+          for fn, cnts in groupby(sorted(map(get_fn_cnt, fr)), key=key_first)))
+        for title, cnt, fr in sorted(
+          map(auth2tuple, doc['topics']), key=key_auth_sort))
+    frags = reduce(
+      lambda a, b: a+b,  map(Counter, map(get_frags, cocitaithors)))
+    out.append(dict(
+      title=doc['title'], type=doc['type'], nka=doc['nka'], count=doc['count'],
+      frags=dict(sorted(frags.items())), cocitaithors=cocitaithors))
   if not _add_pipeline:
     return out
 
