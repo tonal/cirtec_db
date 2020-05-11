@@ -181,7 +181,10 @@ GET http://localhost:7667/cirtec/pos_neg/cocitauthors/
 GET http://localhost:7667/cirtec/pos_neg/contexts/
 
 ###
-# /pos_neg/ngramms/
 GET http://localhost:7667/cirtec/pos_neg/ngramms/
+
+###
+# /pos_neg/pubs/
+GET http://localhost:7667/cirtec/pos_neg/pubs/
 
 ###

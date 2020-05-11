@@ -555,7 +555,6 @@ def get_pos_neg_ngramms_pipeline(
     {'$project': {
       'pubid': True, 'positive_negative': True, 'linked_papers_ngrams': True}},]
   pipeline += filter_by_pubs_acc(author, cited, citing)
-
   pipeline += [
     {'$unwind': '$linked_papers_ngrams'},
     {'$lookup': {
@@ -585,4 +584,30 @@ def get_pos_neg_ngramms_pipeline(
       'ngramms': {'$slice': ['$ngramms', topn]},}},
     {'$sort': {'class_pos_neg': -1}},
   ]
+  return pipeline
+
+
+def get_pos_neg_pubs_pipeline(
+  author: Optional[str], cited: Optional[str], citing: Optional[str]
+):
+  pipeline = [
+    {'$match': {'positive_negative': {'$exists': 1}, }},]
+  if filter_pipeline := filter_by_pubs_acc(author, cited, citing):
+    pipeline += filter_pipeline
+  pipeline += [
+    {'$group': {
+      '_id': {'pid': '$pubid', 'pos_neg': '$positive_negative.val'},
+      'cnt': {'$sum': 1}}},
+    {'$group': {
+      '_id': '$_id.pid',
+      'pos_neg': {'$push': {'val': '$_id.pos_neg', 'cnt': '$cnt'}}}},
+    {'$sort': {'_id': 1}},
+    {'$lookup': {
+        'from': 'publications', 'localField': '_id', 'foreignField': '_id',
+        'as': 'pub'}}, {'$unwind': '$pub'},
+      {'$unwind': '$pub'},
+    ]
+
+  pipeline += [
+    {'$project': {'pos_neg': True, 'pub.name': True}}]
   return pipeline
