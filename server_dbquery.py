@@ -680,6 +680,64 @@ def get_frags_ngramms_cocitauthors_pipeline(
   return pipeline
 
 
+def get_frags_ngramms_ngramms_branch_root(
+  topn:Optional[int], author:Optional[str], cited:Optional[str],
+  citing:Optional[str], nka: Optional[int], ltype: Optional[LType]
+):
+  pipeline = [
+    {'$match': {'linked_papers_ngrams': {'$exists': 1}}},]
+
+  pipeline += filter_by_pubs_acc(author, cited, citing)
+  pipeline += [
+    {'$project': {'linked_paper': '$linked_papers_ngrams'}},
+    {'$unwind': '$linked_paper'},
+    {'$group': {
+      '_id': '$linked_paper._id', 'count': {'$sum': '$linked_paper.cnt'},
+      'cont_ids': {'$addToSet': '$_id'},}},
+    {'$sort': {'count': -1, '_id': 1}},
+    {'$lookup': {
+      'from': 'n_gramms', 'localField': '_id', 'foreignField': '_id',
+      'as': 'ngramm'}},
+    {'$unwind': '$ngramm'},
+  ]
+
+  if nka or ltype:
+    pipeline += [get_ngramm_filter(nka, ltype, 'ngramm')]
+
+  pipeline += [
+    {'$project': {
+      'title': '$ngramm.title', 'type': '$ngramm.type', "nka": "$ngramm.nka",
+      'count': 1, 'conts': '$cont_ids'}}
+  ]
+  if topn:
+    pipeline += [{'$limit': topn}]
+  return pipeline
+
+
+def get_frags_ngramms_ngramms_branch_pipeline(
+  nka: Optional[int], ltype: Optional[LType]
+):
+  pipeline = [
+    {'$project': {
+      'prefix': 0, 'suffix': 0, 'exact': 0, 'positive_negative': 0,
+      'linked_papers_topics': 0, 'bundles': 0}},
+    {'$lookup': {
+      'from': 'n_gramms', 'localField': 'linked_papers_ngrams._id',
+      'foreignField': '_id', 'as': 'cont'}},
+    {'$unwind': '$cont'},
+  ]
+
+  if nka or ltype:
+    pipeline += [get_ngramm_filter(nka, ltype, 'cont')]
+
+  pipeline += [
+    {'$unwind': '$linked_papers_ngrams'},
+    {'$match': {'$expr': {'$eq': ['$linked_papers_ngrams._id', '$cont._id']}}},
+  ]
+  return pipeline
+
+
+
 def get_frags_topics_pipeline(
   topn:Optional[int], author:Optional[str], cited:Optional[str],
   citing:Optional[str], probability:Optional[float]

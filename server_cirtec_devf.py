@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 # -*- codong: utf-8 -*-
-from collections import Counter
+from collections import Counter, defaultdict
 from dataclasses import dataclass
 from functools import partial, reduce
 from itertools import chain, groupby, islice
@@ -20,7 +20,9 @@ from server_dbquery import (
   get_frags_cocitauthors_cocitauthors_pipeline,
   get_frags_cocitauthors_ngramms_pipeline, get_frags_cocitauthors_pipeline,
   get_frags_cocitauthors_topics_pipeline,
-  get_frags_ngramms_cocitauthors_pipeline, get_frags_ngramms_pipeline,
+  get_frags_ngramms_cocitauthors_pipeline,
+  get_frags_ngramms_ngramms_branch_pipeline,
+  get_frags_ngramms_ngramms_branch_root, get_frags_ngramms_pipeline,
   get_frags_topics_pipeline, get_pos_neg_cocitauthors_pipeline,
   get_pos_neg_contexts_pipeline, get_pos_neg_ngramms_pipeline,
   get_pos_neg_pubs_pipeline, get_pos_neg_topics_pipeline,
@@ -489,6 +491,72 @@ async def _req_frags_ngramms_cocitauthors(
     out.append(dict(
       title=doc['title'], type=doc['type'], nka=doc['nka'], count=doc['count'],
       frags=dict(sorted(frags.items())), cocitaithors=cocitaithors))
+  if not _add_pipeline:
+    return out
+
+  return dict(pipeline=pipeline, items=out)
+
+
+@router.get('/frags/ngramms/ngramms/',
+  summary='Кросс-распределение «5 фрагментов» - «фразы из контекстов цитирований»')
+async def _req_frags_ngramm_ngramm(
+  topn: Optional[int] = None,
+  author: Optional[str] = None, cited: Optional[str] = None,
+  citing: Optional[str] = None, nka: Optional[int] = Query(None, ge=0, le=6),
+  ltype: Optional[LType] = Query(None, title='Тип фразы'),
+  topn_ngramm: Optional[int] = None, _add_pipeline: bool = False
+):
+  pipeline_root = get_frags_ngramms_ngramms_branch_root(
+    topn, author, cited, citing, nka, ltype)
+  ngrm2tuple = itemgetter('_id', 'title', 'type', 'nka', 'count', 'conts')
+  contexts = slot.mdb.contexts
+  topN = tuple([
+    ngrm2tuple(doc) async for doc in contexts.aggregate(pipeline_root)])
+  exists = frozenset(map(itemgetter(0), topN))
+
+  pipeline = get_frags_ngramms_ngramms_branch_pipeline(nka, ltype)
+  out_list = []
+
+  for i, (ngrmm, title, typ_, nka, cnt, conts) in enumerate(topN, 1):
+    congr = defaultdict(Counter)
+    titles = {}
+    types = {}
+
+    work_pipeline = [
+      {'$match': {'frag_num': {'$gt': 0}, '_id': {'$in': conts}}}
+    ] + pipeline + [
+      {'$match': {'cont.type': typ_}}
+    ]
+    # _logger.debug('ngrmm: "%s", cnt: %s, pipeline: %s', ngrmm, cnt, work_pipeline)
+    # print('ngrmm: "%s", cnt: %s, pipeline: %s' % (ngrmm, cnt, work_pipeline))
+
+    async for doc in contexts.aggregate(work_pipeline):
+      cont = doc['cont']
+      ngr_id = cont['_id']
+      if ngr_id not in exists:
+        continue
+      fnum = doc['frag_num']
+      congr[ngr_id][fnum] += doc['linked_papers_ngrams']['cnt']
+      titles[ngr_id] = cont['title']
+      types[ngr_id] = cont['type']
+
+    frags = congr.pop(ngrmm)
+    crossgrams = []
+
+    for j, (co, cnts) in enumerate(
+      sorted(congr.items(), key=lambda kv: (-sum(kv[1].values()), kv[0])), 1
+    ):
+      crossgrams.append(
+        dict(
+          title=titles[co], type=types[co], frags=cnts, sum=sum(cnts.values())))
+    if topn_ngramm:
+      crossgrams = crossgrams[:topn_ngramm]
+
+    out_list.append(
+      dict(title=titles[ngrmm], type=typ_, nka=nka, sum=cnt,
+        cnt_cross=len(congr), frags=frags, crossgrams=crossgrams))
+
+  out = out_list
   if not _add_pipeline:
     return out
 
