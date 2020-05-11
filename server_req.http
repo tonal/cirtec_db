@@ -184,7 +184,9 @@ GET http://localhost:7667/cirtec/pos_neg/contexts/
 GET http://localhost:7667/cirtec/pos_neg/ngramms/
 
 ###
-# /pos_neg/pubs/
 GET http://localhost:7667/cirtec/pos_neg/pubs/
+
+###
+GET http://localhost:7667/cirtec/pos_neg/ref_authors/
 
 ###

@@ -496,7 +496,32 @@ async def _req_pos_neg_pubs(
       dict(
         pub=pid, name=name, neutral=int(neutral), positive=int(positive),
         negative=int(negative)))
+  if not _add_pipeline:
+    return out
 
+  return dict(pipeline=pipeline, items=out)
+
+
+@router.get('/pos_neg/ref_authors/',) # summary='Топ N со-цитируемых референсов')
+async def _req_pos_neg_refauthors(
+  topn:Optional[int]=None, author:Optional[str]=None, cited:Optional[str]=None,
+  citing:Optional[str]=None, _add_pipeline: bool = False
+):
+  pipeline = get_refauthors_pipeline(topn, author, cited, citing)
+
+  contexts:Collection = slot.mdb.contexts
+  out = []
+  async for row in contexts.aggregate(pipeline):
+    row.pop('frags', None)
+    classify = row.pop('pos_neg', None)
+    if classify:
+      neutral = sum(1 for v in classify if v['val'] == 0)
+      positive = sum(1 for v in classify if v['val'] > 0)
+      negative = sum(1 for v in classify if v['val'] < 0)
+      row.update(
+        class_pos_neg=dict(
+          neutral=neutral, positive=positive, negative=negative))
+    out.append(row)
   if not _add_pipeline:
     return out
 
