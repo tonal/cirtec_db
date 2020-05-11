@@ -511,6 +511,7 @@ def get_frags_cocitauthors_ngramms_pipeline(
       "_id": {
         "cocit_authors": "$_id.cocit_authors", "ngram": "$_id.ngram"},
       "count": {"$sum": "$count"},
+      "frags": {'$push': {"fn": "$cont.frag_num", "cnt": "$count"}},
       "conts": {
         "$push": {
           "cont_id": "$_id.cont_id", "pubid": "$cont.pubid",
@@ -519,7 +520,8 @@ def get_frags_cocitauthors_ngramms_pipeline(
     {'$group': {
         "_id": "$_id.cocit_authors",
         "count": {"$sum": "$count"},
-        "ngrms": {"$push": {"ngrm": "$ngrm", "count": "$count"}},
+        "ngrms": {
+          "$push": {"ngrm": "$ngrm", "count": "$count", "frags": "$frags"}},
         "conts2": {"$push": "$conts"},}},
     {"$project": {
         "count": 1, "ngrms": 1,

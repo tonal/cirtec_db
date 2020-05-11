@@ -358,21 +358,27 @@ async def _req_frags_cocitauthors_ngramms(
   curs = contexts.aggregate(pipeline)
   # out = [doc async for doc in curs]
   out = []
+  get_frag_num = itemgetter('frag_num')
+  get_fn_cnt = itemgetter('fn', 'cnt')
+  key_first = itemgetter(0)
+  key_last = itemgetter(-1)
   def ngr2tuple(d):
     ngrm = d['ngrm']
-    ret = ngrm['title'], ngrm['type'], ngrm['nka'], d['count']
+    ret = ngrm['title'], ngrm['type'], ngrm['nka'], d['count'], d['frags']
     return ret
-  ngrm_sort_key = lambda v: (-v[-1], *v)
+  key_ngrm_sort = lambda v: (-v[-2], *v[:-1])
   async for doc in curs:
     cocit_author = doc['_id']
     conts = doc['conts']
-    # pubids = tuple(frozenset(map(itemgetter('pubid'), conts)))
-    # contids = tuple(map(itemgetter('cont_id'), conts))
-    frags = Counter(map(itemgetter('frag_num'), conts))
+    frags = Counter(map(get_frag_num, conts))
     crossgrams = tuple(
-      dict(title=title, type=lt, nka=nka, count=cnt)
-      for title, lt, nka, cnt in sorted(
-        map(ngr2tuple, doc['ngrms']), key=ngrm_sort_key))
+      dict(
+        title=title, type=lt, nka=nka, count=cnt,
+        frags=dict(
+          (fn, sum(map(key_last, cnts)))
+          for fn, cnts in groupby(sorted(map(get_fn_cnt, fr)), key=key_first)))
+        for title, lt, nka, cnt, fr in sorted(
+          map(ngr2tuple, doc['ngrms']), key=key_ngrm_sort))
     if topn_gramm:
       crossgrams = crossgrams[:topn_gramm]
     out.append(dict(
