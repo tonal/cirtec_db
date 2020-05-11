@@ -17,7 +17,8 @@ import uvicorn
 
 from server_dbquery import (
   LType, filter_acc_dict, get_frag_publications,
-  get_frags_cocitauthors_cocitauthors_pipeline, get_frags_cocitauthors_pipeline,
+  get_frags_cocitauthors_cocitauthors_pipeline,
+  get_frags_cocitauthors_ngramms_pipeline, get_frags_cocitauthors_pipeline,
   get_frags_ngramms_pipeline, get_frags_topics_pipeline,
   get_pos_neg_cocitauthors_pipeline, get_pos_neg_contexts_pipeline,
   get_pos_neg_ngramms_pipeline, get_pos_neg_pubs_pipeline,
@@ -325,7 +326,6 @@ async def _req_frags_cocitauthors_cocitauthors(
   contexts = slot.mdb.contexts
   curs = contexts.aggregate(pipeline)
   out = []
-
   async for doc in curs:
     cocitpair = doc['cocitpair']
     conts = doc['conts']
@@ -336,6 +336,48 @@ async def _req_frags_cocitauthors_cocitauthors(
       cocitpair=tuple(cocitpair.values()),
       intxtid_cnt=len(contids), pub_cnt=len(pubids),
       frags=dict(sorted(frags.items())), pubids=pubids, intxtids=contids))
+  if not _add_pipeline:
+    return out
+
+  return dict(pipeline=pipeline, items=out)
+
+
+@router.get('/frags/cocitauthors/ngramms/',
+  summary='Кросс-распределение «со-цитирования» - «фразы из контекстов цитирований»')
+async def _req_frags_cocitauthors_ngramms(
+  topn:Optional[int]=None, author:Optional[str]=None, cited:Optional[str]=None,
+  citing:Optional[str]=None,
+  nka:Optional[int]=Query(None, ge=0, le=6),
+  ltype:Optional[LType]=Query(None, title='Тип фразы'), #, description='Может быть одно из значений "lemmas", "nolemmas" или пустой'),
+  topn_gramm:Optional[int]=None,
+  _add_pipeline:bool=False
+):
+  pipeline = get_frags_cocitauthors_ngramms_pipeline(
+    topn, author, cited, citing, nka, ltype)
+  contexts = slot.mdb.contexts
+  curs = contexts.aggregate(pipeline)
+  # out = [doc async for doc in curs]
+  out = []
+  def ngr2tuple(d):
+    ngrm = d['ngrm']
+    ret = ngrm['title'], ngrm['type'], ngrm['nka'], d['count']
+    return ret
+  ngrm_sort_key = lambda v: (-v[-1], *v)
+  async for doc in curs:
+    cocit_author = doc['_id']
+    conts = doc['conts']
+    # pubids = tuple(frozenset(map(itemgetter('pubid'), conts)))
+    # contids = tuple(map(itemgetter('cont_id'), conts))
+    frags = Counter(map(itemgetter('frag_num'), conts))
+    crossgrams = tuple(
+      dict(title=title, type=lt, nka=nka, count=cnt)
+      for title, lt, nka, cnt in sorted(
+        map(ngr2tuple, doc['ngrms']), key=ngrm_sort_key))
+    if topn_gramm:
+      crossgrams = crossgrams[:topn_gramm]
+    out.append(dict(
+      cocit_author=cocit_author, count=doc['count'],
+      frags=dict(sorted(frags.items())), crossgrams=crossgrams))
   if not _add_pipeline:
     return out
 

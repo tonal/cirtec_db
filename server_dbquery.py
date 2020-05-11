@@ -477,6 +477,75 @@ def get_frags_cocitauthors_cocitauthors_pipeline(
   return pipeline
 
 
+def get_frags_cocitauthors_ngramms_pipeline(
+  topn: Optional[int], author: Optional[str], cited: Optional[str],
+  citing: Optional[str], nka: Optional[int], ltype: Optional[LType]
+):
+  pipeline = [
+    {"$match": {
+      "cocit_authors": {"$exists": 1}, "frag_num": {"$exists": 1},
+      "linked_papers_ngrams": {'$exists': 1}}},
+    {"$project": {
+      "pubid": 1, "cocit_authors": 1, "frag_num": 1,
+      "linked_papers_ngrams": 1}},]
+  pipeline += filter_by_pubs_acc(author, cited, citing)
+  pipeline += [
+    {"$unwind": "$cocit_authors"},
+    {"$unwind": "$linked_papers_ngrams"},
+    {'$lookup': {
+      'from': 'n_gramms', 'localField': 'linked_papers_ngrams._id',
+      'foreignField': '_id', 'as': 'ngrm'}},
+    {'$unwind': '$ngrm'},]
+  if nka or ltype:
+    pipeline += [get_ngramm_filter(nka, ltype, 'ngrm')]
+  pipeline += [
+    {"$group": {
+      "_id": {
+        "cocit_authors": "$cocit_authors", "ngram": "$linked_papers_ngrams._id",
+        "cont_id": "$_id"},
+      "cont": {"$first": {"pubid": "$pubid", "frag_num": "$frag_num"}},
+      'count': {'$sum': "$linked_papers_ngrams.cnt"},
+      'ngrm': {'$first': "$ngrm"},}},
+    {"$sort": {"_id": 1}},
+    {"$group": {
+      "_id": {
+        "cocit_authors": "$_id.cocit_authors", "ngram": "$_id.ngram"},
+      "count": {"$sum": "$count"},
+      "conts": {
+        "$push": {
+          "cont_id": "$_id.cont_id", "pubid": "$cont.pubid",
+          "frag_num": "$cont.frag_num"}},
+      'ngrm': {'$first': "$ngrm"},}},
+    {'$group': {
+        "_id": "$_id.cocit_authors",
+        "count": {"$sum": "$count"},
+        "ngrms": {"$push": {"ngrm": "$ngrm", "count": "$count"}},
+        "conts2": {"$push": "$conts"},}},
+    {"$project": {
+        "count": 1, "ngrms": 1,
+        "conts": {
+            "$reduce": {
+               "input": "$conts2", "initialValue": [],
+            "in": {"$setUnion": ["$$value", "$$this"]}}}}},
+    {"$sort": {"count": -1, "_id": 1}},
+  ]
+  if topn:
+    pipeline += [{'$limit': topn}]
+  return pipeline
+
+#   pipeline += [
+#     {'$unwind': '$linked_papers_ngrams'},
+#     {'$lookup': {
+#       'from': 'n_gramms', 'localField': 'linked_papers_ngrams._id',
+#       'foreignField': '_id', 'as': 'ngrm'}},
+#     {'$unwind': '$ngrm'},
+#   ]
+#
+#   if nka or ltype:
+#     pipeline += [get_ngramm_filter(nka, ltype, 'ngrm')]
+
+
+
 def get_frags_ngramms_pipeline(
   topn:Optional[int], author:Optional[str], cited:Optional[str],
   citing:Optional[str], nka:Optional[int], ltype:Optional[LType]
