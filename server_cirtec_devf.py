@@ -19,14 +19,14 @@ from server_dbquery import (
   LType, filter_acc_dict, get_frag_publications,
   get_frags_cocitauthors_cocitauthors_pipeline,
   get_frags_cocitauthors_ngramms_pipeline, get_frags_cocitauthors_pipeline,
-  get_frags_ngramms_pipeline, get_frags_topics_pipeline,
-  get_pos_neg_cocitauthors_pipeline, get_pos_neg_contexts_pipeline,
-  get_pos_neg_ngramms_pipeline, get_pos_neg_pubs_pipeline,
-  get_pos_neg_topics_pipeline, get_ref_auth4ngramm_tops_pipeline,
-  get_ref_bund4ngramm_tops_pipeline, get_refauthors_part_pipeline,
-  get_refauthors_pipeline, get_refbindles_pipeline,
-  get_top_cocitauthors_pipeline, get_top_cocitrefs_pipeline,
-  get_top_ngramms_pipeline, get_top_topics_pipeline)
+  get_frags_cocitauthors_topics_pipeline, get_frags_ngramms_pipeline,
+  get_frags_topics_pipeline, get_pos_neg_cocitauthors_pipeline,
+  get_pos_neg_contexts_pipeline, get_pos_neg_ngramms_pipeline,
+  get_pos_neg_pubs_pipeline, get_pos_neg_topics_pipeline,
+  get_ref_auth4ngramm_tops_pipeline, get_ref_bund4ngramm_tops_pipeline,
+  get_refauthors_part_pipeline, get_refauthors_pipeline,
+  get_refbindles_pipeline, get_top_cocitauthors_pipeline,
+  get_top_cocitrefs_pipeline, get_top_ngramms_pipeline, get_top_topics_pipeline)
 from server_utils import to_out_typed
 from utils import load_config
 
@@ -384,6 +384,42 @@ async def _req_frags_cocitauthors_ngramms(
     out.append(dict(
       cocit_author=cocit_author, count=doc['count'],
       frags=dict(sorted(frags.items())), crossgrams=crossgrams))
+  if not _add_pipeline:
+    return out
+
+  return dict(pipeline=pipeline, items=out)
+
+
+@router.get('/frags/cocitauthors/topics/',
+  summary='Кросс-распределение «со-цитирования» - «топики контекстов цитирований»')
+async def _req_frags_cocitauthors_topics(
+  topn:Optional[int]=None, author:Optional[str]=None, cited:Optional[str]=None,
+  citing:Optional[str]=None, probability:Optional[float]=.5,
+  _add_pipeline:bool=False
+):
+  pipeline = get_frags_cocitauthors_topics_pipeline(
+    topn, author, cited, citing, probability)
+  contexts = slot.mdb.contexts
+  curs = contexts.aggregate(pipeline)
+  # out = [doc async for doc in curs]
+  out = []
+  get_frag_num = itemgetter('frag_num')
+  get_fn = itemgetter('fn')
+  topic2tuple = itemgetter('topic', 'count', 'frags')
+  key_topic_sort = lambda t: (-t[1], t[0])
+  async for doc in curs:
+    cocit_author = doc['_id']
+    conts = doc['conts']
+    frags = Counter(map(get_frag_num, conts))
+    crosstopics = tuple(
+      dict(
+        topic=topic, count=cnt,
+        frags=Counter(sorted(map(get_fn, fr))))
+        for topic, cnt, fr in sorted(
+          map(topic2tuple, doc['topics']), key=key_topic_sort))
+    out.append(dict(
+      cocit_author=cocit_author, count=doc['count'],
+      frags=dict(sorted(frags.items())), crosstopics=crosstopics))
   if not _add_pipeline:
     return out
 

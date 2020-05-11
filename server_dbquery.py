@@ -535,17 +535,58 @@ def get_frags_cocitauthors_ngramms_pipeline(
     pipeline += [{'$limit': topn}]
   return pipeline
 
-#   pipeline += [
-#     {'$unwind': '$linked_papers_ngrams'},
-#     {'$lookup': {
-#       'from': 'n_gramms', 'localField': 'linked_papers_ngrams._id',
-#       'foreignField': '_id', 'as': 'ngrm'}},
-#     {'$unwind': '$ngrm'},
-#   ]
-#
-#   if nka or ltype:
-#     pipeline += [get_ngramm_filter(nka, ltype, 'ngrm')]
 
+def get_frags_cocitauthors_topics_pipeline(
+  topn:Optional[int], author:Optional[str], cited:Optional[str],
+  citing:Optional[str], probability:Optional[float]
+):
+  pipeline = [
+    {"$match": {
+      "cocit_authors": {"$exists": 1}, "frag_num": {"$exists": 1},
+      "linked_papers_topics": {'$exists': 1}}},
+    {"$project": {
+      "pubid": 1, "cocit_authors": 1, "frag_num": 1,
+      "linked_papers_topics": 1}},]
+  pipeline += filter_by_pubs_acc(author, cited, citing)
+  pipeline += [
+    {"$unwind": "$cocit_authors"},
+    {"$unwind": "$linked_papers_topics"},]
+  if probability:
+    pipeline += [
+      {"$match": {"linked_papers_topics.probability": {"$gte": probability}}, }]
+  pipeline += [
+    {"$group": {
+      "_id": {
+        "cocit_authors": "$cocit_authors", "topic": "$linked_papers_topics._id",
+        "cont_id": "$_id"},
+      "cont": {"$first": {"pubid": "$pubid", "frag_num": "$frag_num"}},}},
+    {"$sort": {"_id": 1}},
+    {"$group": {
+      "_id": {
+        "cocit_authors": "$_id.cocit_authors", "topic": "$_id.topic"},
+      "count": {"$sum": 1},
+      "frags": {'$push': {"fn": "$cont.frag_num", "cnt": "$count"}},
+      "conts": {
+        "$push": {
+          "cont_id": "$_id.cont_id", "pubid": "$cont.pubid",
+          "frag_num": "$cont.frag_num"}},}},
+    {'$group': {
+        "_id": "$_id.cocit_authors",
+        "count": {"$sum": "$count"},
+        "topics": {
+          "$push": {"topic": "$_id.topic", "count": "$count", "frags": "$frags"}},
+        "conts2": {"$push": "$conts"},}},
+    {"$project": {
+        "count": 1, "topics": 1,
+        "conts": {
+            "$reduce": {
+               "input": "$conts2", "initialValue": [],
+            "in": {"$setUnion": ["$$value", "$$this"]}}}}},
+    {"$sort": {"count": -1, "_id": 1}},
+  ]
+  if topn:
+    pipeline += [{'$limit': topn}]
+  return pipeline
 
 
 def get_frags_ngramms_pipeline(
