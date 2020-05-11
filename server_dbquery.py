@@ -799,6 +799,38 @@ def get_frags_ngramms_topics_pipeline(
   return pipeline
 
 
+def get_frag_pos_neg_contexts(
+  author:Optional[str], cited:Optional[str],
+  citing:Optional[str]
+):
+  pipeline = [
+    {'$match': {
+      'positive_negative': {'$exists': 1}, 'frag_num': {'$exists': 1}}},
+    {'$project': {'pubid': 1, 'positive_negative': 1, 'frag_num': 1}},
+  ]
+  pipeline += filter_by_pubs_acc(author, cited, citing)
+  pipeline += [
+    {'$group': {
+      '_id': {
+        'class_pos_neg': {
+        '$arrayElemAt': [
+          ['neutral', 'positive', 'positive', 'negative', 'negative'],
+          '$positive_negative.val']},
+        'frag_num': '$frag_num'},
+      'pubids': {'$addToSet': '$pubid'},
+      'intxtids': {'$addToSet': '$_id'}}},
+    {'$sort': {'_id.class_pos_neg': -1}},
+    {'$group': {
+      '_id': '$_id.frag_num',
+      'classes': {'$push': {
+          'pos_neg': '$_id.class_pos_neg',
+          'pubids': '$pubids', 'intxtids': '$intxtids'}}}},
+    {'$project': {'_id': 0, 'frag_num': '$_id', 'classes': '$classes'}},
+    {'$sort': {'frag_num': 1}},
+  ]
+  return pipeline
+
+
 def get_frags_topics_pipeline(
   topn:Optional[int], author:Optional[str], cited:Optional[str],
   citing:Optional[str], probability:Optional[float]

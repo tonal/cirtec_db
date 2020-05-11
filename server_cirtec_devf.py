@@ -16,7 +16,7 @@ from pymongo.database import Database
 import uvicorn
 
 from server_dbquery import (
-  LType, filter_acc_dict, get_frag_publications,
+  LType, filter_acc_dict, get_frag_pos_neg_contexts, get_frag_publications,
   get_frags_cocitauthors_cocitauthors_pipeline,
   get_frags_cocitauthors_ngramms_pipeline, get_frags_cocitauthors_pipeline,
   get_frags_cocitauthors_topics_pipeline,
@@ -598,6 +598,23 @@ async def _req_frags_ngramms_topics(topn: Optional[int] = None,
     out.append(dict(
       title=doc['title'], type=doc['type'], nka=doc['nka'], count=doc['count'],
       frags=dict(sorted(frags.items())), cocitaithors=cocitaithors))
+  if not _add_pipeline:
+    return out
+
+  return dict(pipeline=pipeline, items=out)
+
+
+@router.get('/frags/pos_neg/contexts/',
+  summary='Распределение тональности контекстов по 5-ти фрагментам')
+async def _req_frags_pos_neg_contexts(
+  author: Optional[str] = None,
+  cited: Optional[str] = None, citing: Optional[str] = None,
+  _add_pipeline: bool = False
+):
+  pipeline = get_frag_pos_neg_contexts(author, cited, citing)
+  contexts = slot.mdb.contexts
+  curs = contexts.aggregate(pipeline)
+  out = [doc async for doc in curs]
   if not _add_pipeline:
     return out
 

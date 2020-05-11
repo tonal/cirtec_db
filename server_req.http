@@ -196,3 +196,6 @@ GET http://localhost:7667/cirtec/pos_neg/ref_bundles/
 GET http://localhost:7667/cirtec/pos_neg/topics/
 
 ###
+GET http://localhost:7667/cirtec/frags/pos_neg/contexts/
+
+###
