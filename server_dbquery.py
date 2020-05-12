@@ -1299,6 +1299,64 @@ def get_publications_cocitauthors_pipeline(
   return pipeline
 
 
+def get_publications_topics_topics_pipeline(
+  author: Optional[str], cited: Optional[str], citing: Optional[str],
+  probability:Optional[float]
+):
+  pipeline = [
+    {"$match": {
+      "pubid": {"$exists": 1}, "linked_papers_topics": {'$exists': 1}}},
+    {"$project": {"pubid": 1, "linked_papers_topics": 1}}, ]
+  pipeline += filter_by_pubs_acc(author, cited, citing)
+  pipeline += [{"$project": {"pub": 0}}, {"$unwind": "$linked_papers_topics"}, ]
+  if probability:
+    pipeline += [{
+      "$match": {
+        "linked_papers_topics.probability": {"$gte": probability}}, }]
+  pipeline += [{
+    '$lookup': {
+      'from': 'contexts', 'localField': '_id', 'foreignField': '_id',
+      'as': 'cont'}}, {'$unwind': "$cont"},
+    {'$unwind': "$cont.linked_papers_topics"}, ]
+  if probability:
+    pipeline += [{
+      "$match": {
+        "cont.linked_papers_topics.probability": {"$gte": probability}}, }]
+  pipeline += [{
+    '$project': {
+      "pubid": 1, "topic1": "$linked_papers_topics._id",
+      "topic2": "$cont.linked_papers_topics._id"}},
+    {'$match': {'$expr': {'$ne': ["$topic1", "$topic2"]}}}, {
+      '$group': {
+        "_id": {
+          "topic1": {
+            '$cond': [{'$gte': ["$topic1", "$topic2"]}, "$topic1", "$topic2"]},
+          "topic2": {
+            '$cond': [{'$gte': ["$topic1", "$topic2"]}, "$topic2", "$topic1"]},
+          "cont_id": "$_id"},
+        "pubid": {"$first": "$pubid"}}},
+    {"$sort": {"_id": 1}}, {
+      "$group": {
+        "_id": {"topic1": "$_id.topic1", "topic2": "$_id.topic2"},
+        "count": {"$sum": 1}, "pubid": {"$push": "$pubid"}}},
+    {"$sort": {"count": -1, "_id": 1}},
+    {'$group': {
+      '_id': "$_id.topic1", "count": {"$sum": "$count"},
+      'crosstopics': {
+        '$push': {
+          "topic": "$_id.topic2", "pubs": "$pubid", "count": "$count"}}}},
+    {"$sort": {"count": -1, "_id": 1}},
+    {"$project": {
+      "topic": "$_id", "_id": 0, "count": 1, "crosstopics": 1,
+      "pubs": {
+        "$reduce": {
+          "input": "$crosstopics", "initialValue": [],
+          "in": {"$setUnion": ["$$value", "$$this.pubs"]}}}
+    }}
+  ]
+  return pipeline
+
+
 def get_top_detail_bund_refauthors(
   topn: Optional[int], author: Optional[str], cited: Optional[str],
   citing: Optional[str]
