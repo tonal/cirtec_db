@@ -30,11 +30,12 @@ from server_dbquery import (
   get_frags_topics_topics_pipeline, get_pos_neg_cocitauthors_pipeline,
   get_pos_neg_contexts_pipeline, get_pos_neg_ngramms_pipeline,
   get_pos_neg_pubs_pipeline, get_pos_neg_topics_pipeline,
-  get_ref_auth4ngramm_tops_pipeline, get_ref_bund4ngramm_tops_pipeline,
-  get_refauthors_part_pipeline, get_refauthors_pipeline,
-  get_refbindles_pipeline, get_top_cocitauthors_pipeline,
-  get_top_cocitrefs_pipeline, get_top_detail_bund_refauthors,
-  get_top_ngramms_pipeline, get_top_topics_pipeline)
+  get_publications_cocitauthors_pipeline, get_ref_auth4ngramm_tops_pipeline,
+  get_ref_bund4ngramm_tops_pipeline, get_refauthors_part_pipeline,
+  get_refauthors_pipeline, get_refbindles_pipeline,
+  get_top_cocitauthors_pipeline, get_top_cocitrefs_pipeline,
+  get_top_detail_bund_refauthors, get_top_ngramms_pipeline,
+  get_top_topics_pipeline)
 from server_utils import to_out_typed
 from utils import load_config
 
@@ -999,6 +1000,27 @@ async def _req_pos_neg_topics(
     return out
 
   return dict(pipeline=pipeline, items=out)
+
+
+@router.get('/publ/publications/cocitauthors/',
+  summary='Кросс-распределение «со-цитируемые авторы» по публикациям')
+async def _req_publ_publications_cocitauthors(
+  author:Optional[str]=None, cited:Optional[str]=None,
+  citing:Optional[str]=None, topn_auth:Optional[int]=None,
+  _debug_option: DebugOption=None
+):
+  pipeline = get_publications_cocitauthors_pipeline(
+    author, cited, citing, topn_auth)
+  if _debug_option == DebugOption.pipeline:
+    return pipeline
+  contexts = slot.mdb.contexts
+  curs = contexts.aggregate(pipeline)
+  if _debug_option == DebugOption.raw_out:
+    out = [doc async for doc in curs]
+    return out
+
+  out = [doc async for doc in curs]
+  return out
 
 
 @router.get('/pubs/ref_authors/',) # summary='Топ N со-цитируемых референсов')

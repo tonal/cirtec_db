@@ -1250,6 +1250,55 @@ def get_pos_neg_topics_pipeline(
   return pipeline
 
 
+def get_publications_cocitauthors_pipeline(
+  author: Optional[str], cited: Optional[str], citing: Optional[str],
+  topn_auth:Optional[int]
+):
+  pipeline = [
+    {"$match": {"cocit_authors": {"$exists": 1}}}]
+  if filter_pipeline := filter_by_pubs_acc(author, cited, citing):
+    pipeline += filter_pipeline
+  else:
+    pipeline += [
+      {'$lookup': {
+        'from': 'publications', 'localField': 'pubid', 'foreignField': '_id',
+        'as': 'pub'}},
+      {'$unwind': '$pub'},]
+
+  pipeline += [
+    {'$project': {'prefix': 0, 'suffix': 0, 'exact': 0}},
+    {'$unwind': '$cocit_authors'},
+    {'$group': {
+        '_id': {"pubid": "$pubid", "cocit_authors": '$cocit_authors'},
+        'count': {'$sum': 1}, "name": {"$first": "$pub.name"},
+        'conts': {'$addToSet': '$_id'}}},
+    {'$sort': {'count': -1, '_id': 1}},
+    {"$group": {
+      "_id": "$_id.pubid",
+      "count": {'$sum': "$count"}, "name": {"$first": "$name"},
+      "cocitauthors": {
+        "$push": {"cocit_authors": "$_id.cocit_authors", "conts": "$conts"}}}},
+    {'$sort': {'count': -1, '_id': 1}},
+  ]
+  if topn_auth:
+    pipeline += [
+      {"$project": {
+        "count": 1, "name": 1,
+        "cocitauthors": {"$slice": ["$cocitauthors", topn_auth]}}}
+    ]
+
+  pipeline += [
+    {"$project": {
+      "_id": 0, "pubid": "$_id", "count": 1, "name": 1, "cocitauthors": 1,
+      "conts": {
+        "$reduce": {
+          "input": "$cocitauthors", "initialValue": [],
+          "in": {"$setUnion": ["$$value", "$$this.conts"]}}}
+    }},
+  ]
+  return pipeline
+
+
 def get_top_detail_bund_refauthors(
   topn: Optional[int], author: Optional[str], cited: Optional[str],
   citing: Optional[str]
