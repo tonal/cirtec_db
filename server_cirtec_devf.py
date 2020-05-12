@@ -30,7 +30,7 @@ from server_dbquery import (
   get_frags_topics_topics_pipeline, get_pos_neg_cocitauthors_pipeline,
   get_pos_neg_contexts_pipeline, get_pos_neg_ngramms_pipeline,
   get_pos_neg_pubs_pipeline, get_pos_neg_topics_pipeline,
-  get_publications_cocitauthors_pipeline,
+  get_publications_cocitauthors_pipeline, get_publications_ngramms_pipeline,
   get_publications_topics_topics_pipeline, get_ref_auth4ngramm_tops_pipeline,
   get_ref_bund4ngramm_tops_pipeline, get_refauthors_part_pipeline,
   get_refauthors_pipeline, get_refbindles_pipeline,
@@ -1012,6 +1012,28 @@ async def _req_publ_publications_cocitauthors(
 ):
   pipeline = get_publications_cocitauthors_pipeline(
     author, cited, citing, topn_auth)
+  if _debug_option == DebugOption.pipeline:
+    return pipeline
+  contexts = slot.mdb.contexts
+  curs = contexts.aggregate(pipeline)
+  if _debug_option == DebugOption.raw_out:
+    out = [doc async for doc in curs]
+    return out
+
+  out = [doc async for doc in curs]
+  return out
+
+
+@router.get('/publ/publications/ngramms/',
+  summary='Кросс-распределение «фразы из контекстов цитирований» по публикациям')
+async def _req_publ_publications_ngramms(
+  topn:Optional[int]=None, author:Optional[str]=None, cited:Optional[str]=None,
+  citing:Optional[str]=None, nka:Optional[int]=Query(None, ge=0, le=6),
+  ltype:Optional[LType]=Query(None, title='Тип фразы'),
+  _debug_option: DebugOption = None
+):
+  pipeline = get_publications_ngramms_pipeline(
+    topn, author, cited, citing, nka, ltype)
   if _debug_option == DebugOption.pipeline:
     return pipeline
   contexts = slot.mdb.contexts

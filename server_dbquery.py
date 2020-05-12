@@ -1299,6 +1299,67 @@ def get_publications_cocitauthors_pipeline(
   return pipeline
 
 
+def get_publications_ngramms_pipeline(
+  topn:Optional[int], author: Optional[str], cited: Optional[str],
+  citing: Optional[str], nka:Optional[int], ltype:Optional[LType]
+):
+  pipeline = [
+    {"$match": {"linked_papers_ngrams": {"$exists": 1}}}]
+  if filter_pipeline := filter_by_pubs_acc(author, cited, citing):
+    pipeline += filter_pipeline
+  else:
+    pipeline += [
+      {'$lookup': {
+        'from': 'publications', 'localField': 'pubid', 'foreignField': '_id',
+        'as': 'pub'}},
+      {'$unwind': '$pub'},
+    ]
+
+  pipeline += [
+    {'$unwind': '$linked_papers_ngrams'},
+    {'$lookup': {
+      'from': 'n_gramms', 'localField': 'linked_papers_ngrams._id',
+      'foreignField': '_id', 'as': 'ngrm'}},
+    {'$unwind': '$ngrm'}, ]
+  if nka or ltype:
+    pipeline += [get_ngramm_filter(nka, ltype, 'ngrm')]
+
+  pipeline += [
+    {'$group': {
+        '_id': {"pubid": "$pubid", "ngrm": '$linked_papers_ngrams._id'},
+        'count': {'$sum': 1}, "name": {"$first": "$pub.name"},
+        'conts': {'$addToSet': '$_id'}}},
+    {'$sort': {'count': -1, '_id': 1}},
+    {'$lookup': {
+      'from': 'n_gramms', 'localField': '_id.ngrm', 'foreignField': '_id',
+      'as': 'ngrm'}},
+    {'$unwind': '$ngrm'},
+    {"$group": {
+      "_id": "$_id.pubid",
+      "count": {'$sum': "$count"}, "name": {"$first": "$name"},
+      "crossgrams": {
+        "$push": {
+          "title": "$ngrm.title", "type": "$ngrm.type", "nka": "$ngrm.nka",
+          "conts": "$conts",}}}},
+    {'$sort': {'count': -1, '_id': 1}},
+  ]
+
+  if topn:
+    pipeline += [{"$limit": topn}]
+
+  pipeline += [
+    {"$project": {
+      "pubid": "$_id", "_id": 0, "count": "$count", "name": "$name",
+      "conts": {
+        "$reduce": {
+          "input": "$crossgrams", "initialValue": [],
+          "in": {"$setUnion": ["$$value", "$$this.conts"]}}},
+      "crossgrams": "$crossgrams",
+    }},
+  ]
+  return pipeline
+
+
 def get_publications_topics_topics_pipeline(
   author: Optional[str], cited: Optional[str], citing: Optional[str],
   probability:Optional[float]
