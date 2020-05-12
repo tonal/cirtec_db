@@ -970,6 +970,60 @@ def get_frags_topics_cocitauthors_pipeline(
   return pipeline
 
 
+def get_frags_topics_topics_pipeline(
+  author: Optional[str], cited: Optional[str], citing: Optional[str],
+  probability: Optional[float]
+):
+  pipeline = [
+    {"$match": {
+      "frag_num": {"$exists": 1}, "linked_papers_topics": {'$exists': 1}}},
+    {"$project": {"frag_num": 1, "linked_papers_topics": 1}},
+  ]
+  pipeline += filter_by_pubs_acc(author, cited, citing)
+  pipeline += [
+    {"$project": {"pub": 0}},
+    {"$unwind": "$linked_papers_topics"},]
+  if probability:
+    pipeline += [
+      {"$match": {
+        "linked_papers_topics.probability": {"$gte": probability}}, }]
+  pipeline += [
+    {'$lookup': {
+      'from': 'contexts', 'localField': '_id', 'foreignField': '_id',
+      'as': 'cont'}},
+    {'$unwind': "$cont"},
+    {'$unwind': "$cont.linked_papers_topics"},]
+  if probability:
+    pipeline += [
+      {"$match": {
+        "cont.linked_papers_topics.probability": {"$gte": probability}}, }]
+  pipeline += [
+    {'$project': {
+      "frag_num": 1, "topic1": "$linked_papers_topics._id",
+      "topic2": "$cont.linked_papers_topics._id"}},
+    {'$match': {'$expr': {'$ne': ["$topic1", "$topic2"]}}},
+    {'$group': {
+      "_id": {
+        "topic1": {
+          '$cond': [{'$gte': ["$topic1", "$topic2"]}, "$topic1", "$topic2"]},
+        "topic2": {
+          '$cond': [{'$gte': ["$topic1", "$topic2"]}, "$topic2", "$topic1"]},
+        "cont_id": "$_id"}, "frag_num": {"$first": "$frag_num"}}},
+    {"$sort": {"_id": 1}},
+    {"$group": {
+      "_id": {"topic1": "$_id.topic1", "topic2": "$_id.topic2"},
+      "count": {"$sum": 1},
+      "frags": {"$push": "$frag_num"}}},
+    {"$sort": {"count": -1, "_id": 1}},
+    {'$group': {
+      '_id': "$_id.topic1", "count": {"$sum": "$count"},
+      'crosstopics': {
+        '$push': {
+          "topic": "$_id.topic2", "frags": "$frags", "count": "$count"}}}},
+    {"$sort": {"count": -1, "_id": 1}},
+  ]
+  return pipeline
+
 
 def get_pos_neg_cocitauthors_pipeline(
   topn:Optional[int], author:Optional[str], cited:Optional[str],
