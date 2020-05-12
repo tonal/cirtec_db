@@ -970,6 +970,71 @@ def get_frags_topics_cocitauthors_pipeline(
   return pipeline
 
 
+def get_frags_topics_ngramms_pipeline(
+  author: Optional[str], cited: Optional[str], citing: Optional[str],
+  nka: Optional[int], ltype: Optional[LType], probability: Optional[float],
+  topn_crpssgramm:Optional[int]
+):
+  pipeline = [
+    {"$match": {
+      "linked_papers_topics": {"$exists": 1}, "frag_num": {"$exists": 1},
+      "linked_papers_ngrams": {'$exists': 1}}},
+    {"$project": {
+      "pubid": 1, "linked_papers_topics": 1, "frag_num": 1,
+      "linked_papers_ngrams": 1}},]
+  pipeline += filter_by_pubs_acc(author, cited, citing)
+  pipeline += [
+    {"$unwind": "$linked_papers_ngrams"},
+    {'$lookup': {
+      'from': 'n_gramms', 'localField': 'linked_papers_ngrams._id',
+      'foreignField': '_id', 'as': 'ngrm'}},
+    {'$unwind': '$ngrm'},
+  ]
+  if nka or ltype:
+    pipeline += [get_ngramm_filter(nka, ltype, 'ngrm')]
+  pipeline += [
+    {"$unwind": "$linked_papers_topics"},
+  ]
+  if probability:
+    pipeline += [
+      {'$match': {'linked_papers_topics.probability': {'$gte': probability}}},
+    ]
+  pipeline += [
+    {"$group": {
+      "_id": {
+        "topic": "$linked_papers_topics._id",
+        "ngram": "$linked_papers_ngrams._id",
+        "cont_id": "$_id"},
+      "cont": {"$first": {"pubid": "$pubid", "frag_num": "$frag_num"}},
+      'count': {'$sum': "$linked_papers_ngrams.cnt"},
+      'ngrm': {'$first': "$ngrm"},}},
+    {"$sort": {"_id": 1}},
+    {"$group": {
+      "_id": {"topic": "$_id.topic", "ngram": "$_id.ngram"},
+      "count": {"$sum": "$count"},
+      "frags": {'$push': {"fn": "$cont.frag_num", "cnt": "$count"}},
+      'ngrm': {'$first': "$ngrm"},}},
+    {"$sort": {"count": -1, "_id": 1}},
+    {'$group': {
+      "_id": "$_id.topic",
+      "count": {"$sum": "$count"},
+      "crossgrams": {
+        "$push": {
+          "title": "$ngrm.title", "type": "$ngrm.type", "nka": "$ngrm.nka",
+          "count": "$count", "frags": "$frags"}},}},
+    {"$project": {"_id": 0, "topic": "$_id", "count": 1, "crossgrams": 1}},]
+
+  if topn_crpssgramm:
+    pipeline += [
+      {"$project": {
+        "topic": 1, "count": 1,
+        "crossgrams": {"$slice": ["$crossgrams", topn_crpssgramm]}}}, ]
+  pipeline += [
+    {"$sort": {"count": -1, "title": 1}},
+  ]
+  return pipeline
+
+
 def get_frags_topics_topics_pipeline(
   author: Optional[str], cited: Optional[str], citing: Optional[str],
   probability: Optional[float]

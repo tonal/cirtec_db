@@ -2,6 +2,7 @@
 # -*- codong: utf-8 -*-
 from collections import Counter, defaultdict
 from dataclasses import dataclass
+import enum
 from functools import partial, reduce
 from itertools import chain, groupby, islice
 import logging
@@ -25,15 +26,15 @@ from server_dbquery import (
   get_frags_ngramms_ngramms_branch_pipeline,
   get_frags_ngramms_ngramms_branch_root, get_frags_ngramms_pipeline,
   get_frags_ngramms_topics_pipeline, get_frags_topics_cocitauthors_pipeline,
-  get_frags_topics_pipeline, get_frags_topics_topics_pipeline,
-  get_pos_neg_cocitauthors_pipeline, get_pos_neg_contexts_pipeline,
-  get_pos_neg_ngramms_pipeline, get_pos_neg_pubs_pipeline,
-  get_pos_neg_topics_pipeline, get_ref_auth4ngramm_tops_pipeline,
-  get_ref_bund4ngramm_tops_pipeline, get_refauthors_part_pipeline,
-  get_refauthors_pipeline, get_refbindles_pipeline,
-  get_top_cocitauthors_pipeline, get_top_cocitrefs_pipeline,
-  get_top_detail_bund_refauthors, get_top_ngramms_pipeline,
-  get_top_topics_pipeline)
+  get_frags_topics_ngramms_pipeline, get_frags_topics_pipeline,
+  get_frags_topics_topics_pipeline, get_pos_neg_cocitauthors_pipeline,
+  get_pos_neg_contexts_pipeline, get_pos_neg_ngramms_pipeline,
+  get_pos_neg_pubs_pipeline, get_pos_neg_topics_pipeline,
+  get_ref_auth4ngramm_tops_pipeline, get_ref_bund4ngramm_tops_pipeline,
+  get_refauthors_part_pipeline, get_refauthors_pipeline,
+  get_refbindles_pipeline, get_top_cocitauthors_pipeline,
+  get_top_cocitrefs_pipeline, get_top_detail_bund_refauthors,
+  get_top_ngramms_pipeline, get_top_topics_pipeline)
 from server_utils import to_out_typed
 from utils import load_config
 
@@ -48,6 +49,11 @@ DEF_AUTHOR = 'Sergey-Sinelnikov-Murylev'
 class Slot:
   conf:dict
   mdb:Database
+
+
+class DebugOption(enum.Enum):
+  pipeline = 'pipeline'
+  raw_out = 'raw_out'
 
 
 slot:Optional[Slot] = None
@@ -643,8 +649,8 @@ async def _req_frags_pos_neg_cocitauthors2(
 @router.get('/frags/pos_neg/contexts/',
   summary='Распределение тональности контекстов по 5-ти фрагментам')
 async def _req_frags_pos_neg_contexts(
-  author: Optional[str] = None,
-  cited: Optional[str] = None, citing: Optional[str] = None,
+  author: Optional[str] = None, cited: Optional[str] = None,
+  citing: Optional[str] = None,
   _add_pipeline: bool = False
 ):
   pipeline = get_frag_pos_neg_contexts(author, cited, citing)
@@ -780,17 +786,59 @@ async def _req_frags_topics_cocitauthors(
 
   return dict(pipeline=pipeline, items=out)
 
+
+@router.get('/frags/topics/ngramms/',
+  summary='Кросс-распределение «топики» - «фразы»')
+async def _req_frags_topics_ngramms(
+  author: Optional[str] = None, cited: Optional[str] = None,
+  citing: Optional[str] = None,
+  nka: Optional[int] = Query(None, ge=0, le=6),
+  ltype: Optional[LType] = Query(None, title='Тип фразы'),
+  probability: Optional[float] = .5,
+  topn_crpssgramm:Optional[int]=None,
+  _debug_option: DebugOption=None
+):
+  pipeline = get_frags_topics_ngramms_pipeline(
+    author, cited, citing, nka, ltype, probability, topn_crpssgramm)
+  if _debug_option and _debug_option == DebugOption.pipeline:
+    return pipeline
+
+  contexts = slot.mdb.contexts
+  curs = contexts.aggregate(pipeline)
+  if _debug_option and _debug_option == DebugOption.raw_out:
+    out = [doc async for doc in curs]
+    return out
+  out = []
+  get_frags = itemgetter('frags')
+  get_fn_cnt = itemgetter('fn', 'cnt')
+  key_first = itemgetter(0)
+  key_last = itemgetter(-1)
+  async for doc in curs:
+    crossgrams = doc['crossgrams']
+    for cdoc in crossgrams:
+      cfrags = dict(
+        (fn, sum(map(key_last, cnts))) for fn, cnts in
+        groupby(sorted(map(get_fn_cnt, cdoc['frags'])), key=key_first))
+      cdoc['frags'] = cfrags
+    frags = reduce(
+      lambda a, b: a+b, map(Counter, map(get_frags, crossgrams)))
+    out.append(dict(
+      topic=doc['topic'], count=doc['count'], frags=dict(sorted(frags.items())),
+      crossgrams=crossgrams))
+  return out
+
+
 @router.get('/frags/topics/topics/',
   summary='Кросс-распределение «5 фрагментов» - «топики контекстов цитирований»')
 async def _req_frags_topics_topics(
   author:Optional[str]=None, cited:Optional[str]=None,
-  citing:Optional[str]=None, probability:Optional[float]=.5,
+  citing:Optional[str]=None, probability:Optional[float]=.2,
   _add_pipeline: bool = False
 ):
   pipeline = get_frags_topics_topics_pipeline(
     author, cited, citing, probability)
   contexts = slot.mdb.contexts
-  curs = contexts.aggregate(pipeline)  # out = [doc async for doc in curs]
+  curs = contexts.aggregate(pipeline)
   # out = [doc async for doc in curs]
   out = []
   async for doc in curs:
