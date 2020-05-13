@@ -37,7 +37,7 @@ from server_dbquery import (
   get_top_cocitauthors_pipeline, get_top_cocitauthors_publications_pipeline,
   get_top_cocitrefs_pipeline, get_top_detail_bund_refauthors,
   get_top_ngramms_pipeline, get_top_ngramms_publications_pipeline,
-  get_top_topics_pipeline)
+  get_top_topics_pipeline, get_top_topics_publications_pipeline)
 from server_utils import to_out_typed
 from utils import load_config
 
@@ -1133,16 +1133,39 @@ async def _req_top_ngramm_pubs(
   return out
 
 
+@router.get('/top/topics/publications/',
+  summary='Топ N топиков')
+async def _req_top_topics_pubs(
+  topn:Optional[int]=None, author: Optional[str]=None,
+  cited: Optional[str]=None, citing: Optional[str]=None,
+  probability:Optional[float]=.5,
+  _debug_option: DebugOption = None
+):
+  pipeline = get_top_topics_publications_pipeline(
+    topn, author, cited, citing, probability)
+  if _debug_option == DebugOption.pipeline:
+    return pipeline
+
+  contexts: Collection = slot.mdb.contexts
+  out = [row async for row in contexts.aggregate(pipeline)]
+  return out
+
+
 @router.get('/ref_auth4ngramm_tops/',) # summary='Топ N со-цитируемых референсов')
 async def _ref_auth4ngramm_tops(
   topn:Optional[int]=None, author:Optional[str]=None, cited:Optional[str]=None,
   citing:Optional[str]=None, probability:Optional[float]=.5,
-  _add_pipeline:bool=False
+  _debug_option: DebugOption = None
 ):
+  pipeline = get_ref_auth4ngramm_tops_pipeline(topn, author, cited, citing)
+  if _debug_option == DebugOption.pipeline:
+    return pipeline
+
   contexts: Collection = slot.mdb.contexts
+  if _debug_option == DebugOption.raw_out:
+    return [cont async for cont in contexts.aggregate(pipeline)]
 
   out_bund = []
-  pipeline = get_ref_auth4ngramm_tops_pipeline(topn, author, cited, citing)
   get_topics = lambda c: c.get('topics', ())
   get_topic = itemgetter('_id', 'probability')
   get_first = itemgetter(0)

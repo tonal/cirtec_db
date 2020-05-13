@@ -200,7 +200,7 @@ def get_top_ngramms_publications_pipeline(
   pipeline += [
     {'$group': {
       '_id': '$linked_papers_ngrams', 'count': {'$sum': 1},
-      "ngrm": {"$first": "$ngrm"}, "pubs": {'$push': '$pubid'}, }},
+      "ngrm": {"$first": "$ngrm"}, "pubs": {'$addToSet': '$pubid'}, }},
     {'$sort': {'count': -1, '_id': 1}}]
   if topn:
     pipeline += [{'$limit': topn}]
@@ -209,6 +209,43 @@ def get_top_ngramms_publications_pipeline(
     {'$project': {
       "title": "$ngrm.title", "type": "$ngrm.type", "nka": "$ngrm.nka",
       "_id": 0, "count": "$count", "pubs": "$pubs", }}]
+  return pipeline
+
+
+def get_top_topics_publications_pipeline(
+  topn: Optional[int], author: Optional[str], cited: Optional[str],
+  citing: Optional[str], probability:Optional[float]
+):
+  pipeline = [
+    {'$match': {"linked_papers_topics": {'$exists': 1}}},
+    {'$project': {
+      'prefix': 0, 'suffix': 0, 'exact': 0, 'cocit_authors': 0,
+      "linked_papers_ngrams": 0}}, ]
+  pipeline += filter_by_pubs_acc(author, cited, citing)
+
+  pipeline += [{'$unwind': '$linked_papers_topics'},]
+
+  if probability:
+    pipeline += [
+      {'$match': {"linked_papers_topics.probability": {'$gte': probability}}},]
+
+  pipeline += [
+    {'$group': {
+      '_id': '$linked_papers_topics._id', 'count': {'$sum': 1},
+      'probability_avg': {'$avg': '$linked_papers_topics.probability'},
+      'probability_stddev': {'$stdDevPop': '$linked_papers_topics.probability'},
+      "pubs": {'$addToSet': '$pubid'}, }},
+    {'$sort': {'count': -1, '_id': 1}}]
+  if topn:
+    pipeline += [{'$limit': topn}]
+
+  pipeline += [
+    {'$project': {
+      "topic": "$_id", "_id": 0, "count_pubs": {"$size": "$pubs"},
+      "count_conts": "$count",
+      "probability_avg": {"$round": ["$probability_avg", 2]},
+      "probability_stddev": {"$round": ["$probability_stddev", 2]},
+      "pubs": "$pubs", }}]
   return pipeline
 
 
