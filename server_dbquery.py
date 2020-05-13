@@ -178,6 +178,56 @@ def get_top_cocitauthors_publications_pipeline(
   return pipeline
 
 
+def get_top_cocitrefs2_pipeline(
+  topn: Optional[int], author: Optional[str], cited: Optional[str],
+  citing: Optional[str]
+):
+  pipeline = [
+    {'$match': {'cocit_refs': {'$exists': 1}, 'frag_num': {'$exists': 1}}},
+    {'$project': {'pubid': 1, 'cocit_refs': 1, 'frag_num': 1}},]
+
+  if filter := filter_by_pubs_acc(author, cited, citing):
+    pipeline += filter
+
+  pipeline += [
+    {'$unwind': '$cocit_refs'},
+    {'$lookup': {
+      'from': 'contexts', 'localField': '_id', 'foreignField': '_id',
+      'as': 'cont'}},
+    {'$project': {
+      'pubid': 1, 'cocit_refs': 1, 'frag_num': 1, 'cont.cocit_refs': 1}},
+    {'$unwind': '$cont'},
+    {'$unwind': '$cont.cocit_refs'},
+    {'$match': {'$expr': {'$ne': ['$cocit_refs', '$cont.cocit_refs']}}},
+    {'$group': {
+      '_id': {
+        'cocitref1': {
+          '$cond': [{'$gte': ['$cocit_refs', '$cont.cocit_refs'], },
+            '$cont.cocit_refs', '$cocit_refs']}, 'cocitref2': {
+          '$cond': [{'$gte': ['$cocit_refs', '$cont.cocit_refs'], },
+            '$cocit_refs', '$cont.cocit_refs']},
+        'cont_id': '$_id'},
+      'pubid': {'$first': '$pubid'}, 'frag_num': {'$first': '$frag_num'},}},
+    {'$sort': {'_id': 1}},
+    {'$group': {
+      '_id': {
+        'cocitref1': '$_id.cocitref1', 'cocitref2': '$_id.cocitref2'},
+      'count': {'$sum': 1},
+      "pubs": {"$addToSet": "$pubid"},
+      "frags": {"$push": "$frag_num"},
+      'conts': {"$addToSet": "$_id.cont_id"},}},
+    {'$sort': {'count': -1, '_id': 1}},
+    {'$project': {
+      'cocitpair': ['$_id.cocitref1', '$_id.cocitref2'], '_id': 0,
+      'intxt_cnt': '$count', 'pub_cnt': {"$size": "$pubs"}, "frags": "$frags",
+      "pubids": "$pubs", "intxtids": "$conts"}},
+  ]
+  if topn:
+    pipeline += [{'$limit': topn}]
+
+  return pipeline
+
+
 def get_top_ngramms_publications_pipeline(
   topn: Optional[int], author: Optional[str], cited: Optional[str],
   citing: Optional[str], nka:Optional[int], ltype:Optional[LType]

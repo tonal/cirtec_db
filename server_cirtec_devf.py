@@ -35,9 +35,10 @@ from server_dbquery import (
   get_ref_bund4ngramm_tops_pipeline, get_refauthors_part_pipeline,
   get_refauthors_pipeline, get_refbindles_pipeline,
   get_top_cocitauthors_pipeline, get_top_cocitauthors_publications_pipeline,
-  get_top_cocitrefs_pipeline, get_top_detail_bund_refauthors,
-  get_top_ngramms_pipeline, get_top_ngramms_publications_pipeline,
-  get_top_topics_pipeline, get_top_topics_publications_pipeline)
+  get_top_cocitrefs2_pipeline, get_top_cocitrefs_pipeline,
+  get_top_detail_bund_refauthors, get_top_ngramms_pipeline,
+  get_top_ngramms_publications_pipeline, get_top_topics_pipeline,
+  get_top_topics_publications_pipeline)
 from server_utils import to_out_typed
 from utils import load_config
 
@@ -1111,6 +1112,29 @@ async def _req_top_cocitauthors_pubs(
 
   contexts: Collection = slot.mdb.contexts
   out = [row async for row in contexts.aggregate(pipeline)]
+  return out
+
+
+@router.get('/top/cocitrefs/cocitrefs/',
+  summary='Топ N со-цитируемых авторов по публикациям')
+async def _req_top_cocitrefs2(
+  topn: Optional[int] = None, author: Optional[str] = None,
+  cited: Optional[str] = None, citing: Optional[str] = None,
+  _debug_option: DebugOption = None
+):
+  pipeline = get_top_cocitrefs2_pipeline(topn, author, cited, citing)
+  if _debug_option == DebugOption.pipeline:
+    return pipeline
+
+  contexts: Collection = slot.mdb.contexts
+  if _debug_option == DebugOption.raw_out:
+    out = [row async for row in contexts.aggregate(pipeline)]
+    return out
+
+  out = []
+  async for row in contexts.aggregate(pipeline):
+    row["frags"] = Counter(sorted(row["frags"]))
+    out.append(row)
   return out
 
 

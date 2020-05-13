@@ -208,3 +208,9 @@ GET http://localhost:7667/cirtec/top_detail_bund/ref_authors/
 GET http://localhost:7667/cirtec/frags/topics/topics/
 
 ###
+GET http://localhost:7667/cirtec/pub_cont_bund/?id=0BqX2x
+
+###
+GET http://localhost:7667/cirtec/top/cocitrefs/cocitrefs/
+
+###
