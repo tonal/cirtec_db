@@ -158,8 +158,7 @@ def get_top_topics_pipeline(
   pipeline = [
     {'$match': {'exact': {'$exists': 1}}},
     {'$project': {
-      'prefix': False, 'suffix': False, 'exact': False,
-      'linked_papers_ngrams': False}},
+      'prefix': 0, 'suffix': 0, 'exact': 0, 'linked_papers_ngrams': 0}},
   ]
   pipeline += filter_by_pubs_acc(author, cited, citing)
 
@@ -181,6 +180,13 @@ def get_top_topics_pipeline(
   if topn:
     pipeline += [{'$limit': topn}]
 
+  pipeline += [
+    {'$project': {
+      "topic": "$_id", "_id": 0, "count": "$count",
+      "probability_avg": {"$round": ["$probability_avg", 2]},
+      "probability_stddev": {"$round": ["$probability_stddev", 2]},
+      "contects": "$conts",}}
+  ]
   return pipeline
 
 

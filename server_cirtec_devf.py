@@ -295,19 +295,15 @@ async def _req_top_ref_bundles(
 async def _req_top_topics(
   topn:Optional[int]=None, author:Optional[str]=None, cited:Optional[str]=None,
   citing:Optional[str]=None, probability:Optional[float]=.5,
-  _add_pipeline:bool=False
+  _debug_option:DebugOption=None
 ):
-  coll: Collection = slot.mdb.contexts
   pipeline = get_top_topics_pipeline(topn, author, cited, citing, probability)
-  out = []
-  async for doc in coll.aggregate(pipeline):
-    doc.pop('pos_neg', None)
-    doc.pop('frags', None)
-    out.append(doc)
-  if not _add_pipeline:
-    return out
+  if _debug_option == DebugOption.pipeline:
+    return pipeline
 
-  return dict(pipeline=pipeline, items=out)
+  coll: Collection = slot.mdb.contexts
+  out = [doc async for doc in coll.aggregate(pipeline)]
+  return out
 
 
 @router.get('/frags/cocitauthors/',

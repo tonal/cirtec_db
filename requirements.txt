@@ -45,11 +45,12 @@ python-snappy==0.5.4      # via pymongo
 pytz==2020.1              # via pandas
 pyyaml==5.3.1             # via -r requirements.in
 requests==2.23.0          # via -r requirements.in
-scikit-learn==0.22.2.post1  # via sklearn
+scikit-learn==0.23.0      # via sklearn
 scipy==1.4.1              # via scikit-learn
 six==1.14.0               # via parsel, python-dateutil, w3lib
 sklearn==0.0              # via -r requirements.in
 starlette==0.13.2         # via fastapi
+threadpoolctl==2.0.0      # via scikit-learn
 ujson==2.0.3              # via -r requirements.in
 urllib3==1.25.9           # via requests
 uvicorn==0.11.5           # via -r requirements.in
