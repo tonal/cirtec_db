@@ -34,9 +34,9 @@ from server_dbquery import (
   get_publications_topics_topics_pipeline, get_ref_auth4ngramm_tops_pipeline,
   get_ref_bund4ngramm_tops_pipeline, get_refauthors_part_pipeline,
   get_refauthors_pipeline, get_refbindles_pipeline,
-  get_top_cocitauthors_pipeline, get_top_cocitrefs_pipeline,
-  get_top_detail_bund_refauthors, get_top_ngramms_pipeline,
-  get_top_topics_pipeline)
+  get_top_cocitauthors_pipeline, get_top_cocitauthors_publications_pipeline,
+  get_top_cocitrefs_pipeline, get_top_detail_bund_refauthors,
+  get_top_ngramms_pipeline, get_top_topics_pipeline)
 from server_utils import to_out_typed
 from utils import load_config
 
@@ -1096,6 +1096,23 @@ async def _req_pubs_refauthors(
   return dict(pipeline=pipeline, items=out)
 
 
+@router.get('/top/cocitauthors/publications/',
+  summary='Топ N со-цитируемых авторов по публикациям')
+async def _req_top_cocitauthors_pubs(
+  topn:Optional[int]=None, author: Optional[str]=None,
+  cited: Optional[str]=None, citing: Optional[str]=None,
+  _debug_option:DebugOption=None
+):
+  pipeline = get_top_cocitauthors_publications_pipeline(
+    topn, author, cited, citing)
+  if _debug_option == DebugOption.pipeline:
+    return pipeline
+
+  contexts: Collection = slot.mdb.contexts
+  out = [row async for row in contexts.aggregate(pipeline)]
+  return out
+
+
 @router.get('/ref_auth4ngramm_tops/',) # summary='Топ N со-цитируемых референсов')
 async def _ref_auth4ngramm_tops(
   topn:Optional[int]=None, author:Optional[str]=None, cited:Optional[str]=None,
@@ -1243,15 +1260,15 @@ async def _req_by_frags_refauthors(
 async def _req_top_detail_bund_refauthors(
   topn:Optional[int]=None, author: Optional[str]=None,
   cited: Optional[str]=None, citing: Optional[str]=None,
-  _add_pipeline: bool = False
+  _debug_option:DebugOption=None
 ):
   pipeline = get_top_detail_bund_refauthors(topn, author, cited, citing)
+  if _debug_option == DebugOption.pipeline:
+    return pipeline
+
   contexts:Collection = slot.mdb.contexts
   out = [row async for row in contexts.aggregate(pipeline)]
-  if not _add_pipeline:
-    return out
-
-  return dict(pipeline=pipeline, items=out)
+  return out
 
 
 if __name__ == '__main__':
