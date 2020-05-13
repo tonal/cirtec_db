@@ -36,7 +36,8 @@ from server_dbquery import (
   get_refauthors_pipeline, get_refbindles_pipeline,
   get_top_cocitauthors_pipeline, get_top_cocitauthors_publications_pipeline,
   get_top_cocitrefs_pipeline, get_top_detail_bund_refauthors,
-  get_top_ngramms_pipeline, get_top_topics_pipeline)
+  get_top_ngramms_pipeline, get_top_ngramms_publications_pipeline,
+  get_top_topics_pipeline)
 from server_utils import to_out_typed
 from utils import load_config
 
@@ -1105,6 +1106,25 @@ async def _req_top_cocitauthors_pubs(
 ):
   pipeline = get_top_cocitauthors_publications_pipeline(
     topn, author, cited, citing)
+  if _debug_option == DebugOption.pipeline:
+    return pipeline
+
+  contexts: Collection = slot.mdb.contexts
+  out = [row async for row in contexts.aggregate(pipeline)]
+  return out
+
+
+@router.get('/top/ngramms/publications/',
+  summary='Топ N фраз по публикациям')
+async def _req_top_ngramm_pubs(
+  topn:Optional[int]=None, author: Optional[str]=None,
+  cited: Optional[str]=None, citing: Optional[str]=None,
+  nka:Optional[int]=Query(None, ge=0, le=6),
+  ltype:Optional[LType]=Query(None, title='Тип фразы'),
+  _debug_option:DebugOption=None
+):
+  pipeline = get_top_ngramms_publications_pipeline(
+    topn, author, cited, citing, nka, ltype)
   if _debug_option == DebugOption.pipeline:
     return pipeline
 

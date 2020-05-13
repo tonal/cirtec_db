@@ -178,6 +178,40 @@ def get_top_cocitauthors_publications_pipeline(
   return pipeline
 
 
+def get_top_ngramms_publications_pipeline(
+  topn: Optional[int], author: Optional[str], cited: Optional[str],
+  citing: Optional[str], nka:Optional[int], ltype:Optional[LType]
+):
+  pipeline = [
+    {'$match': {"linked_papers_ngrams": {'$exists': 1}}},
+    {'$project': {
+      'prefix': 0, 'suffix': 0, 'exact': 0, 'cocit_authors': 0,
+      "linked_papers_topics": 0}}, ]
+  pipeline += filter_by_pubs_acc(author, cited, citing)
+
+  pipeline += [
+    {'$unwind': '$linked_papers_ngrams'},
+    {'$lookup': {
+      'from': 'n_gramms', 'localField': 'linked_papers_ngrams._id',
+      'foreignField': '_id', 'as': 'ngrm'}},
+    {'$unwind': '$ngrm'},]
+  if nka or ltype:
+    pipeline += [get_ngramm_filter(nka, ltype, 'ngrm')]
+  pipeline += [
+    {'$group': {
+      '_id': '$linked_papers_ngrams', 'count': {'$sum': 1},
+      "ngrm": {"$first": "$ngrm"}, "pubs": {'$push': '$pubid'}, }},
+    {'$sort': {'count': -1, '_id': 1}}]
+  if topn:
+    pipeline += [{'$limit': topn}]
+
+  pipeline += [
+    {'$project': {
+      "title": "$ngrm.title", "type": "$ngrm.type", "nka": "$ngrm.nka",
+      "_id": 0, "count": "$count", "pubs": "$pubs", }}]
+  return pipeline
+
+
 def get_top_topics_pipeline(
   topn:Optional[int], author:Optional[str], cited:Optional[str],
   citing:Optional[str], probability:Optional[float]
