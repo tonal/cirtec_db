@@ -51,7 +51,7 @@ def main():
   with MongoClient(conf_mongo['uri'], compressors='snappy') as client:
     mdb:Database = client[conf_mongo['db']]
 
-    colls = update_pubs_conts(mdb, for_del, linked_papers_xml)
+    colls = update_pubs_conts(mdb, for_del, linked_papers_xml[:1])
 
     for coll in colls:
       r = coll.delete_many({'for_del': for_del})
@@ -183,7 +183,7 @@ def load_xml(
     # Разбираем контексты цитирования
     j = 0
     one_five = start_refs / 5
-    for j, cont_elt in enumerate(pub.xpath('intextref')):
+    for j, cont_elt in enumerate(pub.xpath('intextref'), 1):
       start = int(cont_elt.xpath('Start/text()').get())
       end = int(cont_elt.xpath('End/text()').get())
       prefix = cont_elt.xpath('Prefix/text()').get() or ''
@@ -199,7 +199,8 @@ def load_xml(
 
       cont_refs = []
       bundles = set()
-      for ref in cont_elt.xpath('Reference'):
+      k = 0
+      for k, ref in enumerate(cont_elt.xpath('Reference'), 1):
         num = int(ref.xpath('text()').get())
         start = int(ref.xpath('@start').get())
         end = int(ref.xpath('@end').get())
@@ -208,7 +209,7 @@ def load_xml(
         try:
           bnd = refs[num].get('bundle')
         except:
-          print(f'  !!! conts:{j} {num=}')
+          print(f'  !!! conts:{j},{k} {num=}')
           bnd = None
         if bnd:
           bundles.add(bnd)
