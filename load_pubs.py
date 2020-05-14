@@ -246,12 +246,11 @@ def calc_cocut_authors(mcont: Collection):
       '_id': '$_id', 'cocit_authors': {'$addToSet': "$bund.authors"}, }},
     {'$sort': {'_id': 1}},
   ]
+  mcont.update_many({}, {"$unset": {'cocit_refs': ""}})
   for row in mcont.aggregate(pipeline):
     mcont_update(
       dict(_id=row['_id']),
-      {
-        '$set': {'cocit_authors': row['cocit_authors']},
-        "$unset": {'cocit_refs': ""}})
+      {'$set': {'cocit_authors': row['cocit_authors']},})
 
 
 def calc_totals(mpubs:Collection, mbnds:Collection, mbnds_update):
