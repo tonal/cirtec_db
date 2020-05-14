@@ -55,7 +55,7 @@ ujson==2.0.3              # via -r requirements.in
 urllib3==1.25.9           # via requests
 uvicorn==0.11.5           # via -r requirements.in
 uvloop==0.14.0            # via -r requirements.in, uvicorn
-w3lib==1.21.0             # via parsel
+w3lib==1.22.0             # via parsel
 websockets==8.1           # via uvicorn
 xlrd==1.2.0               # via -r requirements.in
 yarl==1.4.2               # via aiohttp
