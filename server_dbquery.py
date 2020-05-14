@@ -183,29 +183,30 @@ def get_top_cocitrefs2_pipeline(
   citing: Optional[str]
 ):
   pipeline = [
-    {'$match': {'cocit_refs': {'$exists': 1}, 'frag_num': {'$exists': 1}}},
-    {'$project': {'pubid': 1, 'cocit_refs': 1, 'frag_num': 1}},]
+    {'$match': {'bundles': {'$exists': 1}, 'frag_num': {'$exists': 1}}},
+    {'$project': {'pubid': 1, 'bundles': 1, 'frag_num': 1}},]
 
   if filter := filter_by_pubs_acc(author, cited, citing):
     pipeline += filter
 
   pipeline += [
-    {'$unwind': '$cocit_refs'},
+    {'$unwind': '$bundles'},
     {'$lookup': {
       'from': 'contexts', 'localField': '_id', 'foreignField': '_id',
       'as': 'cont'}},
     {'$project': {
-      'pubid': 1, 'cocit_refs': 1, 'frag_num': 1, 'cont.cocit_refs': 1}},
+      'pubid': 1, 'bundles': 1, 'frag_num': 1, 'cont.bundles': 1}},
     {'$unwind': '$cont'},
-    {'$unwind': '$cont.cocit_refs'},
-    {'$match': {'$expr': {'$ne': ['$cocit_refs', '$cont.cocit_refs']}}},
+    {'$unwind': '$cont.bundles'},
+    {'$match': {'$expr': {'$ne': ['$bundles', '$cont.bundles']}}},
     {'$group': {
       '_id': {
         'cocitref1': {
-          '$cond': [{'$gte': ['$cocit_refs', '$cont.cocit_refs'], },
-            '$cont.cocit_refs', '$cocit_refs']}, 'cocitref2': {
-          '$cond': [{'$gte': ['$cocit_refs', '$cont.cocit_refs'], },
-            '$cocit_refs', '$cont.cocit_refs']},
+          '$cond': [{'$gte': ['$bundles', '$cont.bundles'], },
+            '$cont.bundles', '$bundles']},
+        'cocitref2': {
+          '$cond': [{'$gte': ['$bundles', '$cont.bundles'], },
+            '$bundles', '$cont.bundles']},
         'cont_id': '$_id'},
       'pubid': {'$first': '$pubid'}, 'frag_num': {'$first': '$frag_num'},}},
     {'$sort': {'_id': 1}},
@@ -421,16 +422,16 @@ def get_top_cocitrefs_pipeline(
   citing:Optional[str]
 ):
   pipeline = [
-    {'$match': {'frag_num': {'$gt': 0}, 'cocit_refs': {'$exists': 1}}},
+    {'$match': {'frag_num': {'$gt': 0}, 'bundles': {'$exists': 1}}},
     {'$project': {
       'prefix': 0, 'suffix': 0, 'exact': 0, 'positive_negative': 0,
-      'bundles': 0, 'linked_papers_ngrams': 0, 'linked_papers_topics': 0}},]
+      'linked_papers_ngrams': 0, 'linked_papers_topics': 0}},]
 
   pipeline += filter_by_pubs_acc(author, cited, citing)
   pipeline += [
-    {'$unwind': '$cocit_refs'},
+    {'$unwind': '$bundles'},
     {'$group': {
-        '_id': '$cocit_refs', 'count': {'$sum': 1},
+        '_id': '$bundles', 'count': {'$sum': 1},
         'conts': {'$addToSet': '$_id'}}},
     {'$sort': {'count': -1, '_id': 1}},
   ]

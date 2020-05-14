@@ -205,7 +205,7 @@ async def _req_top_cocitauthors(
     title = bundles['title']
     year = bundles.get('year', '?')
     descr = f'{" ".join(authors) if authors else "?"} ({year}) {title}'
-    return dict(bid=_id, descr=descr, contects=conts)
+    return dict(bundle=_id, descr=descr, intxtids=conts)
 
   out = [repack(**doc) async for doc in coll.aggregate(pipeline)]
 
@@ -1230,11 +1230,7 @@ async def _ref_auth4ngramm_tops(
       ngrams=tuple(ngrams))
     out_bund.append(cont)
 
-  out = out_bund
-  if not _add_pipeline:
-    return out
-
-  return dict(pipeline=pipeline, items=out)
+  return out_bund
 
 
 @router.get('/ref_bund4ngramm_tops/',) # summary='Топ N со-цитируемых референсов')
