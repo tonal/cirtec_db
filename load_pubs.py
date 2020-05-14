@@ -89,7 +89,7 @@ def update_pubs_conts(
 
   # Интеллектуальное заполнение выходных данных из имеющихся
   best_bibs(mbnds, mbnds_update)
-
+  calc_cocut_authors(mcont)
   calc_totals(mpubs, mbnds, mbnds_update)
 
   rename_new_field(mbnds, 'bibs')
@@ -233,6 +233,27 @@ def load_xml(
   return i, cont_cnt
 
 
+def calc_cocut_authors(mcont: Collection):
+  mcont_update = mcont.update_one
+  pipeline = [
+    {'$unwind': '$bundles_new'},
+    {'$lookup': {
+      'from': 'bundles', 'localField': 'bundles_new', 'foreignField': '_id',
+      'as': 'bund'}},
+    {'$unwind': '$bund'},
+    {'$unwind': '$bund.authors'},
+    {'$group': {
+      '_id': '$_id', 'cocit_authors': {'$addToSet': "$bund.authors"}, }},
+    {'$sort': {'_id': 1}},
+  ]
+  for row in mcont.aggregate(pipeline):
+    mcont_update(
+      dict(_id=row['_id']),
+      {
+        '$set': {'cocit_authors': row['cocit_authors']},
+        "$unset": {'cocit_refs': ""}})
+
+
 def calc_totals(mpubs:Collection, mbnds:Collection, mbnds_update):
   for obj in mpubs.aggregate([
     {'$project': {'refs': 1}},
@@ -253,6 +274,7 @@ def calc_totals(mpubs:Collection, mbnds:Collection, mbnds_update):
     mbnds.update_one(
       dict(_id=obj['_id']),
       {'$set': dict(total_pubs=total_pubs, total_cits=total_cits)})
+
 
 
 if __name__ == '__main__':

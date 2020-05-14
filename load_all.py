@@ -15,8 +15,8 @@ import requests
 
 from load_classif_pos_neg import update_class_pos_neg
 from load_pubs import update_pubs_conts, SOURCE_XML
-from load_cocits import (
-  update_cocits_authors, COCITS_AUTHORS, update_cocits_refs, COCITS_REFS)
+# from load_cocits import (
+#   update_cocits_authors, COCITS_AUTHORS, update_cocits_refs, COCITS_REFS)
 from load_ngrams import update_ngramms, NGRAM_ROOT
 from load_topics import update_topics, TOPICS
 from utils import load_config
@@ -41,11 +41,10 @@ def main():
     colls = tuple(
       c for u, *args in (
         (update_pubs_conts, SOURCE_XML),
-        # (update_bundles, BUNDLES),
         (update_ngramms, NGRAM_ROOT),
         (update_topics, TOPICS),
-        (update_cocits_authors, COCITS_AUTHORS),
-        (update_cocits_refs, COCITS_REFS),
+        # (update_cocits_authors, COCITS_AUTHORS),
+        # (update_cocits_refs, COCITS_REFS),
         (update_class_pos_neg,),
       )
       for c in do_upd(u, *args)
