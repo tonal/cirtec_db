@@ -7,12 +7,13 @@ from collections import Counter
 from datetime import datetime
 from functools import reduce
 import re
-from typing import Callable
+from typing import Callable, Iterable
 
 from pymongo.database import Database
 from pymongo import MongoClient
 import requests
 
+from load_bundles import BUNDLES, update_bundles
 from load_classif_pos_neg import update_class_pos_neg
 from load_pubs import update_pubs_conts, SOURCE_XML
 # from load_cocits import (
@@ -41,6 +42,7 @@ def main():
     colls = tuple(
       c for u, *args in (
         (update_pubs_conts, SOURCE_XML),
+        (update_bundles, BUNDLES),
         (update_ngramms, NGRAM_ROOT),
         (update_topics, TOPICS),
         # (update_cocits_authors, COCITS_AUTHORS),
@@ -58,8 +60,8 @@ def main():
 
 
 def check_date():
-  for uri in (
-    SOURCE_XML, BUNDLES, TOPICS, COCITS_AUTHORS, COCITS_REFS
+  for uri in flatten_uri(
+    SOURCE_XML, BUNDLES, TOPICS, # COCITS_AUTHORS, COCITS_REFS
   ):
     rsp = requests.head(uri)
     print(uri, rsp.status_code)
@@ -69,6 +71,15 @@ def check_date():
       v = rsp.headers.get(k)
       if v:
         print(' ', f'{k}: {v}')
+
+
+def flatten_uri(*args):
+  for elt in args:
+    if isinstance(elt, str):
+      if elt.startswith(('http://', 'https://')):
+        yield elt
+    elif isinstance(elt, Iterable):
+      yield from flatten_uri(*elt)
 
 
 if __name__ == '__main__':

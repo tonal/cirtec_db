@@ -25,10 +25,7 @@ start =
                 attribute title { text },
                 attribute url { xsd:anyURI }?,
                 attribute year { text },
-                element from_pdf { text },
-                element all_intext_ref {
-                    element intext_ref { text }+
-                }?
+                element from_pdf { text }
             }+,
             element intextref {
                 element Prefix { text },

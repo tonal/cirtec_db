@@ -18,17 +18,17 @@ cssselect==1.1.0          # via parsel
 dawg-python==0.7.2        # via pymorphy2
 dnspython==1.16.0         # via pymongo
 docopt==0.6.2             # via pymorphy2
-fastapi==0.54.1           # via -r requirements.in
+fastapi==0.54.2           # via -r requirements.in
 fastnumbers==3.0.0        # via -r requirements.in
 h11==0.9.0                # via uvicorn
 html-text==0.5.1          # via -r requirements.in
 httptools==0.1.1          # via uvicorn
 idna==2.9                 # via requests, yarl
-joblib==0.14.1            # via -r requirements.in, scikit-learn
+joblib==0.15.1            # via -r requirements.in, scikit-learn
 lxml==4.5.0               # via -r requirements.in, html-text, parsel
-more-itertools==8.2.0     # via -r requirements.in
+more-itertools==8.3.0     # via -r requirements.in
 motor==2.1.0              # via -r requirements.in
-multidict==4.7.5          # via aiohttp, yarl
+multidict==4.7.6          # via aiohttp, yarl
 numpy==1.18.4             # via pandas, scikit-learn, scipy
 orjson==3.0.0             # via -r requirements.in
 pandas==1.0.3             # via -r requirements.in
