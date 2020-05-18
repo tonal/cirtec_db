@@ -452,22 +452,24 @@ async def _req_frags_cocitauthors(
   citing:Optional[str]=None,
   nka:Optional[int]=Query(None, ge=0, le=6),
   ltype:Optional[LType]=Query(None, title='Тип фразы'), #, description='Может быть одно из значений "lemmas", "nolemmas" или пустой'),
-  _add_pipeline:bool=False
+  _debug_oprion:DebugOption=None
 ):
-  coll: Collection = slot.mdb.contexts
   pipeline = get_frags_ngramms_pipeline(topn, author, cited, citing, nka, ltype)
+  if _debug_oprion == DebugOption.pipeline:
+    return pipeline
+  coll: Collection = slot.mdb.contexts
+  cursor = coll.aggregate(pipeline)
+  if _debug_oprion == DebugOption.raw_out:
+    return [doc async for doc in cursor]
   out = []
-  async for doc in coll.aggregate(pipeline):
+  async for doc in cursor:
     frags = dict(sorted(map(itemgetter('frag_num', 'count'), doc['frags'])))
     out_dict = dict(
       title=doc['title'], type=doc['type'], nka=doc['nka'], count=doc['count'],
       frags=frags)
     out.append(out_dict)
 
-  if not _add_pipeline:
-    return out
-
-  return dict(pipeline=pipeline, items=out)
+  return out
 
 
 @router.get('/frags/ngramms/cocitauthors/',
