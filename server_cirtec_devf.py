@@ -276,20 +276,24 @@ async def _req_top_ref_bundles(
   summary='Топ N бандлов')
 async def _req_top_ref_bundles(
   topn:Optional[int]=None, author:Optional[str]=None, cited:Optional[str]=None,
-  citing:Optional[str]=None, _add_pipeline:bool=False
+  citing:Optional[str]=None, _debug_option:Optional[DebugOption]=None
 ):
+  pipeline = get_refbindles_pipeline(topn, author, cited, citing)
+  if _debug_option == DebugOption.pipeline:
+    return pipeline
 
   coll: Collection = slot.mdb.contexts
-  pipeline = get_refbindles_pipeline(topn, author, cited, citing)
+  curs = coll.aggregate(pipeline)
+  if _debug_option == DebugOption.raw_out:
+    return [doc async for doc in curs]
+
   out = []
-  async for doc in coll.aggregate(pipeline):
+  async for doc in curs:
     doc.pop('pos_neg', None)
     doc.pop('frags', None)
     out.append(doc)
-  if not _add_pipeline:
-    return out
 
-  return dict(pipeline=pipeline, items=out)
+  return out
 
 
 @router.get('/top/topics/',

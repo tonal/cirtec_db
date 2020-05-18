@@ -29,11 +29,12 @@ def get_refbindles_pipeline(
     {'$unwind': '$bundles'},
     {'$match': {'bundles': {'$ne': 'nUSJrP'}}},  ##
     {'$group': {
-      '_id': '$bundles', 'cits': {'$sum': 1}, 'pubs': {'$addToSet': '$pub_id'},
+      '_id': '$bundles', 'cits': {'$sum': 1}, 'pubs': {'$addToSet': '$pubid'},
       'pos_neg': {'$push': '$positive_negative'},
       'frags': {'$push': '$frag_num'}, }},
     {'$project': {
-        'cits': 1, 'pubs': {'$size': '$pubs'}, 'pos_neg': 1, 'frags': 1}},
+      'cits': 1, 'pubs': {'$size': '$pubs'}, "pubs_ids": '$pubs', 'pos_neg': 1,
+      'frags': 1}},
     {'$lookup': {
       'from': 'bundles', 'localField': '_id', 'foreignField': '_id',
       'as': 'bundle'}},
