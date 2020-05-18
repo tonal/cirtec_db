@@ -291,6 +291,8 @@ async def _req_top_ref_bundles(
   async for doc in curs:
     doc.pop('pos_neg', None)
     doc.pop('frags', None)
+    if 'authors' not in doc:
+      doc['authors'] = []
     out.append(doc)
 
   return out
