@@ -804,7 +804,7 @@ async def _req_frags_topics_ngramms(
     return pipeline
 
   contexts = slot.mdb.contexts
-  curs = contexts.aggregate(pipeline)
+  curs = contexts.aggregate(pipeline, allowDiskUse=True)
   if _debug_option and _debug_option == DebugOption.raw_out:
     out = [doc async for doc in curs]
     return out
