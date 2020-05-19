@@ -1018,6 +1018,70 @@ async def _req_pos_neg_topics(
   return dict(pipeline=pipeline, items=out)
 
 
+@router.get('/publ/ngramms/ngramms/',
+  summary='Кросс-распределение «публикации» - «фразы из контекстов цитирований»')
+async def _req_publ_ngramm_ngramm(
+  topn:Optional[int]=10, author:Optional[str]=None, cited:Optional[str]=None,
+  citing:Optional[str]=None, nka:Optional[int]=Query(None, ge=0, le=6),
+  ltype:Optional[LType]=Query(None, title='Тип фразы'),
+  topn_ngramm:Optional[int]=None,
+  _debug_option: DebugOption = None
+):
+  pipeline_root = get_frags_ngramms_ngramms_branch_root(topn, author, cited,
+    citing, nka, ltype)
+  pipeline_branch = get_frags_ngramms_ngramms_branch_pipeline(nka, ltype)
+  if _debug_option == DebugOption.pipeline:
+    return dict(pipeline_root=pipeline_root, pipeline_branch=pipeline_branch)
+
+  ngrm2tuple = itemgetter('_id', 'title', 'type', 'nka', 'count', 'conts')
+  contexts = slot.mdb.contexts
+  topN = tuple(
+    [ngrm2tuple(doc) async for doc in contexts.aggregate(pipeline_root)])
+  exists = frozenset(map(itemgetter(0), topN))
+
+  out_list = []
+
+  for i, (ngrmm, title, typ_, nka, cnt, conts) in enumerate(topN, 1):
+    congr = defaultdict(set)
+    titles = {}
+    types = {}
+
+    work_pipeline = [{
+      '$match': {
+        'frag_num': {'$gt': 0}, '_id': {'$in': conts}}}] + pipeline_branch + [
+                      {'$match': {'cont.type': typ_}}]
+    # _logger.debug('ngrmm: "%s", cnt: %s, pipeline_branch: %s', ngrmm, cnt, work_pipeline)
+    # print('ngrmm: "%s", cnt: %s, pipeline_branch: %s' % (ngrmm, cnt, work_pipeline))
+
+    async for doc in contexts.aggregate(work_pipeline):
+      cont = doc['cont']
+      ngr_id = cont['_id']
+      if ngr_id not in exists:
+        continue
+      pubid = doc['pubid']
+      congr[ngr_id].add(pubid)
+      titles[ngr_id] = cont['title']
+      types[ngr_id] = cont['type']
+
+    pubids = congr.pop(ngrmm)
+    crossgrams = []
+
+    for j, (co, cnts) in enumerate(
+      sorted(congr.items(), key=lambda kv: (-len(kv[1]), kv[0])), 1):
+      crossgrams.append(
+        dict(
+          title=titles[co], type=types[co], pubids=sorted(cnts), cnt=len(cnts)))
+    if topn_ngramm:
+      crossgrams = crossgrams[:topn_ngramm]
+
+    out_list.append(
+      dict(
+        title=titles[ngrmm], type=typ_, nka=nka, cnt_pubs=len(pubids),
+        cnt_cross=len(congr), pubids=pubids, crossgrams=crossgrams))
+
+  return out_list
+
+
 @router.get('/publ/publications/cocitauthors/',
   summary='Кросс-распределение «со-цитируемые авторы» по публикациям')
 async def _req_publ_publications_cocitauthors(
@@ -1053,9 +1117,6 @@ async def _req_publ_publications_ngramms(
     return pipeline
   contexts = slot.mdb.contexts
   curs = contexts.aggregate(pipeline)
-  if _debug_option == DebugOption.raw_out:
-    out = [doc async for doc in curs]
-    return out
 
   out = [doc async for doc in curs]
   return out
