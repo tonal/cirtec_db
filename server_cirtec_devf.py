@@ -1126,7 +1126,7 @@ async def _req_publ_publications_ngramms(
   summary='Кросс-распределение «публикации» - «топики контекстов цитирований»')
 async def _req_publ_topics_topics(
   author:Optional[str]=None, cited:Optional[str]=None,
-  citing:Optional[str]=None, probability:Optional[float]=.5,
+  citing:Optional[str]=None, probability:Optional[float]=.4,
   _debug_option: DebugOption = None
 ):
   pipeline = get_publications_topics_topics_pipeline(
