@@ -85,7 +85,7 @@ GET http://localhost:8668/cirtec_dev/frags/topics/?author=Sergey-Sinelnikov-Mury
 GET http://localhost:8668/cirtec_dev/frags/ngramms/
 
 ###
-GET http://localhost:8668/cirtec_dev/frags/ngramms/?ltype=lemmas
+GET http://localhost:8668/cirtec_dev/frags/ngramms/?ltype=lemmas&topn=100&author=Sergey-Sinelnikov-Murylev
 
 ###
 GET http://localhost:8668/cirtec_dev/frags/topics/ngramms/
