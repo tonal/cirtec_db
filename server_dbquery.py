@@ -1269,10 +1269,18 @@ def get_pos_neg_cocitauthors_pipeline(
     {'$sort': {'coauthor_cnt': -1, '_id.title': 1}},
     {'$group': {
       '_id': '$_id.pos_neg', 'cocitauthor': {
-        '$push': {'author': '$_id.title', 'count': '$coauthor_cnt'}}, }},
-    {'$project': {
-      '_id': False, 'class_pos_neg': '$_id',
-      'cocitauthors': {'$slice': ['$cocitauthor', topn]}}},
+        '$push': {'author': '$_id.title', 'count': '$coauthor_cnt'}}, }},]
+  if topn:
+    pipeline += [{
+      '$project': {
+        '_id': False, 'class_pos_neg': '$_id',
+        'cocitauthors': {'$slice': ['$cocitauthor', topn]}}},]
+  else:
+    pipeline += [{
+      '$project': {
+        '_id': False, 'class_pos_neg': '$_id', 'cocitauthors': '$cocitauthor'}}]
+
+  pipeline += [
     {'$sort': {'class_pos_neg': -1}}, ]
   return pipeline
 

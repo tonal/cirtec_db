@@ -883,16 +883,15 @@ async def _req_frags_topics_topics(
   summary='для каждого класса тональности привести топ со-цитируемых авторов')
 async def _req_pos_neg_cocitauthors(
   topn:Optional[int]=None, author:Optional[str]=None, cited:Optional[str]=None,
-  citing:Optional[str]=None, _add_pipeline:bool=False
+  citing:Optional[str]=None, _debug_option:DebugOption=None
 ):
-  contexts = slot.mdb.contexts
   pipeline = get_pos_neg_cocitauthors_pipeline(topn, author, cited, citing)
+  if _debug_option == DebugOption.pipeline:
+    return pipeline
+  contexts = slot.mdb.contexts
   curs = contexts.aggregate(pipeline)
   out = [doc async for doc in curs]
-  if not _add_pipeline:
-    return out
-
-  return dict(pipeline=pipeline, items=out)
+  return out
 
 
 @router.get('/pos_neg/contexts/',
