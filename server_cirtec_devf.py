@@ -518,21 +518,25 @@ async def _req_frags_ngramms_cocitauthors(
 @router.get('/frags/ngramms/ngramms/',
   summary='Кросс-распределение «5 фрагментов» - «фразы из контекстов цитирований»')
 async def _req_frags_ngramm_ngramm(
-  topn: Optional[int] = None,
+  topn: Optional[int]=10,
   author: Optional[str] = None, cited: Optional[str] = None,
   citing: Optional[str] = None, nka: Optional[int] = Query(None, ge=0, le=6),
   ltype: Optional[LType] = Query(None, title='Тип фразы'),
-  topn_ngramm: Optional[int] = None, _add_pipeline: bool = False
+  topn_ngramm: Optional[int] = None,
+  _debug_option:DebugOption=None
 ):
   pipeline_root = get_frags_ngramms_ngramms_branch_root(
     topn, author, cited, citing, nka, ltype)
+  pipeline_branch = get_frags_ngramms_ngramms_branch_pipeline(nka, ltype)
+  if _debug_option == DebugOption.pipeline:
+    return dict(pipeline_root=pipeline_root, pipeline_branch=pipeline_branch)
+
   ngrm2tuple = itemgetter('_id', 'title', 'type', 'nka', 'count', 'conts')
   contexts = slot.mdb.contexts
   topN = tuple([
     ngrm2tuple(doc) async for doc in contexts.aggregate(pipeline_root)])
   exists = frozenset(map(itemgetter(0), topN))
 
-  pipeline = get_frags_ngramms_ngramms_branch_pipeline(nka, ltype)
   out_list = []
 
   for i, (ngrmm, title, typ_, nka, cnt, conts) in enumerate(topN, 1):
@@ -542,11 +546,11 @@ async def _req_frags_ngramm_ngramm(
 
     work_pipeline = [
       {'$match': {'frag_num': {'$gt': 0}, '_id': {'$in': conts}}}
-    ] + pipeline + [
+    ] + pipeline_branch + [
       {'$match': {'cont.type': typ_}}
     ]
-    # _logger.debug('ngrmm: "%s", cnt: %s, pipeline: %s', ngrmm, cnt, work_pipeline)
-    # print('ngrmm: "%s", cnt: %s, pipeline: %s' % (ngrmm, cnt, work_pipeline))
+    # _logger.debug('ngrmm: "%s", cnt: %s, pipeline_branch: %s', ngrmm, cnt, work_pipeline)
+    # print('ngrmm: "%s", cnt: %s, pipeline_branch: %s' % (ngrmm, cnt, work_pipeline))
 
     async for doc in contexts.aggregate(work_pipeline):
       cont = doc['cont']
@@ -574,11 +578,7 @@ async def _req_frags_ngramm_ngramm(
       dict(title=titles[ngrmm], type=typ_, nka=nka, sum=cnt,
         cnt_cross=len(congr), frags=frags, crossgrams=crossgrams))
 
-  out = out_list
-  if not _add_pipeline:
-    return out
-
-  return dict(pipeline=pipeline, items=out)
+  return out_list
 
 
 @router.get('/frags/ngramms/topics/',
