@@ -154,7 +154,7 @@ GET http://localhost:8668/cirtec_dev/pub_cont_bund/?id=KRqlBG
 GET http://localhost:8668/cirtec_dev/publ/publications/topics/
 
 ###
-GET http://localhost:8668/cirtec_dev/frags/ngramms/cocitauthors/
+GET http://localhost:8668/cirtec_dev/frags/ngramms/cocitauthors/?ltype=lemmas&author=Sergey-Sinelnikov-Murylev
 
 ###
 GET http://localhost:8668/cirtec_dev/db/bundle/?id=G63mJe
