@@ -893,16 +893,15 @@ async def _req_pos_neg_cocitauthors(
   summary='для каждого класса тональности показать общее количество контекстов')
 async def _req_pos_neg_contexts(
   author:Optional[str]=None, cited:Optional[str]=None,
-  citing:Optional[str]=None, _add_pipeline:bool=False
+  citing:Optional[str]=None, _debug_option: DebugOption = None
 ):
-  contexts = slot.mdb.contexts
   pipeline = get_pos_neg_contexts_pipeline(author, cited, citing)
+  if _debug_option == DebugOption.pipeline:
+    return pipeline
+  contexts = slot.mdb.contexts
   curs = contexts.aggregate(pipeline)
   out = [doc async for doc in curs]
-  if not _add_pipeline:
-    return out
-
-  return dict(pipeline=pipeline, items=out)
+  return out
 
 
 @router.get('/pos_neg/ngramms/',
@@ -911,28 +910,32 @@ async def _req_pos_neg_ngramms(
   topn:Optional[int]=None, author:Optional[str]=None, cited:Optional[str]=None,
   citing:Optional[str]=None, nka:Optional[int]=Query(None, ge=0, le=6),
   ltype:Optional[LType]=Query(None, title='Тип фразы'), #, description='Может быть одно из значений "lemmas", "nolemmas" или пустой'),
-  _add_pipeline:bool=False
+  _debug_option:DebugOption=None
 ):
-  contexts = slot.mdb.contexts
   pipeline = get_pos_neg_ngramms_pipeline(
     topn, author, cited, citing, nka, ltype)
+  if _debug_option == DebugOption.pipeline:
+    return pipeline
+  contexts = slot.mdb.contexts
   curs = contexts.aggregate(pipeline)
   out = [doc async for doc in curs]
-  if not _add_pipeline:
-    return out
-
-  return dict(pipeline=pipeline, items=out)
+  return out
 
 
 @router.get('/pos_neg/pubs/',) # summary='Топ N со-цитируемых референсов')
 async def _req_pos_neg_pubs(
   author:Optional[str]=None, cited:Optional[str]=None,
-  citing:Optional[str]=None, _add_pipeline: bool = False
+  citing:Optional[str]=None, _debug_option:DebugOption=None
 ):
-  contexts: Collection = slot.mdb.contexts
-  out = []
   pipeline = get_pos_neg_pubs_pipeline(author, cited, citing)
-  async for doc in contexts.aggregate(pipeline):
+  if _debug_option == DebugOption.pipeline:
+    return pipeline
+  contexts: Collection = slot.mdb.contexts
+  curs = contexts.aggregate(pipeline)
+  if _debug_option == DebugOption.raw_out:
+    return [doc async for doc in curs]
+  out = []
+  async for doc in curs:
     pid: str = doc['_id']
     name: str = doc['pub']['name']
     classif = doc['pos_neg']
@@ -943,10 +946,7 @@ async def _req_pos_neg_pubs(
       dict(
         pub=pid, name=name, neutral=int(neutral), positive=int(positive),
         negative=int(negative)))
-  if not _add_pipeline:
-    return out
-
-  return dict(pipeline=pipeline, items=out)
+  return out
 
 
 @router.get('/pos_neg/ref_authors/',) # summary='Топ N со-цитируемых референсов')

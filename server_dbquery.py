@@ -1335,10 +1335,18 @@ def get_pos_neg_ngramms_pipeline(
       'ngramms': {
         '$push': {
           'title': '$_id.title', 'nka': '$_id.nka', 'ltype': '$_id.ltype',
-          'count': '$ngrm_cnt'}},}},
-    {'$project': {
-      '_id': False, 'class_pos_neg': '$_id',
-      'ngramms': {'$slice': ['$ngramms', topn]},}},
+          'count': '$ngrm_cnt'}},}},]
+  if topn:
+    pipeline += [{
+      '$project': {
+        '_id': False, 'class_pos_neg': '$_id',
+        'ngramms': {'$slice': ['$ngramms', topn]}, }},]
+  else:
+    pipeline += [{
+      '$project': {
+        '_id': False, 'class_pos_neg': '$_id', 'ngramms': '$ngramms' }},]
+
+  pipeline += [
     {'$sort': {'class_pos_neg': -1}},
   ]
   return pipeline
