@@ -1198,7 +1198,7 @@ def get_frags_topics_topics_pipeline(
   pipeline = [
     {"$match": {
       "frag_num": {"$exists": 1}, "linked_papers_topics": {'$exists': 1}}},
-    {"$project": {"frag_num": 1, "linked_papers_topics": 1}},
+    {"$project": {"pubid": 1, "frag_num": 1, "linked_papers_topics": 1}},
   ]
   pipeline += filter_by_pubs_acc(author, cited, citing)
   pipeline += [

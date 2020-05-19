@@ -847,13 +847,16 @@ async def _req_frags_topics_ngramms(
 async def _req_frags_topics_topics(
   author:Optional[str]=None, cited:Optional[str]=None,
   citing:Optional[str]=None, probability:Optional[float]=.2,
-  _add_pipeline: bool = False
+  _debug_option:DebugOption=None
 ):
   pipeline = get_frags_topics_topics_pipeline(
     author, cited, citing, probability)
+  if _debug_option == DebugOption.pipeline:
+    return pipeline
   contexts = slot.mdb.contexts
   curs = contexts.aggregate(pipeline)
-  # out = [doc async for doc in curs]
+  if _debug_option == DebugOption.raw_out:
+    return [doc async for doc in curs]
   out = []
   async for doc in curs:
     crosstopics = doc['crosstopics']
@@ -864,10 +867,7 @@ async def _req_frags_topics_topics(
       topic=doc['_id'], count=doc['count'], frags=dict(sorted(frags.items())),
       crosstopics=crosstopics)
     out.append(odoc)
-  if not _add_pipeline:
-    return out
-
-  return dict(pipeline=pipeline, items=out)
+  return out
 
 
 @router.get('/pos_neg/cocitauthors/',
