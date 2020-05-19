@@ -195,24 +195,30 @@ async def _req_top_cocitauthors(
   summary='Топ N со-цитируемых референсов')
 async def _req_top_cocitauthors(
   topn:Optional[int]=None, author:Optional[str]=None, cited:Optional[str]=None,
-  citing:Optional[str]=None, _add_pipeline:bool=False
+  citing:Optional[str]=None,
+  _debug_option:DebugOption=None
 ):
-  coll: Collection = slot.mdb.contexts
   pipeline = get_top_cocitrefs_pipeline(topn, author, cited, citing)
+  if _debug_option == DebugOption.pipeline:
+    return pipeline
+  coll: Collection = slot.mdb.contexts
 
   def repack(_id, count, conts, bundles):
     authors = bundles.get('authors')
-    title = bundles['title']
+    title = bundles.get('title')
     year = bundles.get('year', '?')
-    descr = f'{" ".join(authors) if authors else "?"} ({year}) {title}'
+    descr = f'{" ".join(authors) if authors else "?"} ({year})'
+    if title:
+      descr += f' {title}'
     return dict(bundle=_id, descr=descr, intxtids=conts)
 
-  out = [repack(**doc) async for doc in coll.aggregate(pipeline)]
+  curs = coll.aggregate(pipeline)
+  if _debug_option == DebugOption.raw_out:
+    return [doc async for doc in curs]
 
-  if not _add_pipeline:
-    return out
+  out = [repack(**doc) async for doc in curs]
 
-  return dict(pipeline=pipeline, items=out)
+  return out
 
 
 @router.get('/top/ngramms/',
