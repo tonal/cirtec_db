@@ -743,20 +743,23 @@ async def _req_frags_refbundles(
 async def _req_frags_topics(
   topn:Optional[int]=None, author:Optional[str]=None, cited:Optional[str]=None,
   citing:Optional[str]=None, probability:Optional[float]=.5,
-  _add_pipeline:bool=False
+  _debug_option:DebugOption=None
 ):
-  coll: Collection = slot.mdb.contexts
   pipeline = get_frags_topics_pipeline(topn, author, cited, citing, probability)
+  if _debug_option == DebugOption.pipeline:
+    return pipeline
+  coll: Collection = slot.mdb.contexts
+  curs = coll.aggregate(pipeline)
+  if _debug_option == DebugOption.raw_out:
+    return [doc async for doc in curs]
+
   out = []
-  async for doc in coll.aggregate(pipeline):
+  async for doc in curs:
     frags = dict(sorted(map(itemgetter('frag_num', 'count'), doc['frags'])))
     out_dict = dict(name=doc['_id'], count=doc['count'], frags=frags)
     out.append(out_dict)
 
-  if not _add_pipeline:
-    return out
-
-  return dict(pipeline=pipeline, items=out)
+  return out
 
 
 @router.get('/frags/topics/cocitauthors/',

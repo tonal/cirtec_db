@@ -79,7 +79,7 @@ GET http://localhost:8668/cirtec_dev/frags/topics/topics/
 GET http://localhost:8668/cirtec_dev/frags/cocitauthors/cocitauthors/
 
 ###
-GET http://localhost:8668/cirtec_dev/frags/topics/
+GET http://localhost:8668/cirtec_dev/frags/topics/?author=Sergey-Sinelnikov-Murylev
 
 ###
 GET http://localhost:8668/cirtec_dev/frags/ngramms/
