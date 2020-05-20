@@ -1612,7 +1612,7 @@ def get_top_detail_bund_refauthors(
     {'$group': {
       '_id': {'author': '$bun.authors', 'bund': '$bundles'},
       'cits': {'$addToSet': '$_id'}, 'cits_all': {'$sum': 1},
-      'pubs': {'$addToSet': '$pub_id'}, 'bunds': {
+      'pubs': {'$addToSet': '$pubid'}, 'bunds': {
         '$addToSet': {
           '_id': '$bun._id', 'total_cits': '$bun.total_cits',
           'total_pubs': '$bun.total_pubs'}}, }},
@@ -1639,10 +1639,10 @@ def get_top_detail_bund_refauthors(
       'bunds_cnt': {'$size': '$bunds'},
       'total_cits': {'$sum': '$bunds.total_cits'},
       'total_pubs': {'$sum': '$bunds.total_pubs'},
-      'bunds': {
+      'bundles': {
         '$map': {
           'input': '$bunds', 'as': 'b',
-          'in': {'bund': '$$b._id', 'cnt': '$$b.cnt'}, }}, }},
+          'in': {'bundle': '$$b._id', 'cnt': '$$b.cnt'}, }}, }},
     {'$sort': {
       'cits_all': -1, 'cits': -1, 'bunds_cnt': -1, 'pubs': -1, 'author': 1}}, ]
 
