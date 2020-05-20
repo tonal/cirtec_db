@@ -56,8 +56,9 @@ def update_ngramms(
 
   col_gramms.update_many({}, {'$set': {'for_del': for_del}})
 
+  cash_cont = set()
   cnt = 0
-  PREF = 'linked_papers_'
+  PREF = ('linked_papers_', 'cited_papers_', 'citing_papers_')
   PREF_LEN = len(PREF)
   for (ngramm_path, obj_type) in NGRAM_DIR:
     type_uri = urljoin(ngramm_root, f'{ngramm_path}/')
@@ -86,13 +87,17 @@ def update_ngramms(
           g_pub_id, gcnt = cdoc.popitem()
           if not g_pub_id.startswith(PREF):
             continue
-          pub_id, ref_num, start = g_pub_id[PREF_LEN:].rsplit('_', 2)
+          # pub_id, ref_num, start = g_pub_id[PREF_LEN:].rsplit('_', 2)
+          pg_cat, _, pub_id, ref_num, start = g_pub_id[PREF_LEN:].rsplit('_', 4)
           # print('  ', k, pub_id, ref_num, start, gcnt)
           cont_id = f'{pub_id}@{start}'
-          mcont_update(dict(_id=cont_id), {
-            '$set': {'pub_id': pub_id, 'start': int(start)},
-            '$addToSet': {
-              'linked_papers_ngrams_new': {'_id': ngr_id, 'cnt': gcnt}}})
+          if (cont_id, ngr_id) not in cash_cont:
+            mcont_update(dict(_id=cont_id), {
+              '$set': {'pub_id': pub_id, 'start': int(start)},
+              '$addToSet': {
+                'linked_papers_ngrams_new': {'_id': ngr_id, 'cnt': gcnt},
+              }})
+            cash_cont.add((cont_id, ngr_id))
           lp_cnt += gcnt
         if not lp_cnt:
           continue
