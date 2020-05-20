@@ -713,41 +713,51 @@ async def _req_frags_pubs(
 @router.get('/frags/ref_authors/',) # summary='')
 async def _req_frags_refauthors(
   topn:Optional[int]=None, author:Optional[str]=None, cited:Optional[str]=None,
-  citing:Optional[str]=None, _add_pipeline:bool=False
+  citing:Optional[str]=None,
+  _debug_option:DebugOption=None
 ):
-  coll: Collection = slot.mdb.contexts
   pipeline = get_refauthors_pipeline(topn, author, cited, citing)
+  if _debug_option == DebugOption.pipeline:
+    return pipeline
+  coll: Collection = slot.mdb.contexts
+  curs = coll.aggregate(pipeline)
+  if _debug_option == DebugOption.raw_out:
+    return [doc async for doc in curs]
   out = []
-  async for doc in coll.aggregate(pipeline):
+  async for doc in curs:
     doc.pop('pos_neg', None)
     frags = Counter(doc.pop('frags', ()))
     doc.update(frags=frags)
     out.append(doc)
 
-  if not _add_pipeline:
-    return out
-
-  return dict(pipeline=pipeline, items=out)
+  return out
 
 
 @router.get('/frags/ref_bundles/',) # summary='')
 async def _req_frags_refbundles(
   topn:Optional[int]=None, author:Optional[str]=None, cited:Optional[str]=None,
-  citing:Optional[str]=None, _add_pipeline:bool=False
+  citing:Optional[str]=None,
+  _debug_option:DebugOption=None
 ):
-  coll: Collection = slot.mdb.contexts
   pipeline = get_refbindles_pipeline(topn, author, cited, citing)
+  if _debug_option == DebugOption.pipeline:
+    return pipeline
+
+  coll: Collection = slot.mdb.contexts
+  curs = coll.aggregate(pipeline)
+  if _debug_option == DebugOption.raw_out:
+    return [doc async for doc in curs]
   out = []
-  async for doc in coll.aggregate(pipeline):
-    doc.pop('pos_neg', None)
+  async for doc in curs:
     frags = Counter(doc.pop('frags', ()))
-    doc.update(frags=frags)
-    out.append(doc)
+    out_doc = dict(
+      bundle=doc['_id'], year=doc.get('year') or '',
+      authors=doc.get('authors') or [], title=doc.get('title') or '',
+      total_pubs=doc['total_pubs'], total_cits=doc['total_cits'], frags=frags,
+      pubs=doc['pubs'], cits=doc['cits'], pubsids=doc['pubs_ids'])
+    out.append(out_doc)
 
-  if not _add_pipeline:
-    return out
-
-  return dict(pipeline=pipeline, items=out)
+  return out
 
 
 @router.get('/frags/topics/',

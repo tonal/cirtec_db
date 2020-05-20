@@ -25,13 +25,13 @@ html-text==0.5.1          # via -r requirements.in
 httptools==0.1.1          # via uvicorn
 idna==2.9                 # via requests, yarl
 joblib==0.15.1            # via -r requirements.in, scikit-learn
-lxml==4.5.0               # via -r requirements.in, html-text, parsel
+lxml==4.5.1               # via -r requirements.in, html-text, parsel
 more-itertools==8.3.0     # via -r requirements.in, pytest
 motor==2.1.0              # via -r requirements.in
 multidict==4.7.6          # via aiohttp, yarl
 numpy==1.18.4             # via pandas, scikit-learn, scipy
-orjson==3.0.0             # via -r requirements.in
-packaging==20.3           # via pytest
+orjson==3.0.1             # via -r requirements.in
+packaging==20.4           # via pytest
 pandas==1.0.3             # via -r requirements.in
 parsel==1.6.0             # via -r requirements.in
 pluggy==0.13.1            # via pytest
@@ -51,7 +51,7 @@ python-snappy==0.5.4      # via pymongo
 pytz==2020.1              # via pandas
 pyyaml==5.3.1             # via -r requirements.in
 requests==2.23.0          # via -r requirements.in
-scikit-learn==0.23.0      # via sklearn
+scikit-learn==0.23.1      # via sklearn
 scipy==1.4.1              # via scikit-learn
 six==1.14.0               # via packaging, parsel, python-dateutil, w3lib
 sklearn==0.0              # via -r requirements.in
