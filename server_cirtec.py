@@ -86,7 +86,7 @@ def main():
   conf_app = conf['srv_run_args']
   uvicorn.run(
     app, host=conf_app.get('host') or '0.0.0.0',
-    port=conf_app.get('port') or 8668,
+    port=conf_app.get('port') or 7667,
     use_colors=True) # , log_config=None)
 
 
