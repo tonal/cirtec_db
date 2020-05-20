@@ -1472,7 +1472,8 @@ def get_publications_cocitauthors_pipeline(
 
 def get_publications_ngramms_pipeline(
   topn:Optional[int], author: Optional[str], cited: Optional[str],
-  citing: Optional[str], nka:Optional[int], ltype:Optional[LType]
+  citing: Optional[str], nka:Optional[int], ltype:Optional[LType],
+  topn_gramm:Optional[int]
 ):
   pipeline = [
     {"$match": {"linked_papers_ngrams": {"$exists": 1}}}]
@@ -1518,16 +1519,26 @@ def get_publications_ngramms_pipeline(
   if topn:
     pipeline += [{"$limit": topn}]
 
-  pipeline += [
-    {"$project": {
-      "pubid": "$_id", "_id": 0, "count": "$count", "name": "$name",
-      "conts": {
-        "$reduce": {
-          "input": "$crossgrams", "initialValue": [],
-          "in": {"$setUnion": ["$$value", "$$this.conts"]}}},
-      "crossgrams": "$crossgrams",
-    }},
-  ]
+  if topn_gramm:
+    pipeline += [
+      {"$project": {
+        "pubid": "$_id", "_id": 0, "count": "$count", "name": "$name",
+        "conts": {
+          "$reduce": {
+            "input": "$crossgrams", "initialValue": [],
+            "in": {"$setUnion": ["$$value", "$$this.conts"]}}},
+        "crossgrams": {"$slice": ["$crossgrams", topn_gramm]},
+      }},]
+  else:
+    pipeline += [
+      {"$project": {
+        "pubid": "$_id", "_id": 0, "count": "$count", "name": "$name",
+        "conts": {
+          "$reduce": {
+            "input": "$crossgrams", "initialValue": [],
+            "in": {"$setUnion": ["$$value", "$$this.conts"]}}},
+        "crossgrams": "$crossgrams",
+      }},]
   return pipeline
 
 

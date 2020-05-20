@@ -1130,13 +1130,14 @@ async def _req_publ_publications_cocitauthors(
 @router.get('/publ/publications/ngramms/',
   summary='Кросс-распределение «фразы из контекстов цитирований» по публикациям')
 async def _req_publ_publications_ngramms(
-  topn:Optional[int]=10, author:Optional[str]=None, cited:Optional[str]=None,
+  topn:Optional[int]=None, author:Optional[str]=None, cited:Optional[str]=None,
   citing:Optional[str]=None, nka:Optional[int]=Query(None, ge=0, le=6),
   ltype:Optional[LType]=Query(None, title='Тип фразы'),
+  topn_gramm:Optional[int] = 10,
   _debug_option: DebugOption = None
 ):
   pipeline = get_publications_ngramms_pipeline(
-    topn, author, cited, citing, nka, ltype)
+    topn, author, cited, citing, nka, ltype, topn_gramm)
   if _debug_option == DebugOption.pipeline:
     return pipeline
   contexts = slot.mdb.contexts
