@@ -65,7 +65,6 @@ def update_pubs_conts(
   now = datetime.now
   mpubs:Collection = mdb['publications']
   mpubs_update = partial(mpubs.update_one, upsert=True)
-  mpubs_insert = mpubs.insert_one
   mbnds = mdb['bundles']
   mbnds_update = partial(mbnds.update_one, upsert=True)
 
@@ -91,6 +90,8 @@ def update_pubs_conts(
   best_bibs(mbnds, mbnds_update)
   calc_cocut_authors(mcont)
   calc_totals(mpubs, mbnds, mbnds_update)
+
+  mpubs.update_many({}, {'$unset': {'pub_id': for_del}})
 
   rename_new_field(mbnds, 'bibs')
   rename_new_field(mcont, 'bundles')

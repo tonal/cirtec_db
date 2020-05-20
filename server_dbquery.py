@@ -466,7 +466,7 @@ def get_refauthors_part_pipeline(
     {'$unwind': '$bun.authors'},
     {'$group': {
       '_id': '$bun.authors', 'cits': {'$addToSet': '$_id'},
-      'cits_all': {'$sum': 1}, 'pubs': {'$addToSet': '$pub_id'},
+      'cits_all': {'$sum': 1}, 'pubs': {'$addToSet': '$pubid'},
       'bunds_ids': {'$addToSet': '$bundles'},
       'bunds': {
         '$addToSet': {
@@ -504,7 +504,7 @@ def get_ref_auth4ngramm_tops_pipeline(
     {'$unwind': '$bundle'},
     {'$unwind': '$bundle.authors'},
     {'$group': {
-        '_id': '$bundle.authors', 'pubs': {'$addToSet': '$pub_id'}, 'conts': {
+        '_id': '$bundle.authors', 'pubs': {'$addToSet': '$pubid'}, 'conts': {
           '$addToSet': {
             'cid': '$_id', 'topics': '$linked_papers_topics',
             'ngrams': '$linked_papers_ngrams'}}}},
@@ -535,7 +535,7 @@ def get_ref_bund4ngramm_tops_pipeline(
     {'$match': {'bundles': {'$ne': 'nUSJrP'}}},
     {'$group': {
       '_id': '$bundles', 'cits': {'$sum': 1},
-      'pubs': {'$addToSet': '$pub_id'}, 'conts': {
+      'pubs': {'$addToSet': '$pubid'}, 'conts': {
         '$addToSet': {
           'cid': '$_id', 'topics': '$linked_papers_topics',
           'ngrams': '$linked_papers_ngrams'}}}},
