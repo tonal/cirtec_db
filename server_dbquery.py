@@ -163,19 +163,18 @@ def get_top_cocitauthors_publications_pipeline(
       "linked_papers_topics": 0}}, ]
   pipeline += filter_by_pubs_acc(author, cited, citing)
 
-  pipeline += [{'$unwind': '$cocit_authors'}, ]
-
-  pipeline += [{
-    '$group': {
+  pipeline += [
+    {'$unwind': '$cocit_authors'},
+    {'$group': {
       '_id': '$cocit_authors', 'count': {'$sum': 1},
-      'pubs': {'$push': '$pubid'}, }},
+      'pubs': {'$addToSet': '$pubid'}, }},
     {'$sort': {'count': -1, '_id': 1}}]
   if topn:
     pipeline += [{'$limit': topn}]
 
   pipeline += [{
     '$project': {
-      "name": "$_id", "_id": 0, "count": "$count", "pubs": "$pubs", }}]
+      "name": "$_id", "_id": 0, "count": {"$size": "$pubs"}, "pubs": "$pubs", }}]
   return pipeline
 
 
