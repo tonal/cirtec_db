@@ -94,10 +94,15 @@ GET http://localhost:8668/cirtec_dev/frags/topics/ngramms/
 GET http://localhost:8668/cirtec_dev/frags/topics/ngramms/?ltype=lemmas
 
 ###
-GET http://localhost:8668/cirtec_dev/frags/topics/ngramms/?ltype=lemmas&amp;author=Sergey-Sinelnikov-Murylev
+GET http://localhost:8668/cirtec_dev/frags/topics/ngramms/?ltype=lemmas&author=Sergey-Sinelnikov-Murylev
 
 ###
 GET http://localhost:8668/cirtec_dev/frags/ngramms/topics/
+
+###
+#author=Sergey-Sinelnikov-Murylev
+#cited=Sergey-Sinelnikov-Murylev
+GET http://localhost:8668/cirtec_dev/frags/ngramms/topics/?ltype=lemmas&citing=Sergey-Sinelnikov-Murylev
 
 ###
 GET http://localhost:8668/cirtec_dev/frags/cocitauthors/ngramms/

@@ -597,11 +597,13 @@ async def _req_frags_ngramm_ngramm(
 
 @router.get('/frags/ngramms/topics/',
   summary='Кросс-распределение «фразы» - «топики контекстов цитирований»')
-async def _req_frags_ngramms_topics(topn: Optional[int] = None,
-  author: Optional[str]=10, cited: Optional[str] = None,
-  citing: Optional[str] = None, nka: Optional[int] = Query(None, ge=0, le=6),
-  ltype: Optional[LType] = Query(None, title='Тип фразы'),
-  probability: Optional[float] = .5,
+async def _req_frags_ngramms_topics(
+  topn: Optional[int]=10,
+  author: Optional[str]=None, cited: Optional[str]=None,
+  citing: Optional[str]=None, nka: Optional[int]=Query(None, ge=0, le=6),
+  ltype: Optional[LType]=Query(None, title='Тип фразы'),
+  probability: Optional[float]=.5,
+  topn_topics:Optional[int]=10,
   _debug_option:DebugOption=None
 ):
   pipeline = get_frags_ngramms_topics_pipeline(
@@ -629,6 +631,8 @@ async def _req_frags_ngramms_topics(topn: Optional[int] = None,
           for fn, cnts in groupby(sorted(map(get_fn_cnt, fr)), key=key_first)))
         for title, cnt, fr in sorted(
           map(auth2tuple, doc['topics']), key=key_auth_sort))
+    if topn_topics:
+      cocitaithors = cocitaithors[:topn_topics]
     frags = reduce(
       lambda a, b: a+b,  map(Counter, map(get_frags, cocitaithors)))
     out.append(dict(

@@ -902,7 +902,7 @@ def get_frags_ngramms_topics_pipeline(
       "linked_papers_topics": {"$exists": 1}, "frag_num": {"$exists": 1},
       "linked_papers_ngrams": {'$exists': 1}}},
     {"$project": {
-      "pubid": 1, "linked_papers_topics": 1, "frag_num": 1,
+      "pubid": 1, "frag_num": 1, "linked_papers_topics": 1,
       "linked_papers_ngrams": 1}},]
   pipeline += filter_by_pubs_acc(author, cited, citing)
   pipeline += [
