@@ -375,11 +375,11 @@ async def _req_frags_cocitauthors_cocitauthors(
 @router.get('/frags/cocitauthors/ngramms/',
   summary='Кросс-распределение «со-цитирования» - «фразы из контекстов цитирований»')
 async def _req_frags_cocitauthors_ngramms(
-  topn:Optional[int]=10, author:Optional[str]=None, cited:Optional[str]=None,
+  topn:Optional[int]=None, author:Optional[str]=None, cited:Optional[str]=None,
   citing:Optional[str]=None,
   nka:Optional[int]=Query(None, ge=0, le=6),
-  ltype:Optional[LType]=Query(None, title='Тип фразы'), #, description='Может быть одно из значений "lemmas", "nolemmas" или пустой'),
-  topn_gramm:Optional[int]=None,
+  ltype:Optional[LType]=Query(None, title='Тип фразы'),
+  topn_gramm:Optional[int]=10,
   _debug_option:DebugOption=None
 ):
   pipeline = get_frags_cocitauthors_ngramms_pipeline(
