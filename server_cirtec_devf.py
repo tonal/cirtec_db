@@ -623,21 +623,21 @@ async def _req_frags_ngramms_topics(
   auth2tuple = itemgetter('topic', 'count', "frags")
   key_auth_sort = lambda v: (-v[1], v[0])
   async for doc in curs:
-    cocitaithors = tuple(
+    topics = tuple(
       dict(
-        cocit_author=title, count=cnt,
+        topic=title, count=cnt,
         frags=dict(
           (fn, sum(map(key_last, cnts)))
           for fn, cnts in groupby(sorted(map(get_fn_cnt, fr)), key=key_first)))
         for title, cnt, fr in sorted(
           map(auth2tuple, doc['topics']), key=key_auth_sort))
     if topn_topics:
-      cocitaithors = cocitaithors[:topn_topics]
+      topics = topics[:topn_topics]
     frags = reduce(
-      lambda a, b: a+b,  map(Counter, map(get_frags, cocitaithors)))
+      lambda a, b: a+b,  map(Counter, map(get_frags, topics)))
     out.append(dict(
       title=doc['title'], type=doc['type'], nka=doc['nka'], count=doc['count'],
-      frags=dict(sorted(frags.items())), cocitaithors=cocitaithors))
+      frags=dict(sorted(frags.items())), topics=topics))
 
   return out
 
