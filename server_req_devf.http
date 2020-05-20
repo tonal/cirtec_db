@@ -43,7 +43,7 @@ GET http://localhost:8668/cirtec_dev/publications/?id=ranepa:rosa:doppubs:gai-wp
 GET http://localhost:8668/cirtec_dev/top/topics/
 
 ###
-GET http://localhost:8668/cirtec_dev/top/topics/publications/
+GET http://localhost:8668/cirtec_dev/top/topics/publications/?author=Sergey-Sinelnikov-Murylev
 
 ###
 GET http://localhost:8668/cirtec_dev/top/ngramms/?topn=50

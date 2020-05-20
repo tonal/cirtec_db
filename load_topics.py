@@ -52,30 +52,43 @@ def update_topics(mdb:Database, for_del:int, uri_topics:str):
   with urlopen(uri_topics) as f:
     topics = json.load(f)
 
-  tlp = topics['linked_papers']
-  i = 0
-  for i, topic in enumerate(tlp['topics'], 1):
-    title = topic.pop('topic')
-    topic['title'] = title
-    topic['number'] = int(topic['number'])
-    topic['probability_average'] = float(topic['probability_average'])
-    topic['probability_std'] = float(topic['probability_std'])
-    mtops_update(dict(_id=title), {'$set': topic, '$unset': {'for_del': 1}})
-  print('topic:', i)
-  cnts = Counter()
-  i = 0
-  get_as_tuple = itemgetter('ref_key', 'topic', 'probability')
-  for i, cont in enumerate(tlp['contexts'], 1):
-    ref_key, topic, probab = get_as_tuple(cont)
-    pub_id, num, start = ref_key.rsplit('_', 2)
-    cont_id = f'{pub_id}@{start}'
-    mcont_update(
-      dict(_id=cont_id), {
-      '$set': {'ref_num': int(num)}, '$addToSet': {
-        'linked_papers_topics_new': {
-          '_id': topic, 'probability': float(probab)}}})
+  # tlp = topics['linked_papers']
+  cnt_t = cnt_r = 0
+  for name, tlp in topics.items():
+    i = 0
+    for i, topic in enumerate(tlp['topics'], 1):
+      title = topic.pop('topic')
+      # topic['title'] = ', '.join(sorted(map(str.strip, title.split(','))))
+      topic['title'] = ', '.join(map(str.strip, title.split(',')))
+      topic['number'] = int(topic['number'])
+      topic['probability_average'] = float(topic['probability_average'])
+      topic['probability_std'] = float(topic['probability_std'])
+      mtops_update(
+        dict(_id=title),
+        {
+          '$set': topic, '$unset': {'for_del': 1},
+          "$addToSet": {'papers_categ': name}})
+    print(name, 'topic:', i)
+    cnt_t += i
+    cnts = Counter()
+    i = 0
+    get_as_tuple = itemgetter('ref_key', 'topic', 'probability')
+    for i, cont in enumerate(tlp['contexts'], 1):
+      ref_key, topic, probab = get_as_tuple(cont)
+      # topic = ', '.join(sorted(map(str.strip, topic.split(','))))
+      topic = ', '.join(map(str.strip, topic.split(',')))
+      pub_id, num, start = ref_key.rsplit('_', 2)
+      cont_id = f'{pub_id}@{start}'
+      mcont_update(
+        dict(_id=cont_id), {
+        '$set': {'ref_num': int(num)}, '$addToSet': {
+          'linked_papers_topics_new': {
+            '_id': topic, 'probability': float(probab)}}})
 
-  print(i, len(cnts))
+    print(name, i, len(cnts))
+    cnt_r += i
+
+  print('all', cnt_t, cnt_r)
 
   rename_new_field(mcont, 'linked_papers_topics')
 
