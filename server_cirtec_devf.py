@@ -224,7 +224,7 @@ async def _req_top_cocitauthors(
 @router.get('/top/ngramms/',
   summary='Топ N фраз по публикациям')
 async def _req_top_ngramms(
-  topn:Optional[int]=None, author:Optional[str]=None, cited:Optional[str]=None,
+  topn:Optional[int]=10, author:Optional[str]=None, cited:Optional[str]=None,
   citing:Optional[str]=None,
   nka:Optional[int]=Query(None, ge=0, le=6),
   ltype:Optional[LType]=Query(None, title='Тип фразы'), #, description='Может быть одно из значений "lemmas", "nolemmas" или пустой'),
@@ -370,7 +370,7 @@ async def _req_frags_cocitauthors_cocitauthors(
 @router.get('/frags/cocitauthors/ngramms/',
   summary='Кросс-распределение «со-цитирования» - «фразы из контекстов цитирований»')
 async def _req_frags_cocitauthors_ngramms(
-  topn:Optional[int]=None, author:Optional[str]=None, cited:Optional[str]=None,
+  topn:Optional[int]=10, author:Optional[str]=None, cited:Optional[str]=None,
   citing:Optional[str]=None,
   nka:Optional[int]=Query(None, ge=0, le=6),
   ltype:Optional[LType]=Query(None, title='Тип фразы'), #, description='Может быть одно из значений "lemmas", "nolemmas" или пустой'),
@@ -455,7 +455,7 @@ async def _req_frags_cocitauthors_topics(
 @router.get('/frags/ngramms/',
   summary='Распределение «5 фрагментов» - «фразы из контекстов цитирований»')
 async def _req_frags_cocitauthors(
-  topn:Optional[int]=None, author:Optional[str]=None, cited:Optional[str]=None,
+  topn:Optional[int]=10, author:Optional[str]=None, cited:Optional[str]=None,
   citing:Optional[str]=None,
   nka:Optional[int]=Query(None, ge=0, le=6),
   ltype:Optional[LType]=Query(None, title='Тип фразы'), #, description='Может быть одно из значений "lemmas", "nolemmas" или пустой'),
@@ -482,7 +482,7 @@ async def _req_frags_cocitauthors(
 @router.get('/frags/ngramms/cocitauthors/',
   summary='Кросс-распределение «фразы» - «со-цитирования»')
 async def _req_frags_ngramms_cocitauthors(
-  topn: Optional[int] = None, author: Optional[str] = None,
+  topn: Optional[int] = 10, author: Optional[str] = None,
   cited: Optional[str] = None, citing: Optional[str] = None,
   nka: Optional[int] = Query(None, ge=0, le=6),
   ltype: Optional[LType] = Query(None, title='Тип фразы'),
@@ -531,7 +531,7 @@ async def _req_frags_ngramm_ngramm(
   author: Optional[str] = None, cited: Optional[str] = None,
   citing: Optional[str] = None, nka: Optional[int] = Query(None, ge=0, le=6),
   ltype: Optional[LType] = Query(None, title='Тип фразы'),
-  topn_ngramm: Optional[int] = None,
+  topn_ngramm: Optional[int]=10,
   _debug_option:DebugOption=None
 ):
   pipeline_root = get_frags_ngramms_ngramms_branch_root(
@@ -593,7 +593,7 @@ async def _req_frags_ngramm_ngramm(
 @router.get('/frags/ngramms/topics/',
   summary='Кросс-распределение «фразы» - «топики контекстов цитирований»')
 async def _req_frags_ngramms_topics(topn: Optional[int] = None,
-  author: Optional[str] = None, cited: Optional[str] = None,
+  author: Optional[str]=10, cited: Optional[str] = None,
   citing: Optional[str] = None, nka: Optional[int] = Query(None, ge=0, le=6),
   ltype: Optional[LType] = Query(None, title='Тип фразы'),
   probability: Optional[float] = .5,
@@ -828,7 +828,7 @@ async def _req_frags_topics_ngramms(
   nka: Optional[int] = Query(None, ge=0, le=6),
   ltype: Optional[LType] = Query(None, title='Тип фразы'),
   probability: Optional[float] = .5,
-  topn_crpssgramm:Optional[int]=None,
+  topn_crpssgramm:Optional[int]=10,
   _debug_option: DebugOption=None
 ):
   pipeline = get_frags_topics_ngramms_pipeline(
@@ -922,7 +922,7 @@ async def _req_pos_neg_contexts(
 @router.get('/pos_neg/ngramms/',
   summary='для каждого класса тональности показать топ фраз с количеством повторов каждой')
 async def _req_pos_neg_ngramms(
-  topn:Optional[int]=None, author:Optional[str]=None, cited:Optional[str]=None,
+  topn:Optional[int]=10, author:Optional[str]=None, cited:Optional[str]=None,
   citing:Optional[str]=None, nka:Optional[int]=Query(None, ge=0, le=6),
   ltype:Optional[LType]=Query(None, title='Тип фразы'), #, description='Может быть одно из значений "lemmas", "nolemmas" или пустой'),
   _debug_option:DebugOption=None
@@ -1039,7 +1039,7 @@ async def _req_publ_ngramm_ngramm(
   topn:Optional[int]=10, author:Optional[str]=None, cited:Optional[str]=None,
   citing:Optional[str]=None, nka:Optional[int]=Query(None, ge=0, le=6),
   ltype:Optional[LType]=Query(None, title='Тип фразы'),
-  topn_ngramm:Optional[int]=None,
+  topn_ngramm:Optional[int]=10,
   _debug_option: DebugOption = None
 ):
   pipeline_root = get_frags_ngramms_ngramms_branch_root(topn, author, cited,
@@ -1121,7 +1121,7 @@ async def _req_publ_publications_cocitauthors(
 @router.get('/publ/publications/ngramms/',
   summary='Кросс-распределение «фразы из контекстов цитирований» по публикациям')
 async def _req_publ_publications_ngramms(
-  topn:Optional[int]=None, author:Optional[str]=None, cited:Optional[str]=None,
+  topn:Optional[int]=10, author:Optional[str]=None, cited:Optional[str]=None,
   citing:Optional[str]=None, nka:Optional[int]=Query(None, ge=0, le=6),
   ltype:Optional[LType]=Query(None, title='Тип фразы'),
   _debug_option: DebugOption = None
@@ -1234,7 +1234,7 @@ async def _req_top_cocitrefs2(
 @router.get('/top/ngramms/publications/',
   summary='Топ N фраз по публикациям')
 async def _req_top_ngramm_pubs(
-  topn:Optional[int]=None, author: Optional[str]=None,
+  topn:Optional[int]=10, author: Optional[str]=None,
   cited: Optional[str]=None, citing: Optional[str]=None,
   nka:Optional[int]=Query(None, ge=0, le=6),
   ltype:Optional[LType]=Query(None, title='Тип фразы'),
