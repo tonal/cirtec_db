@@ -228,18 +228,24 @@ async def _req_top_ngramms(
   citing:Optional[str]=None,
   nka:Optional[int]=Query(None, ge=0, le=6),
   ltype:Optional[LType]=Query(None, title='Тип фразы'), #, description='Может быть одно из значений "lemmas", "nolemmas" или пустой'),
-  _add_pipeline:bool=False
+  _debug_option:Optional[DebugOption]=None
 ):
-  coll: Collection = slot.mdb.contexts
   pipeline = get_top_ngramms_pipeline(topn, author, cited, citing, nka, ltype)
-  out = []
+  if _debug_option == DebugOption.pipeline:
+    return pipeline
+  coll: Collection = slot.mdb.contexts
+  curs = coll.aggregate(pipeline)
+  if _debug_option == DebugOption.raw_out:
+    return [doc async for doc in curs]
+
   get_as_tuple = itemgetter('_id', 'count', 'count_cont', 'conts')
   get_pubs = itemgetter('cont_id', 'cnt')
   key_sort = lambda kv: (-kv[-1], kv[0])
   get_name = itemgetter('title')
   get_ltype = itemgetter('type')
 
-  async for doc in coll.aggregate(pipeline):
+  out = []
+  async for doc in curs:
     nid, cnt, count_cont, conts = get_as_tuple(doc)
     odoc = dict(
       title=get_name(nid), type=get_ltype(nid),
@@ -252,10 +258,7 @@ async def _req_top_ngramms(
           ).most_common(),
           key=key_sort)))
     out.append(odoc)
-  if not _add_pipeline:
-    return out
-
-  return dict(pipeline=pipeline, items=out)
+  return out
 
 
 @router.get('/top/ref_authors/',
@@ -263,19 +266,21 @@ async def _req_top_ngramms(
 async def _req_top_ref_bundles(
   topn: Optional[int] = None,  author: Optional[str] = None,
   cited: Optional[str] = None, citing: Optional[str] = None,
-  _add_pipeline: bool = False
+  _debug_option:Optional[DebugOption]=None
 ):
-  coll: Collection = slot.mdb.contexts
   pipeline = get_refauthors_pipeline(topn, author, cited, citing)
+  if _debug_option == DebugOption.pipeline:
+    return pipeline
+  coll: Collection = slot.mdb.contexts
+  curs = coll.aggregate(pipeline)
+  if _debug_option == DebugOption.raw_out:
+    return [doc async for doc in curs]
   out = []
-  async for doc in coll.aggregate(pipeline):
+  async for doc in curs:
     doc.pop('pos_neg', None)
     doc.pop('frags', None)
     out.append(doc)
-  if not _add_pipeline:
-    return out
-
-  return dict(pipeline=pipeline, items=out)
+  return out
 
 
 @router.get('/top/ref_bundles/',

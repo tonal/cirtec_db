@@ -96,7 +96,7 @@ def get_refauthors_pipeline(
   pipeline += filter_by_pubs_acc(author, cited, citing)
 
   pipeline += [
-    {'$match': {'bundles': {'$ne': 'nUSJrP'}}},
+    # {'$match': {'bundles': {'$ne': 'nUSJrP'}}},
     {'$lookup': {
       'from': 'bundles', 'localField': 'bundles', 'foreignField': '_id',
       'as': 'bun'}},
@@ -104,7 +104,7 @@ def get_refauthors_pipeline(
     {'$unwind': '$bun.authors'},
     {'$group': {
       '_id': '$bun.authors', 'cits': {'$addToSet': '$_id'},
-      'cits_all': {'$sum': 1}, 'pubs': {'$addToSet': '$pub_id'},
+      'cits_all': {'$sum': 1}, 'pubs': {'$addToSet': '$pubid'},
       'bunds_ids': {'$addToSet': '$bundles'},
       'bunds': {
         '$addToSet': {
