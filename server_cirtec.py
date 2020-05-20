@@ -71,15 +71,15 @@ def main():
   # srv_run_args = conf['srv_run_args']
   # web.run_app(app, **srv_run_args)
   app = FastAPI(
-    openapi_url='/cirtec_dev/openapi.json', docs_url='/cirtec_dev/docs',
-    redoc_url='/cirtec_dev/redoc',
+    openapi_url='/cirtec/openapi.json', docs_url='/cirtec/docs',
+    redoc_url='/cirtec/redoc',
     description='Сервер данных.'
   )
 
   conf = _load_conf()
   router.add_event_handler('startup', partial(_init_app, conf))
 
-  app.include_router(router, prefix='/cirtec_dev', )
+  app.include_router(router, prefix='/cirtec', )
 
   # asgi_app = SentryAsgiMiddleware(app)
 
@@ -92,7 +92,7 @@ def main():
 
 def _load_conf() -> dict:
   # env.read_envfile()
-  conf = load_config()['dev']
+  conf = load_config()
 
   return conf
 
