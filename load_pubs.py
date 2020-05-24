@@ -90,7 +90,7 @@ def update_pubs_conts(
   # Интеллектуальное заполнение выходных данных из имеющихся
   best_bibs(mbnds, mbnds_update)
   calc_cocut_authors(mcont)
-  calc_totals(mpubs, mbnds, mbnds_update)
+  # calc_totals(mpubs, mbnds, mbnds_update)
 
   mpubs.update_many({}, {'$unset': {'pub_id': for_del}})
 

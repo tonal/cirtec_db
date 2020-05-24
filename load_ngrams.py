@@ -47,7 +47,7 @@ def update_ngramms(
   col_gramms = mdb['n_gramms']
   ngrm_update = partial(col_gramms.update_one, upsert=True)
   mcont = mdb['contexts']
-  mcont_update = partial(mcont.update_one, upsert=True)
+  mcont_update = partial(mcont.find_one_and_update)
   # mcont.update_many({}, {'$unset': {'linked_papers_ngrams': 1}})
 
   col_gramms.update_many({}, {'$set': {'for_del': for_del}})
@@ -86,14 +86,14 @@ def update_ngramms(
             if not g_pub_id.startswith(PREF):
               continue
             # pub_id, ref_num, start = g_pub_id[PREF_LEN:].rsplit('_', 2)
-            pg_cat, *pubparts, ref_num, start = g_pub_id.split('_')
+            pg_cat, _, *pubparts, ref_num, start = g_pub_id.split('_')
             pub_id = '_'.join(pubparts)
             assert not pub_id.isdigit(), f'"{g_pub_id}" {pg_cat} {pub_id} {ref_num}, {start}'
             # print('  ', k, pub_id, ref_num, start, gcnt)
             cont_id = f'{pub_id}@{start}'
             if (cont_id, ngr_id) not in cash_cont:
               mcont_update(dict(_id=cont_id), {
-                '$set': {'pub_id': pub_id, 'start': int(start)},
+                '$set': {'pubid': pub_id, 'start': int(start)},
                 '$addToSet': {
                   'ngrams_new': {'_id': ngr_id, 'cnt': gcnt},
                 }})
