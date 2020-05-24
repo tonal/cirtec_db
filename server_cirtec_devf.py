@@ -1176,12 +1176,16 @@ async def _req_publ_topics_topics(
 @router.get('/pubs/ref_authors/',) # summary='Топ N со-цитируемых референсов')
 async def _req_pubs_refauthors(
   top_auth:Optional[int]=3, author:Optional[str]=None, cited:Optional[str]=None,
-  citing:Optional[str]=None, _add_pipeline:bool=False
+  citing:Optional[str]=None,
+  _debug_option:DebugOption=None
 ):
+  pipeline = get_refauthors_part_pipeline(top_auth, None, None, None)
+  if _debug_option == DebugOption.pipeline:
+    return pipeline
+
   publications: Collection = slot.mdb.publications
   contexts: Collection = slot.mdb.contexts
 
-  pipeline = get_refauthors_part_pipeline(top_auth, None, None, None)
 
   out = []
   async for pub in publications.find(
@@ -1190,20 +1194,17 @@ async def _req_pubs_refauthors(
     projection={'_id': True, 'name': True}, sort=[('_id', ASCENDING)]
   ):
     pid = pub['_id']
-    pub_pipeline = [{'$match': {'pub_id': pid}}] + pipeline
+    pub_pipeline = [{'$match': {'pubid': pid}}] + pipeline
     ref_authors = []
     async for row in contexts.aggregate(pub_pipeline):
       row.pop('pos_neg', None)
       row.pop('frags', None)
       ref_authors.append(row)
 
-    pub_out = dict(pub_id=pid, name=pub['name'], ref_authors=ref_authors)
+    pub_out = dict(pubid=pid, name=pub['name'], ref_authors=ref_authors)
     out.append(pub_out)
 
-  if not _add_pipeline:
-    return out
-
-  return dict(pipeline=pipeline, items=out)
+  return out
 
 
 @router.get('/top/cocitauthors/publications/',
