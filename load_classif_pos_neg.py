@@ -6,6 +6,7 @@
 from datetime import datetime
 from functools import reduce
 from operator import itemgetter
+from typing import Iterable
 
 from joblib import load as jl_load
 import pandas as pd
@@ -28,11 +29,11 @@ def main():
   with MongoClient(conf_mongo['uri'], compressors='snappy') as client:
     mdb = client[conf_mongo['db']] # 'cirtec'
 
-    r = update_class_pos_neg(mdb, for_del)
+    r = update_class_pos_neg(mdb, [], for_del)
 
 
 
-def update_class_pos_neg(mdb:Database, for_del:int):
+def update_class_pos_neg(mdb:Database, authors:Iterable[str], for_del:int):
   """Обновление данных о классах контекстов (positive, neutral, negative)
   """
   now = datetime.now
@@ -69,7 +70,10 @@ def parse_contexts(mcont:Collection):
   wnorm = Text2Seq()
   seq2text = wnorm.seq2text
   get_flds = itemgetter('_id', 'prefix', 'exact', 'suffix')
-  for i, cont in enumerate(mcont.find({'exact': {'$exists': True}}), 1):
+  for i, cont in enumerate(
+    mcont.find({'$and': [{'exact': {'$exists': 1}}, {'exact': {'$ne': None}}]}),
+    1
+  ):
     # print(i, f'"{li.rstrip()}"')
     cid, prefix, exact, suffix = get_flds(cont)
     try:

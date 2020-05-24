@@ -16,7 +16,7 @@ from pymongo.collection import Collection
 from pymongo.database import Database
 import uvicorn
 
-from server_dbquery import (
+from server_dbquery_dev import (
   LType, filter_acc_dict, get_frag_pos_neg_cocitauthors2,
   get_frag_pos_neg_contexts, get_frag_publications,
   get_frags_cocitauthors_cocitauthors_pipeline,
@@ -111,14 +111,6 @@ async def _close_app():
   slot.mdb.client.close()
 
 
-@router.get('/db/publication/',
-  summary='Данные по указанному публикации (publications) из mongodb')
-async def _db_publication(id: str):
-  coll: Collection = slot.mdb.publications
-  doc: dict = await coll.find_one(dict(_id=id))
-  return doc
-
-
 @router.get('/db/bundle/',
   summary='Данные по указанному бандлу (bundles) из mongodb')
 async def _db_bundle(id:str):
@@ -130,8 +122,24 @@ async def _db_bundle(id:str):
 @router.get('/db/context/',
   summary='Данные по указанному контексту (contexts) из mongodb')
 async def _db_context(id: str):
-  coll: Collection = slot.mdb.contexts
-  doc: dict = await coll.find_one(dict(_id=id))
+  coll:Collection = slot.mdb.contexts
+  doc:dict = await coll.find_one(dict(_id=id))
+  return doc
+
+
+@router.get('/db/ngramm/',
+  summary='Данные по указанной нграмме (n_gramms) из mongodb')
+async def _db_topic(id: str):
+  coll:Collection = slot.mdb.n_gramms
+  doc:dict = await coll.find_one(dict(_id=id))
+  return doc
+
+
+@router.get('/db/publication/',
+  summary='Данные по указанному публикации (publications) из mongodb')
+async def _db_publication(id: str):
+  coll:Collection = slot.mdb.publications
+  doc:dict = await coll.find_one(dict(_id=id))
   return doc
 
 
@@ -139,14 +147,6 @@ async def _db_context(id: str):
   summary='Данные по указанному топику (topics) из mongodb')
 async def _db_topic(id: str):
   coll: Collection = slot.mdb.topics
-  doc: dict = await coll.find_one(dict(_id=id))
-  return doc
-
-
-@router.get('/db/ngramm/',
-  summary='Данные по указанной нграмме (n_gramms) из mongodb')
-async def _db_topic(id: str):
-  coll: Collection = slot.mdb.n_gramms
   doc: dict = await coll.find_one(dict(_id=id))
   return doc
 

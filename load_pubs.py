@@ -3,35 +3,34 @@
 """
 Загрузка контекстов цитирования
 """
-from collections import defaultdict
 from datetime import datetime
 from functools import partial, reduce
 import re
-from typing import Tuple
+from typing import Any, Dict, Iterable, Tuple
 
 from pymongo.collection import Collection
 from pymongo.database import Database
 from lxml import etree
 from parsel import Selector
 from pymongo import MongoClient
-from pymongo.errors import DuplicateKeyError
 
-from load_utils import best_bibs, bib2bib, rename_new_field
+from load_utils import AUTHORS, rename_new_field
 from utils import load_config, norm_spaces
+
 
 SOURCE_XML = (
   (
     'uni_authors',
-    'http://onir2.ranepa.ru:8081/prl/groups/Sergey-Sinelnikov-Murylev/xml/linked_papers.xml'),
+    'http://onir2.ranepa.ru:8081/prl/groups/%(author)s/xml/linked_papers.xml'),
   (
     'uni_cited',
-    'http://onir2.ranepa.ru:8081/prl/groups/Sergey-Sinelnikov-Murylev/xml/cited_papers.xml'),
+    'http://onir2.ranepa.ru:8081/prl/groups/%(author)s/xml/cited_papers.xml'),
   (
     'uni_citing',
-    'http://onir2.ranepa.ru:8081/prl/groups/Sergey-Sinelnikov-Murylev/xml/citing_papers.xml'),
+    'http://onir2.ranepa.ru:8081/prl/groups/%(author)s/xml/citing_papers.xml'),
 )
 
-AUTHOR = 'Sergey-Sinelnikov-Murylev'
+# AUTHOR = 'Sergey-Sinelnikov-Murylev'
 
 re_start_stop = re.compile(
   r'start:\s* (?P<start>\d+)\s*;\s* end:\s* (?P<stop>\d+)', re.I | re.X
@@ -51,7 +50,8 @@ def main():
   with MongoClient(conf_mongo['uri'], compressors='snappy') as client:
     mdb:Database = client[conf_mongo['db']]
 
-    colls = update_pubs_conts(mdb, for_del, linked_papers_xml[:1])
+    # colls = update_pubs_conts(mdb, [AUTHOR], for_del, linked_papers_xml[:1])
+    colls = update_pubs_conts(mdb, AUTHORS, for_del, linked_papers_xml[:1])
 
     for coll in colls:
       r = coll.delete_many({'for_del': for_del})
@@ -59,7 +59,7 @@ def main():
 
 
 def update_pubs_conts(
-  mdb:Database, for_del:int, pubs_files
+  mdb:Database, authors:Iterable[str], for_del:int, pubs_files
 ) -> Tuple[Collection, ...]:
   """Обновление публикаций и контекстов"""
   now = datetime.now
@@ -79,12 +79,13 @@ def update_pubs_conts(
   cache_conts = set()
   cnt_pub = cnt_cont = 0
 
-  for uni_field, papers_xml in pubs_files:
-    cp, cc = load_xml(
-      mpubs_update, mbnds_update, mcont_update,
-      papers_xml, uni_field, cache_pubs, cache_conts)
-    cnt_pub += cp
-    cnt_cont += cc
+  for author in authors:
+    for uni_field, papers_xml in pubs_files:
+      cp, cc = load_xml(
+        mpubs_update, mbnds_update, mcont_update,
+        papers_xml, author, uni_field, cache_pubs, cache_conts)
+      cnt_pub += cp
+      cnt_cont += cc
 
   # Интеллектуальное заполнение выходных данных из имеющихся
   best_bibs(mbnds, mbnds_update)
@@ -102,15 +103,17 @@ def update_pubs_conts(
 
 def load_xml(
   mpubs_update, mbnds_update, mcont_update, linked_papers_xml:str,
-  uni_field:str, cache_pubs, cache_conts
+  uni_author:str, uni_field:str, cache_pubs, cache_conts
 ):
-  xml_root = etree.parse(linked_papers_xml)
+  xml_uri = linked_papers_xml % dict(author=uni_author)
+  print(xml_uri)
+  xml_root = etree.parse(xml_uri)
   i = cont_cnt = 0
   for i, pub in enumerate(Selector(root=xml_root).xpath('//ref'), 1):
     pub_id = pub.xpath('@found_in').get()
     if pub_id in cache_pubs:
       mpubs_update(dict(_id=pub_id),
-        {'$addToSet': {uni_field: AUTHOR}, '$unset': {'for_del': 1}})
+        {'$addToSet': {uni_field: uni_author}, '$unset': {'for_del': 1}})
       print(i, pub_id, 'Публикация уже в базе')
       continue
 
@@ -177,7 +180,7 @@ def load_xml(
       doc_pub.update(year=int(year))
 
     mpubs_update(dict(_id=pub_id), {
-      '$set': doc_pub, '$addToSet': {uni_field: AUTHOR},
+      '$set': doc_pub, '$addToSet': {uni_field: uni_author},
       '$unset': {'for_del': 1}})
     print(i, pub_id, pub_name)
 
@@ -203,10 +206,13 @@ def load_xml(
       k = 0
       for k, ref in enumerate(cont_elt.xpath('Reference'), 1):
         num = int(ref.xpath('text()').get())
-        start = int(ref.xpath('@start').get())
-        end = int(ref.xpath('@end').get())
-        exact = ref.xpath('@exact').get()
-        cont_ref_doc = dict(num=num, start=start, end=end, exact=exact)
+        cont_ref_doc = dict(num=num)
+        if start := ref.xpath('@start').get():
+          cont_ref_doc.update(start=int(start))
+        if end := ref.xpath('@end').get():
+          cont_ref_doc.update(end=int(end))
+        if exact := ref.xpath('@exact').get():
+          cont_ref_doc.update(exact=exact)
         try:
           bnd = refs[num].get('bundle')
         except:
@@ -235,6 +241,7 @@ def load_xml(
 
 
 def calc_cocut_authors(mcont: Collection):
+  now = datetime.now
   mcont_update = mcont.update_one
   pipeline = [
     {'$unwind': '$bundles_new'},
@@ -247,15 +254,22 @@ def calc_cocut_authors(mcont: Collection):
       '_id': '$_id', 'cocit_authors': {'$addToSet': "$bund.authors"}, }},
     {'$sort': {'_id': 1}},
   ]
+  print(now(), 'calc_cocut_authors start')
   mcont.update_many({}, {"$unset": {'cocit_refs': ""}})
-  for row in mcont.aggregate(pipeline):
+  i = 0
+  for i, row in enumerate(mcont.aggregate(pipeline), 1):
     mcont_update(
       dict(_id=row['_id']),
       {'$set': {'cocit_authors': row['cocit_authors']},})
+    if i % 1000 == 0:
+      print(now(), 'calc_cocut_authors', i)
+  print(now(), 'calc_cocut_authors end', i)
 
 
 def calc_totals(mpubs:Collection, mbnds:Collection, mbnds_update):
-  for obj in mpubs.aggregate([
+  now = datetime.now
+  print(now(), 'calc_totals start')
+  pipeline = [
     {'$project': {'refs': 1}},
     {'$unwind': '$refs'},
     {'$match': {'refs.bundle': {'$exists': 1}}},
@@ -268,13 +282,70 @@ def calc_totals(mpubs:Collection, mbnds:Collection, mbnds_update):
     {'$group': {
       '_id': '$bundle', 'pubs': {'$addToSet': '$_id'},
       'conts': {'$addToSet': '$cont'}}},
-  ]):
+  ]
+  i = 0
+  for i, obj in enumerate(mpubs.aggregate(pipeline), 1):
     total_cits = len(obj['conts'])
     total_pubs = len(obj['pubs'])
     mbnds.update_one(
       dict(_id=obj['_id']),
       {'$set': dict(total_pubs=total_pubs, total_cits=total_cits)})
+    if i % 1000 == 0:
+      print(now(), 'calc_totals', i)
+  print(now(), 'calc_totals end', i)
 
+
+def bib2bib(a:str, y:str, t:str):
+  res = {}
+  if authors := a.strip():
+    res.update(authors=tuple(sorted(set(authors.split()))))
+  if y:
+    # Только первый год из возможных
+    if year := y.strip()[:4].strip():
+      res.update(year=year)
+  if title := norm_spaces(t):
+    res.update(title=title)
+  return res
+
+
+def best_bibs(mbnds:Collection, mbnds_update):
+  """Интеллектуальное заполнение выходных данных из имеющихся"""
+  now = datetime.now
+  print(now(), 'best_bibs start')
+
+  def bkey(b: Dict[str, Any]) -> Tuple[int, int, int, str, int, int, list, str]:
+    lb = len(b)
+    if title := b.get('title'):
+      tu = 1 if title[0].isupper() else 0
+      tl = len(title)
+    else:
+      tu, tl = -1, 0
+    if authors := b.get('authors'):
+      al = len(authors)
+      aa = sum(len(a) for a in authors)
+    else:
+      al = aa = 0
+    return lb, tu, tl, title, al, aa, authors, b.get('year')
+
+  i = cnt = 0
+  for i, bundle in enumerate(
+    mbnds.find(
+      # Выбираем обновлённые, у которых массив выходных длиннее 1
+      {'for_del': {'$exists': 0}, 'bibs_new.1': {'$exists': 1}}),
+    1
+  ):
+    # 'ss'.isu
+    bibs = bundle['bibs_new']
+    best = max(bibs, key=bkey)
+    real_bib = {k: v for k, v in bundle.items() if
+      v and k in {'title', 'authors', 'year'}}
+    if real_bib != best:
+      mbnds_update(dict(_id=bundle['_id']), {'$set': best})
+      cnt += 1
+      if cnt % 1000 == 0:
+        print(now(), 'best_bibs', i, cnt)
+
+  print(now(), 'best_bibs end', i, cnt)
 
 
 if __name__ == '__main__':

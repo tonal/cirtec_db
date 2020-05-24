@@ -16,10 +16,9 @@ import requests
 from load_bundles import BUNDLES, update_bundles
 from load_classif_pos_neg import update_class_pos_neg
 from load_pubs import update_pubs_conts, SOURCE_XML
-# from load_cocits import (
-#   update_cocits_authors, COCITS_AUTHORS, update_cocits_refs, COCITS_REFS)
 from load_ngrams import update_ngramms, NGRAM_ROOT
 from load_topics import update_topics, TOPICS
+from load_utils import AUTHORS
 from utils import load_config
 
 
@@ -36,7 +35,7 @@ def main():
 
     def do_upd(update:Callable, *args):
       print(now(), f'{update.__name__}: {update.__doc__}')
-      ret = update(mdb, for_del, *args)
+      ret = update(mdb, AUTHORS, for_del, *args)
       return ret
 
     colls = tuple(
@@ -45,8 +44,6 @@ def main():
         (update_bundles, BUNDLES),
         (update_ngramms, NGRAM_ROOT),
         (update_topics, TOPICS),
-        # (update_cocits_authors, COCITS_AUTHORS),
-        # (update_cocits_refs, COCITS_REFS),
         (update_class_pos_neg,),
       )
       for c in do_upd(u, *args)
@@ -61,16 +58,18 @@ def main():
 
 def check_date():
   for uri in flatten_uri(
-    SOURCE_XML, BUNDLES, TOPICS, # COCITS_AUTHORS, COCITS_REFS
+    SOURCE_XML, BUNDLES, NGRAM_ROOT, TOPICS,
   ):
-    rsp = requests.head(uri)
-    print(uri, rsp.status_code)
-    # for k, v in rsp.headers.items():
-    #   print(' ', f'{k}: {v}')
-    for k in ('Date', 'Last-Modified'):
-      v = rsp.headers.get(k)
-      if v:
-        print(' ', f'{k}: {v}')
+    for author in AUTHORS:
+      uri_author = uri % dict(author=author)
+      rsp = requests.head(uri_author)
+      print(uri_author, rsp.status_code)
+      # for k, v in rsp.headers.items():
+      #   print(' ', f'{k}: {v}')
+      for k in ('Date', 'Last-Modified'):
+        v = rsp.headers.get(k)
+        if v:
+          print(' ', f'{k}: {v}')
 
 
 def flatten_uri(*args):
