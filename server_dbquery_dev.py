@@ -81,6 +81,20 @@ def filter_acc_dict(
   return match
 
 
+def filter_by_topic(
+  author:Optional[str], cited:Optional[str], citing:Optional[str], *,
+  as_field:str='topic'
+):
+  pipeline = [
+    {
+    '$match': {
+      "$or": [
+        {f'{as_field}.uni_{fld}': val} for fld, val in
+          (('author', author), ('cited', cited), ('citing', citing),)
+        if val]}}, ]
+  return pipeline
+
+
 def get_refauthors_pipeline(
   topn: Optional[int], author:Optional[str], cited:Optional[str],
   citing:Optional[str]
@@ -280,9 +294,10 @@ def get_top_topics_publications_pipeline(
     pipeline += [
       {'$match': {"topics.probability": {'$gte': probability}}},]
 
+  pipeline += _add_topic_pipeline(author, cited, citing)
   pipeline += [
     {'$group': {
-      '_id': '$topics._id', 'count': {'$sum': 1},
+      '_id': '$topics.title', 'count': {'$sum': 1},
       'probability_avg': {'$avg': '$topics.probability'},
       'probability_stddev': {'$stdDevPop': '$topics.probability'},
       "pubs": {'$addToSet': '$pubid'}, }},
@@ -318,9 +333,11 @@ def get_top_topics_pipeline(
     pipeline += [
       {'$match': {'topics.probability': {'$gte': probability}}},]
 
+  pipeline = _add_topic_pipeline(author, cited, citing)
+
   pipeline += [
     {'$group': {
-      '_id': '$topics._id', 'count': {'$sum': 1},
+      '_id': '$topic.title', 'count': {'$sum': 1},
       'probability_avg': {'$avg': '$topics.probability'},
       'probability_stddev': {'$stdDevPop': '$topics.probability'},
       'conts': {'$addToSet': '$_id'}, }},
@@ -336,6 +353,20 @@ def get_top_topics_pipeline(
       "probability_stddev": {"$round": ["$probability_stddev", 2]},
       "contects": "$conts",}}
   ]
+  return pipeline
+
+
+def _add_topic_pipeline(
+  author:Optional[str], cited:Optional[str], citing:Optional[str],
+  *, localField:str='topics._id', as_field:str='topic'
+):
+  pipeline = [
+    {'$lookup': {
+      'from': 'topics', 'localField': localField, 'foreignField': '_id',
+      'as': as_field}},
+    {"$unwind": "$" + as_field}, ]
+  if any([author, cited, citing]):
+    pipeline += filter_by_topic(author, cited, citing)
   return pipeline
 
 
@@ -489,8 +520,8 @@ def get_ref_auth4ngramm_tops_pipeline(
   citing:Optional[str]
 ):
   pipeline = [
-    {'$match': {'exact': {'$exists': True}}},
-    {'$project': {'prefix': False, 'suffix': False, 'exact': False, }},]
+    {'$match': {'exact': {'$exists': 1}}},
+    {'$project': {'prefix': 0, 'suffix': 0, 'exact': 0, }},]
 
   pipeline += filter_by_pubs_acc(author, cited, citing)
   pipeline += [
@@ -504,10 +535,9 @@ def get_ref_auth4ngramm_tops_pipeline(
     {'$group': {
         '_id': '$bundle.authors', 'pubs': {'$addToSet': '$pubid'}, 'conts': {
           '$addToSet': {
-            'cid': '$_id', 'topics': '$topics',
-            'ngrams': '$ngrams'}}}},
+            'cid': '$_id', 'topics': '$topics', 'ngrams': '$ngrams'}}}},
     {'$project': {
-        '_id': False, 'aurhor': '$_id', 'cits': {'$size': '$conts'},
+        '_id': 0, 'aurhor': '$_id', 'cits': {'$size': '$conts'},
         'pubs': {'$size': '$pubs'}, 'pubs_ids': '$pubs', 'conts': '$conts',
         'total_cits': '$bundle.total_cits', 'total_pubs': '$bundle.total_pubs',
         'year': '$bundle.year', 'authors': '$bundle.authors',
@@ -707,10 +737,13 @@ def get_frags_cocitauthors_topics_pipeline(
   if probability:
     pipeline += [
       {"$match": {"topics.probability": {"$gte": probability}}, }]
+
+  pipeline = _add_topic_pipeline(author, cited, citing)
+
   pipeline += [
     {"$group": {
       "_id": {
-        "cocit_authors": "$cocit_authors", "topic": "$topics._id",
+        "cocit_authors": "$cocit_authors", "topic": "$topic.title",
         "cont_id": "$_id"},
       "cont": {"$first": {"pubid": "$pubid", "frag_num": "$frag_num"}},}},
     {"$sort": {"_id": 1}},
@@ -934,11 +967,11 @@ def get_frags_ngramms_topics_pipeline(
         "ngram": "$_id.ngram", "topic": "$_id.topic"},
       "count": {"$sum": "$count"},
       "frags": {'$push': {"fn": "$cont.frag_num", "cnt": "$count"}},
-      'ngrm': {'$first': "$ngrm"},}},
-    {'$lookup': {
-      'from': 'topics', 'localField': '_id.topic', 'foreignField': '_id',
-      'as': 'topic'}},
-    {"$unwind": '$topic'},
+      'ngrm': {'$first': "$ngrm"},}},]
+
+  pipeline += _add_topic_pipeline(author, cited, citing, localField='_id.topic')
+
+  pipeline += [
     {'$group': {
       "_id": "$_id.ngram",
       "title": {"$first": "$ngrm.title"},
@@ -1051,19 +1084,19 @@ def get_frags_topics_pipeline(
   pipeline = [
     {'$match': {
       'frag_num': {'$exists': 1}, 'topics': {'$exists': 1}}},
-    {'$project': {
-      'pubid': 1, 'frag_num': 1, 'linked_paper': '$topics'}},]
+    {'$project': {'pubid': 1, 'frag_num': 1, 'topics': 1}},]
   pipeline += filter_by_pubs_acc(author, cited, citing)
   pipeline += [
-    {'$unwind': '$linked_paper'},
+    {'$unwind': '$topics'},
   ]
   if probability :
     pipeline += [
-      {'$match': {'linked_paper.probability': {'$gte': probability}}},]
+      {'$match': {'topics.probability': {'$gte': probability}}},]
 
+  pipeline += _add_topic_pipeline(author, cited, citing)
   pipeline += [
     {'$group': {
-      '_id': {'_id': '$linked_paper._id', 'frag_num': '$frag_num'},
+      '_id': {'_id': '$topic.title', 'frag_num': '$frag_num'},
       'count': {'$sum': 1,}}},
     {'$group': {
       '_id': '$_id._id', 'count': {'$sum': '$count'},
@@ -1093,10 +1126,12 @@ def get_frags_topics_cocitauthors_pipeline(
   if probability:
     pipeline += [
       {"$match": {"topics.probability": {"$gte": probability}}, }]
+
+  pipeline += _add_topic_pipeline(author, cited, citing)
   pipeline += [
     {"$group": {
       "_id": {
-        "cocit_authors": "$cocit_authors", "topic": "$topics._id",
+        "cocit_authors": "$cocit_authors", "topic": "$topic.title",
         "cont_id": "$_id"},
       "cont": {"$first": {"pubid": "$pubid", "frag_num": "$frag_num"}},}},
     {"$sort": {"_id": 1}},
@@ -1136,9 +1171,7 @@ def get_frags_topics_ngramms_pipeline(
     {"$match": {
       "topics": {"$exists": 1}, "frag_num": {"$exists": 1},
       "ngrams": {'$exists': 1}}},
-    {"$project": {
-      "pubid": 1, "topics": 1, "frag_num": 1,
-      "ngrams": 1}},]
+    {"$project": {"pubid": 1, "topics": 1, "frag_num": 1, "ngrams": 1}},]
   pipeline += filter_by_pubs_acc(author, cited, citing)
   pipeline += [
     {"$unwind": "$ngrams"},
@@ -1156,10 +1189,11 @@ def get_frags_topics_ngramms_pipeline(
     pipeline += [
       {'$match': {'topics.probability': {'$gte': probability}}},
     ]
+  pipeline += _add_topic_pipeline(author, cited, citing)
   pipeline += [
     {"$group": {
       "_id": {
-        "topic": "$topics.title",
+        "topic": "$topic.title",
         "ngram": "$ngrams._id",
         "cont_id": "$_id"},
       "cont": {"$first": {"pubid": "$pubid", "frag_num": "$frag_num"}},
@@ -1209,6 +1243,7 @@ def get_frags_topics_topics_pipeline(
     pipeline += [
       {"$match": {
         "topics.probability": {"$gte": probability}}, }]
+  pipeline += _add_topic_pipeline(author, cited, citing)
   pipeline += [
     {'$lookup': {
       'from': 'contexts', 'localField': '_id', 'foreignField': '_id',
@@ -1219,10 +1254,12 @@ def get_frags_topics_topics_pipeline(
     pipeline += [
       {"$match": {
         "cont.topics.probability": {"$gte": probability}}, }]
+  pipeline += _add_topic_pipeline(
+    author, cited, citing, localField='cont.topics._id', as_field='cont_topic')
   pipeline += [
     {'$project': {
-      "frag_num": 1, "topic1": "$topics._id",
-      "topic2": "$cont.topics._id"}},
+      "frag_num": 1, "topic1": "$topic.title",
+      "topic2": "$cont_topic.title"}},
     {'$match': {'$expr': {'$ne': ["$topic1", "$topic2"]}}},
     {'$group': {
       "_id": {
@@ -1402,14 +1439,16 @@ def get_pos_neg_topics_pipeline(
 
   pipeline += [
     {'$unwind': '$topics'},
-    {'$match': {'topics.probability': {'$gte': probability}}},
+    {'$match': {'topics.probability': {'$gte': probability}}},]
+  pipeline += _add_topic_pipeline(author, cited, citing)
+  pipeline += [
     {'$group': {
       '_id': {
         'pos_neg': {
           '$arrayElemAt': [
             ['neutral', 'positive', 'positive', 'negative', 'negative'],
             '$positive_negative.val']},
-        'topic': '$topics._id'},
+        'topic': '$topic.title'},
       'topic_cnt': {'$sum': 1}}},
     {'$sort': {'topic_cnt': -1}},
     {'$group': {
@@ -1553,11 +1592,14 @@ def get_publications_topics_topics_pipeline(
       "pubid": {"$exists": 1}, "topics": {'$exists': 1}}},
     {"$project": {"pubid": 1, "topics": 1}}, ]
   pipeline += filter_by_pubs_acc(author, cited, citing)
-  pipeline += [{"$project": {"pub": 0}}, {"$unwind": "$topics"}, ]
+  pipeline += [
+    {"$project": {"pub": 0}},
+    {"$unwind": "$topics"}, ]
   if probability:
     pipeline += [{
       "$match": {
         "topics.probability": {"$gte": probability}}, }]
+  pipeline += _add_topic_pipeline(author, cited, citing)
   pipeline += [{
     '$lookup': {
       'from': 'contexts', 'localField': '_id', 'foreignField': '_id',
@@ -1567,10 +1609,12 @@ def get_publications_topics_topics_pipeline(
     pipeline += [{
       "$match": {
         "cont.topics.probability": {"$gte": probability}}, }]
+  pipeline += _add_topic_pipeline(
+    author, cited, citing, localField='cont.topics._id', as_field='cont_topic')
   pipeline += [{
     '$project': {
-      "pubid": 1, "topic1": "$topics._id",
-      "topic2": "$cont.topics._id"}},
+      "pubid": 1, "topic1": "$topic.title",
+      "topic2": "$cont_topic.title"}},
     {'$match': {'$expr': {'$ne': ["$topic1", "$topic2"]}}}, {
       '$group': {
         "_id": {

@@ -1299,7 +1299,7 @@ async def _ref_auth4ngramm_tops(
 
   out_bund = []
   get_topics = lambda c: c.get('topics', ())
-  get_topic = itemgetter('_id', 'probability')
+  get_topic = itemgetter('title', 'probability')
   get_first = itemgetter(0)
   get_second = itemgetter(1)
   if probability is None:
@@ -1356,7 +1356,7 @@ async def _req_bund4ngramm_tops(
   get_probab = itemgetter('probability')
   get_first = itemgetter(0)
   get_second = itemgetter(1)
-  get_topic = itemgetter('_id', 'probability')
+  get_topic = itemgetter('title', 'probability')
 
   def topic_stat(it_tp):
     it_tp = tuple(it_tp)

@@ -111,7 +111,7 @@ def load_topics_json(mcont_update, mtops_replace, uri_topics, uni_author):
       mcont_update(dict(_id=cont_id), {
         '$set': {'ref_num': int(num)}, '$addToSet': {
           'topics_new': {
-            '_id': oid, 'probability': float(probab)}}})
+            '_id': oid, 'title': topic, 'probability': float(probab)}}})
 
     print(name, i, len(cnts))
     cnt_r += i
