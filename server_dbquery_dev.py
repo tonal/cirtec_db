@@ -333,7 +333,7 @@ def get_top_topics_pipeline(
     pipeline += [
       {'$match': {'topics.probability': {'$gte': probability}}},]
 
-  pipeline = _add_topic_pipeline(author, cited, citing)
+  pipeline += _add_topic_pipeline(author, cited, citing)
 
   pipeline += [
     {'$group': {
