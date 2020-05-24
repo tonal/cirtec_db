@@ -577,7 +577,7 @@ async def _req_frags_ngramm_ngramm(
       if ngr_id not in exists:
         continue
       fnum = doc['frag_num']
-      congr[ngr_id][fnum] += doc['linked_papers_ngrams']['cnt']
+      congr[ngr_id][fnum] += doc['ngrams']['cnt']
       titles[ngr_id] = cont['title']
       types[ngr_id] = cont['type']
 
