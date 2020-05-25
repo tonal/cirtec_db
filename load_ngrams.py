@@ -50,6 +50,8 @@ def update_ngramms(
   mcont = mdb['contexts']
   mcont_update = partial(mcont.find_one_and_update)
   # mcont.update_many({}, {'$unset': {'linked_papers_ngrams': 1}})
+  # mcont.update_many(
+  #   {"ngrams": {"$exists": 1}}, {"$unset": {"ngrams": 1}})
 
   col_gramms.update_many({}, {'$set': {'for_del': for_del}})
 
