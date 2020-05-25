@@ -34,6 +34,7 @@ def main():
   with MongoClient(conf_mongo['uri'], compressors='snappy') as client:
     mdb = client[conf_mongo['db']] # 'cirtec'
 
+    # col_gramms, = update_ngramms(mdb, AUTHORS[:1], for_del, NGRAM_ROOT)
     col_gramms, = update_ngramms(mdb, AUTHORS, for_del, NGRAM_ROOT)
 
     r = col_gramms.delete_many({'for_del': for_del})

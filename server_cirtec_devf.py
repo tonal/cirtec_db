@@ -176,160 +176,6 @@ async def _req_publications(
   return out
 
 
-@router.get('/top/cocitauthors/',
-  summary='Топ N со-цитируемых авторов')
-async def _req_top_cocitauthors(
-  topn:Optional[int]=None, author:Optional[str]=None, cited:Optional[str]=None,
-  citing:Optional[str]=None, _add_pipeline:bool=False
-):
-  pass
-  coll: Collection = slot.mdb.contexts
-  pipeline = get_top_cocitauthors_pipeline(topn, author, cited, citing)
-
-  out = []
-  async for doc in coll.aggregate(pipeline):
-    title = doc.pop('_id')
-    out.append(dict(title=title, **doc))
-  if not _add_pipeline:
-    return out
-
-  return dict(pipeline=pipeline, items=out)
-
-
-@router.get('/top/cocitrefs/',
-  summary='Топ N со-цитируемых референсов')
-async def _req_top_cocitauthors(
-  topn:Optional[int]=None, author:Optional[str]=None, cited:Optional[str]=None,
-  citing:Optional[str]=None,
-  _debug_option:DebugOption=None
-):
-  pipeline = get_top_cocitrefs_pipeline(topn, author, cited, citing)
-  if _debug_option == DebugOption.pipeline:
-    return pipeline
-  coll: Collection = slot.mdb.contexts
-
-  def repack(_id, count, conts, bundles):
-    authors = bundles.get('authors')
-    title = bundles.get('title')
-    year = bundles.get('year', '?')
-    descr = f'{" ".join(authors) if authors else "?"} ({year})'
-    if title:
-      descr += f' {title}'
-    return dict(bundle=_id, descr=descr, intxtids=conts)
-
-  curs = coll.aggregate(pipeline)
-  if _debug_option == DebugOption.raw_out:
-    return [doc async for doc in curs]
-
-  out = [repack(**doc) async for doc in curs]
-
-  return out
-
-
-@router.get('/top/ngramms/',
-  summary='Топ N фраз по публикациям')
-async def _req_top_ngramms(
-  topn:Optional[int]=10, author:Optional[str]=None, cited:Optional[str]=None,
-  citing:Optional[str]=None,
-  nka:Optional[int]=Query(None, ge=0, le=6),
-  ltype:Optional[LType]=Query(None, title='Тип фразы'), #, description='Может быть одно из значений "lemmas", "nolemmas" или пустой'),
-  _debug_option:Optional[DebugOption]=None
-):
-  pipeline = get_top_ngramms_pipeline(topn, author, cited, citing, nka, ltype)
-  if _debug_option == DebugOption.pipeline:
-    return pipeline
-  coll: Collection = slot.mdb.contexts
-  curs = coll.aggregate(pipeline)
-  if _debug_option == DebugOption.raw_out:
-    return [doc async for doc in curs]
-
-  get_as_tuple = itemgetter('_id', 'count', 'count_cont', 'conts')
-  get_pubs = itemgetter('cont_id', 'cnt')
-  key_sort = lambda kv: (-kv[-1], kv[0])
-  get_name = itemgetter('title')
-  get_ltype = itemgetter('type')
-
-  out = []
-  async for doc in curs:
-    nid, cnt, count_cont, conts = get_as_tuple(doc)
-    odoc = dict(
-      title=get_name(nid), type=get_ltype(nid),
-      all=cnt, count_cont=count_cont,
-      contects=dict(
-        sorted(
-          Counter(
-            p for p, n in (get_pubs(co) for co in conts)
-            for _ in range(n)
-          ).most_common(),
-          key=key_sort)))
-    out.append(odoc)
-  return out
-
-
-@router.get('/top/ref_authors/',
-  summary='Топ N авторов бандлов')
-async def _req_top_ref_bundles(
-  topn: Optional[int] = None,  author: Optional[str] = None,
-  cited: Optional[str] = None, citing: Optional[str] = None,
-  _debug_option:Optional[DebugOption]=None
-):
-  pipeline = get_refauthors_pipeline(topn, author, cited, citing)
-  if _debug_option == DebugOption.pipeline:
-    return pipeline
-  coll: Collection = slot.mdb.contexts
-  curs = coll.aggregate(pipeline)
-  if _debug_option == DebugOption.raw_out:
-    return [doc async for doc in curs]
-  out = []
-  async for doc in curs:
-    doc.pop('pos_neg', None)
-    doc.pop('frags', None)
-    out.append(doc)
-  return out
-
-
-@router.get('/top/ref_bundles/',
-  summary='Топ N бандлов')
-async def _req_top_ref_bundles(
-  topn:Optional[int]=None, author:Optional[str]=None, cited:Optional[str]=None,
-  citing:Optional[str]=None, _debug_option:Optional[DebugOption]=None
-):
-  pipeline = get_refbindles_pipeline(topn, author, cited, citing)
-  if _debug_option == DebugOption.pipeline:
-    return pipeline
-
-  coll: Collection = slot.mdb.contexts
-  curs = coll.aggregate(pipeline)
-  if _debug_option == DebugOption.raw_out:
-    return [doc async for doc in curs]
-
-  out = []
-  async for doc in curs:
-    doc.pop('pos_neg', None)
-    doc.pop('frags', None)
-    if 'authors' not in doc:
-      doc['authors'] = []
-    out.append(doc)
-
-  return out
-
-
-@router.get('/top/topics/',
-  summary='Топ N топиков')
-async def _req_top_topics(
-  topn:Optional[int]=None, author:Optional[str]=None, cited:Optional[str]=None,
-  citing:Optional[str]=None, probability:Optional[float]=.5,
-  _debug_option:DebugOption=None
-):
-  pipeline = get_top_topics_pipeline(topn, author, cited, citing, probability)
-  if _debug_option == DebugOption.pipeline:
-    return pipeline
-
-  coll: Collection = slot.mdb.contexts
-  out = [doc async for doc in coll.aggregate(pipeline)]
-  return out
-
-
 @router.get('/frags/cocitauthors/',
   summary='Распределение «со-цитируемые авторы» по 5-ти фрагментам')
 async def _req_frags_cocitauthors(
@@ -1207,6 +1053,56 @@ async def _req_pubs_refauthors(
   return out
 
 
+@router.get('/top/cocitauthors/',
+  summary='Топ N со-цитируемых авторов')
+async def _req_top_cocitauthors(
+  topn:Optional[int]=None, author:Optional[str]=None, cited:Optional[str]=None,
+  citing:Optional[str]=None, _add_pipeline:bool=False
+):
+  pass
+  coll: Collection = slot.mdb.contexts
+  pipeline = get_top_cocitauthors_pipeline(topn, author, cited, citing)
+
+  out = []
+  async for doc in coll.aggregate(pipeline):
+    title = doc.pop('_id')
+    out.append(dict(title=title, **doc))
+  if not _add_pipeline:
+    return out
+
+  return dict(pipeline=pipeline, items=out)
+
+
+@router.get('/top/cocitrefs/',
+  summary='Топ N со-цитируемых референсов')
+async def _req_top_cocitauthors(
+  topn:Optional[int]=None, author:Optional[str]=None, cited:Optional[str]=None,
+  citing:Optional[str]=None,
+  _debug_option:DebugOption=None
+):
+  pipeline = get_top_cocitrefs_pipeline(topn, author, cited, citing)
+  if _debug_option == DebugOption.pipeline:
+    return pipeline
+  coll: Collection = slot.mdb.contexts
+
+  def repack(_id, count, conts, bundles):
+    authors = bundles.get('authors')
+    title = bundles.get('title')
+    year = bundles.get('year', '?')
+    descr = f'{" ".join(authors) if authors else "?"} ({year})'
+    if title:
+      descr += f' {title}'
+    return dict(bundle=_id, descr=descr, intxtids=conts)
+
+  curs = coll.aggregate(pipeline)
+  if _debug_option == DebugOption.raw_out:
+    return [doc async for doc in curs]
+
+  out = [repack(**doc) async for doc in curs]
+
+  return out
+
+
 @router.get('/top/cocitauthors/publications/',
   summary='Топ N со-цитируемых авторов по публикациям')
 async def _req_top_cocitauthors_pubs(
@@ -1247,6 +1143,46 @@ async def _req_top_cocitrefs2(
   return out
 
 
+@router.get('/top/ngramms/',
+  summary='Топ N фраз по публикациям')
+async def _req_top_ngramms(
+  topn:Optional[int]=10, author:Optional[str]=None, cited:Optional[str]=None,
+  citing:Optional[str]=None,
+  nka:Optional[int]=Query(None, ge=0, le=6),
+  ltype:Optional[LType]=Query(None, title='Тип фразы'), #, description='Может быть одно из значений "lemmas", "nolemmas" или пустой'),
+  _debug_option:Optional[DebugOption]=None
+):
+  pipeline = get_top_ngramms_pipeline(topn, author, cited, citing, nka, ltype)
+  if _debug_option == DebugOption.pipeline:
+    return pipeline
+  coll: Collection = slot.mdb.contexts
+  curs = coll.aggregate(pipeline)
+  if _debug_option == DebugOption.raw_out:
+    return [doc async for doc in curs]
+
+  get_as_tuple = itemgetter('_id', 'count', 'count_cont', 'conts')
+  get_pubs = itemgetter('cont_id', 'cnt')
+  key_sort = lambda kv: (-kv[-1], kv[0])
+  get_name = itemgetter('title')
+  get_ltype = itemgetter('type')
+
+  out = []
+  async for doc in curs:
+    nid, cnt, count_cont, conts = get_as_tuple(doc)
+    odoc = dict(
+      title=get_name(nid), type=get_ltype(nid),
+      all=cnt, count_cont=count_cont,
+      contects=dict(
+        sorted(
+          Counter(
+            p for p, n in (get_pubs(co) for co in conts)
+            for _ in range(n)
+          ).most_common(),
+          key=key_sort)))
+    out.append(odoc)
+  return out
+
+
 @router.get('/top/ngramms/publications/',
   summary='Топ N фраз по публикациям')
 async def _req_top_ngramm_pubs(
@@ -1263,6 +1199,70 @@ async def _req_top_ngramm_pubs(
 
   contexts: Collection = slot.mdb.contexts
   out = [row async for row in contexts.aggregate(pipeline)]
+  return out
+
+
+@router.get('/top/ref_authors/',
+  summary='Топ N авторов бандлов')
+async def _req_top_ref_bundles(
+  topn: Optional[int] = None,  author: Optional[str] = None,
+  cited: Optional[str] = None, citing: Optional[str] = None,
+  _debug_option:Optional[DebugOption]=None
+):
+  pipeline = get_refauthors_pipeline(topn, author, cited, citing)
+  if _debug_option == DebugOption.pipeline:
+    return pipeline
+  coll: Collection = slot.mdb.contexts
+  curs = coll.aggregate(pipeline)
+  if _debug_option == DebugOption.raw_out:
+    return [doc async for doc in curs]
+  out = []
+  async for doc in curs:
+    doc.pop('pos_neg', None)
+    doc.pop('frags', None)
+    out.append(doc)
+  return out
+
+
+@router.get('/top/ref_bundles/',
+  summary='Топ N бандлов')
+async def _req_top_ref_bundles(
+  topn:Optional[int]=None, author:Optional[str]=None, cited:Optional[str]=None,
+  citing:Optional[str]=None, _debug_option:Optional[DebugOption]=None
+):
+  pipeline = get_refbindles_pipeline(topn, author, cited, citing)
+  if _debug_option == DebugOption.pipeline:
+    return pipeline
+
+  coll: Collection = slot.mdb.contexts
+  curs = coll.aggregate(pipeline)
+  if _debug_option == DebugOption.raw_out:
+    return [doc async for doc in curs]
+
+  out = []
+  async for doc in curs:
+    doc.pop('pos_neg', None)
+    doc.pop('frags', None)
+    if 'authors' not in doc:
+      doc['authors'] = []
+    out.append(doc)
+
+  return out
+
+
+@router.get('/top/topics/',
+  summary='Топ N топиков')
+async def _req_top_topics(
+  topn:Optional[int]=None, author:Optional[str]=None, cited:Optional[str]=None,
+  citing:Optional[str]=None, probability:Optional[float]=.5,
+  _debug_option:DebugOption=None
+):
+  pipeline = get_top_topics_pipeline(topn, author, cited, citing, probability)
+  if _debug_option == DebugOption.pipeline:
+    return pipeline
+
+  coll: Collection = slot.mdb.contexts
+  out = [doc async for doc in coll.aggregate(pipeline)]
   return out
 
 
