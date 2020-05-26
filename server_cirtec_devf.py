@@ -1295,8 +1295,9 @@ async def _ref_auth4ngramm_tops(
     return pipeline
 
   contexts: Collection = slot.mdb.contexts
+  curs = contexts.aggregate(pipeline, allowDiskUse=True)
   if _debug_option == DebugOption.raw_out:
-    return [cont async for cont in contexts.aggregate(pipeline)]
+    return [cont async for cont in curs]
 
   out_bund = []
   get_topics = lambda c: c.get('topics', ())
@@ -1313,7 +1314,7 @@ async def _ref_auth4ngramm_tops(
 
   get_count = itemgetter('count')
   get_ngr = itemgetter('_id', 'cnt')
-  async for cont in contexts.aggregate(pipeline):
+  async for cont in curs:
     conts = cont.pop('conts')
 
     cont_ids = map(itemgetter('cid'), conts)
