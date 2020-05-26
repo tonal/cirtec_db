@@ -250,7 +250,8 @@ def get_top_ngramms_publications_pipeline(
     pipeline += [get_ngramm_filter(nka, ltype, 'ngrm')]
   pipeline += [
     {'$group': {
-      '_id': '$linked_papers_ngrams', 'count': {'$sum': 1},
+      '_id': '$linked_papers_ngrams._id',
+      'count': {'$sum': '$linked_papers_ngrams.cnt'},
       "ngrm": {"$first": "$ngrm"}, "pubs": {'$addToSet': '$pubid'}, }},
     {'$sort': {'count': -1, '_id': 1}}]
   if topn:
