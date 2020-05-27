@@ -200,12 +200,17 @@ async def _req_frags_cocitauthors(
   summary='Кросс-распределение «5 фрагментов» - «со-цитируемые авторы»')
 async def _req_frags_cocitauthors_cocitauthors(
   topn:Optional[int]=None, author:Optional[str]=None, cited:Optional[str]=None,
-  citing:Optional[str]=None, _add_pipeline:bool=False
+  citing:Optional[str]=None,
+  _debug_option:DebugOption=None
 ):
   pipeline = get_frags_cocitauthors_cocitauthors_pipeline(
     topn, author, cited, citing)
+  if _debug_option == DebugOption.pipeline:
+    return pipeline
   contexts = slot.mdb.contexts
-  curs = contexts.aggregate(pipeline)
+  curs = contexts.aggregate(pipeline, allowDiskUse=True)
+  if _debug_option == DebugOption.raw_out:
+    return [doc async for doc in curs]
   out = []
   async for doc in curs:
     cocitpair = doc['cocitpair']
@@ -217,10 +222,7 @@ async def _req_frags_cocitauthors_cocitauthors(
       cocitpair=tuple(cocitpair.values()),
       intxtid_cnt=len(contids), pub_cnt=len(pubids),
       frags=dict(sorted(frags.items())), pubids=pubids, intxtids=contids))
-  if not _add_pipeline:
-    return out
-
-  return dict(pipeline=pipeline, items=out)
+  return out
 
 
 @router.get('/frags/cocitauthors/ngramms/',
