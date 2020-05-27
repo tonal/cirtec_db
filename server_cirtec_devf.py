@@ -500,12 +500,15 @@ async def _req_frags_ngramms_topics(
 async def _req_frags_pos_neg_cocitauthors2(
   topn:Optional[int]=None, author: Optional[str] = None,
   cited:Optional[str]=None, citing:Optional[str]=None,
-  _add_pipeline: bool = False
+  _debug_option:DebugOption=None
 ):
   pipeline = get_frag_pos_neg_cocitauthors2(topn, author, cited, citing)
+  if _debug_option == DebugOption.pipeline:
+    return pipeline
   contexts = slot.mdb.contexts
-  curs = contexts.aggregate(pipeline)
-  # out = [doc async for doc in curs]
+  curs = contexts.aggregate(pipeline, allowDiskUse=True)
+  if _debug_option == DebugOption.raw_out:
+    return [doc async for doc in curs]
   out = []
   async for doc in curs:
     cocitpair = doc['cocitpair']
@@ -522,10 +525,7 @@ async def _req_frags_pos_neg_cocitauthors2(
       cont_cnt=len(intxtids), pub_cnt=len(pubids),
       frags=dict(sorted(frags.items())), neutral=neutral, positive=positive,
       negative=negative, pubids=pubids, intxtids=intxtids))
-  if not _add_pipeline:
-    return out
-
-  return dict(pipeline=pipeline, items=out)
+  return out
 
 
 @router.get('/frags/pos_neg/contexts/',
@@ -533,16 +533,15 @@ async def _req_frags_pos_neg_cocitauthors2(
 async def _req_frags_pos_neg_contexts(
   author: Optional[str] = None, cited: Optional[str] = None,
   citing: Optional[str] = None,
-  _add_pipeline: bool = False
+  _debug_option:DebugOption=None
 ):
   pipeline = get_frag_pos_neg_contexts(author, cited, citing)
+  if _debug_option == DebugOption.pipeline:
+    return pipeline
   contexts = slot.mdb.contexts
   curs = contexts.aggregate(pipeline)
   out = [doc async for doc in curs]
-  if not _add_pipeline:
-    return out
-
-  return dict(pipeline=pipeline, items=out)
+  return out
 
 
 @router.get('/frags/publications/',
@@ -550,14 +549,19 @@ async def _req_frags_pos_neg_contexts(
 async def _req_frags_pubs(
   author: Optional[str] = None, cited: Optional[str] = None,
   citing: Optional[str] = None,
-  _add_pipeline: bool = False
+  _debug_option:DebugOption=None
 ):
-  publications = slot.mdb.publications
   pipeline = get_frag_publications(author, cited, citing)
+  if _debug_option == DebugOption.pipeline:
+    return pipeline
+  publications = slot.mdb.publications
+  curs = publications.aggregate(pipeline)
+  if _debug_option == DebugOption.raw_out:
+    return [doc async for doc in curs]
 
   to_tuple = itemgetter('_id', 'descr', 'sum', 'frags')
   out = []
-  async for doc in publications.aggregate(pipeline):
+  async for doc in curs:
     pubid, descr, sum, frags = to_tuple(doc)
 
     if len(frags) == 1 and 'fn' not in frags[0]:
@@ -566,10 +570,7 @@ async def _req_frags_pubs(
       frags = dict(map(itemgetter('fn', 'count'), frags))
     out.append(dict(pubid=pubid, descr=descr, sum=sum, frags=frags))
 
-  if not _add_pipeline:
-    return out
-
-  return dict(pipeline=pipeline, items=out)
+  return out
 
 
 @router.get('/frags/ref_authors/',) # summary='')
