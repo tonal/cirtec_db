@@ -7,7 +7,7 @@ from collections import Counter, defaultdict
 
 from pymongo import MongoClient
 
-from select4reportA import print_freq_topics_by_frags, get_topn
+from reports.select4reportA import print_freq_topics_by_frags, get_topn
 from utils import load_config
 
 

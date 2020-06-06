@@ -8,7 +8,7 @@ import json
 
 from pymongo import MongoClient
 
-from select4reportA import get_topn
+from reports.select4reportA import get_topn
 from utils import load_config
 
 
@@ -59,7 +59,7 @@ def print_topics_top_author_by_frags(mdb):
     ):
       crosscocitaith[co] = dict(frags=cnts, sum=sum(cnts.values()))
 
-  with open('out_json/topics_top_author_by_frags.json', 'w') as out:
+  with open('../out_json/topics_top_author_by_frags.json', 'w') as out:
     json.dump(out_dict, out, ensure_ascii=False)
 
 
@@ -113,7 +113,7 @@ def print_topics_top_ngramm_by_frags(
       # print(f"   {j:<3d} '{co}': {msg} ({sum(cnts.values())})")
       crossgrams[co] = dict(frags=cnts, sum=sum(cnts.values()))
 
-  with open('out_json/topics_top_ngramm_by_frags.json', 'w') as out:
+  with open('../out_json/topics_top_ngramm_by_frags.json', 'w') as out:
     json.dump(out_dict, out, ensure_ascii=False)
 
 

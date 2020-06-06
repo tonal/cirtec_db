@@ -199,7 +199,7 @@ async def _req_frags_cocitauthors(
 @router.get('/frags/cocitauthors/cocitauthors/',
   summary='Кросс-распределение «5 фрагментов» - «со-цитируемые авторы»')
 async def _req_frags_cocitauthors_cocitauthors(
-  topn:Optional[int]=None, author:Optional[str]=None, cited:Optional[str]=None,
+  topn:Optional[int]=100, author:Optional[str]=None, cited:Optional[str]=None,
   citing:Optional[str]=None,
   _debug_option:DebugOption=None
 ):
@@ -498,7 +498,7 @@ async def _req_frags_ngramms_topics(
 @router.get('/frags/pos_neg/cocitauthors/cocitauthors/',
   summary='Со-цитируемые авторы, распределение тональности их со-цитирований и распределение по 5-ти фрагментам')
 async def _req_frags_pos_neg_cocitauthors2(
-  topn:Optional[int]=None, author: Optional[str] = None,
+  topn:Optional[int]=100, author: Optional[str] = None,
   cited:Optional[str]=None, citing:Optional[str]=None,
   _debug_option:DebugOption=None
 ):

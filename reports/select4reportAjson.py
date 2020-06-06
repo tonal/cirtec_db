@@ -43,7 +43,7 @@ def print_freq_contexts(contexts):
     {'$group': {'_id': '$frag_num', 'count': {'$sum': 1}}},
     {'$sort': {'_id': 1}}])
   cnts = Counter({doc['_id']: int(doc["count"]) for doc in curs})
-  with open('out_json/freq_contexts.json', 'w') as out:
+  with open('../out_json/freq_contexts.json', 'w') as out:
     json.dump(cnts, out, ensure_ascii=False)
 
 
@@ -81,7 +81,7 @@ def print_freq_contexts_by_pubs(mdb):
     pcnts = pub[1]
     out_pubs[pid] = dict(descr=pub[0], sum=sum(pcnts.values()), frags=pcnts)
 
-  with open('out_json/freq_contexts_by_pubs.json', 'w') as out:
+  with open('../out_json/freq_contexts_by_pubs.json', 'w') as out:
     json.dump(out_pubs, out, ensure_ascii=False)
 
 
@@ -118,7 +118,7 @@ def print_freq_cocitauth_by_frags(contexts, topn:int=5):
     ):
       out_cocitauthors[co] = dict(frags=cnts, sum=sum(cnts.values()))
 
-  with open('out_json/freq_cocitauth_by_frags.json', 'w') as out:
+  with open('../out_json/freq_cocitauth_by_frags.json', 'w') as out:
     json.dump(out_dict, out, ensure_ascii=False)
 
 
@@ -193,7 +193,7 @@ def print_freq_ngramm_by_frag(mdb, topn:int=10, *, nka:int=2, ltype:str='lemmas'
     ):
       crossgrams[co] = dict(frags=cnts, sum=sum(cnts.values()))
 
-  with open('out_json/freq_ngramm_by_frag.json', 'w') as out:
+  with open('../out_json/freq_ngramm_by_frag.json', 'w') as out:
     json.dump(out_dict, out, ensure_ascii=False)
 
 
@@ -262,7 +262,7 @@ def print_freq_topics_by_frags(mdb, topn:int=20):
     ):
       crosstopics[co] = dict(frags=cnts, sum=sum(cnts.values()))
 
-  with open('out_json/freq_topics_by_frags.json', 'w') as out:
+  with open('../out_json/freq_topics_by_frags.json', 'w') as out:
     json.dump(out_dict, out, ensure_ascii=False)
 
 
@@ -353,7 +353,7 @@ def print_freqs_table(mdb):
 
     out_dict[i] = out_frag
 
-  with open('out_json/freqs_table.json', 'w') as out:
+  with open('../out_json/freqs_table.json', 'w') as out:
     json.dump(out_dict, out, ensure_ascii=False)
 
 

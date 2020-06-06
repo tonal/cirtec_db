@@ -29,9 +29,9 @@ lxml==4.5.1               # via -r requirements.in, html-text, parsel
 more-itertools==8.3.0     # via -r requirements.in
 motor==2.1.0              # via -r requirements.in
 multidict==4.7.6          # via aiohttp, yarl
-numpy==1.18.4             # via pandas, scikit-learn, scipy
-orjson==3.0.1             # via -r requirements.in
-pandas==1.0.3             # via -r requirements.in
+numpy==1.18.5             # via pandas, scikit-learn, scipy
+orjson==3.0.2             # via -r requirements.in
+pandas==1.0.4             # via -r requirements.in
 parsel==1.6.0             # via -r requirements.in
 pycares==3.1.1            # via aiodns
 pycparser==2.20           # via cffi
@@ -50,8 +50,8 @@ scipy==1.4.1              # via scikit-learn
 six==1.15.0               # via parsel, python-dateutil, w3lib
 sklearn==0.0              # via -r requirements.in
 starlette==0.13.2         # via fastapi
-threadpoolctl==2.0.0      # via scikit-learn
-ujson==2.0.3              # via -r requirements.in
+threadpoolctl==2.1.0      # via scikit-learn
+ujson==3.0.0              # via -r requirements.in
 urllib3==1.25.9           # via requests
 uvicorn==0.11.5           # via -r requirements.in
 uvloop==0.14.0            # via -r requirements.in, uvicorn

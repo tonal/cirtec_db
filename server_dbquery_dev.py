@@ -623,25 +623,15 @@ def get_frags_cocitauthors_cocitauthors_pipeline(
       "pubid": 1,"cocit_authors": 1,"frag_num": 1,"cont.cocit_authors": 1}},
     {"$unwind": "$cont"},
     {"$unwind": "$cont.cocit_authors"},
-    {"$match": {"$expr": {"$ne": ["$cocit_authors", "$cont.cocit_authors"]}}},
-    {"$group": {
+    {"$match": {"$expr": {"$lt": ["$cocit_authors", "$cont.cocit_authors"]}}},
+    {"$project": {
       "_id": {
-        "cocitauthor1": {
-          "$cond": [
-            {"$gte": ["$cocit_authors", "$cont.cocit_authors"]},
-            "$cont.cocit_authors", "$cocit_authors"]},
-        "cocitauthor2": {
-          "$cond": [
-            {"$gte": ["$cocit_authors", "$cont.cocit_authors"]},
-            "$cocit_authors", "$cont.cocit_authors"]},
+        "author1": "$cocit_authors", "author2": "$cont.cocit_authors",
         "cont_id": "$_id"},
-      "cont": {"$first": {"pubid": "$pubid", "frag_num": "$frag_num"}}}
-    },
+      "cont": {"pubid": "$pubid", "frag_num": "$frag_num"}}},
     {"$sort": {"_id": 1}},
     {"$group": {
-      "_id": {
-        "cocitauthor1": "$_id.cocitauthor1",
-        "cocitauthor2": "$_id.cocitauthor2"},
+      "_id": {"author1": "$_id.author1","author2": "$_id.author2"},
       "count": {"$sum": 1},
       "conts": {
         "$push": {
@@ -650,9 +640,7 @@ def get_frags_cocitauthors_cocitauthors_pipeline(
     {"$sort": {"count": -1, "_id": 1}},
     {"$project": {
         "_id": 1,
-        "cocitpair": {
-          "author1": "$_id.cocitauthor1",
-          "author2": "$_id.cocitauthor2"},
+        "cocitpair": {"author1": "$_id.author1", "author2": "$_id.author2"},
         "count": "$count", "conts": "$conts"}},
   ]
   if topn:
@@ -1010,24 +998,19 @@ def get_frag_pos_neg_cocitauthors2(
       'cont.cocit_authors': 1}},
     {'$unwind': '$cont'},
     {'$unwind': '$cont.cocit_authors'},
-    {'$match': {'$expr': {'$ne': ['$cocit_authors', '$cont.cocit_authors']}}},
-    {'$group': {
-      '_id': {
-        'cocitauthor1': {'$cond': [
-          {'$gte': ['$cocit_authors', '$cont.cocit_authors'],},
-          '$cont.cocit_authors', '$cocit_authors']},
-        'cocitauthor2': {'$cond': [
-          {'$gte': ['$cocit_authors', '$cont.cocit_authors'],},
-          '$cocit_authors', '$cont.cocit_authors']},
-        'cont_id': '$_id'},
-      'cont': {'$first': {
-        'pubid': '$pubid', 'frag_num': '$frag_num',
-        'positive_negative': '$positive_negative'}},}},
+    {"$match": {"$expr": {"$lt": ["$cocit_authors", "$cont.cocit_authors"]}}},
+    {"$project": {
+      "_id": {
+        "author1": "$cocit_authors", "author2": "$cont.cocit_authors",
+        "cont_id": "$_id"},
+      "cont": {
+        "pubid": "$pubid", "frag_num": "$frag_num",
+        'positive_negative': '$positive_negative'}}},
     {'$sort': {'_id': 1}},
     {'$group': {
       '_id': {
-        'cocitauthor1': '$_id.cocitauthor1',
-        'cocitauthor2': '$_id.cocitauthor2'},
+        'author1': '$_id.author1',
+        'author2': '$_id.author2'},
       'count': {'$sum': 1},
       'conts': {'$push': {
         'cont_id': '$_id.cont_id', 'pubid': '$cont.pubid',
@@ -1037,7 +1020,7 @@ def get_frag_pos_neg_cocitauthors2(
     {'$project': {
       '_id': False,
       'cocitpair': {
-        'author1': '$_id.cocitauthor1', 'author2': '$_id.cocitauthor2'},
+        'author1': '$_id.author1', 'author2': '$_id.author2'},
       'count': '$count', 'conts': '$conts', }},
   ]
   if topn:
