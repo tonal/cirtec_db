@@ -115,10 +115,10 @@ async def _close_app():
 @router.get('/db/bundle/',
   summary='Данные по указанному бандлу (bundles) из mongodb')
 async def _db_bundle(id:str):
-  _logger.info('start func(%s)', id)
+  # _logger.info('start func(%s)', id)
   coll:Collection = slot.mdb.bundles
   doc:dict = await coll.find_one(dict(_id=id))
-  _logger.info('end func(%s)->%s', id, doc)
+  # _logger.info('end func(%s)->%s', id, doc)
   return doc
 
 
