@@ -10,7 +10,7 @@ async-timeout==3.0.1      # via aiohttp
 attrs==19.3.0             # via -r requirements.in, aiohttp
 brotlipy==0.7.0           # via aiohttp
 cchardet==2.1.6           # via aiohttp
-certifi==2020.4.5.1       # via requests
+certifi==2020.4.5.2       # via requests
 cffi==1.14.0              # via brotlipy, pycares, zstandard
 chardet==3.0.4            # via aiohttp, requests
 click==7.1.2              # via -r requirements.in, uvicorn
@@ -30,7 +30,7 @@ more-itertools==8.3.0     # via -r requirements.in
 motor==2.1.0              # via -r requirements.in
 multidict==4.7.6          # via aiohttp, yarl
 numpy==1.18.5             # via pandas, scikit-learn, scipy
-orjson==3.0.2             # via -r requirements.in
+orjson==3.1.0             # via -r requirements.in
 pandas==1.0.4             # via -r requirements.in
 parsel==1.6.0             # via -r requirements.in
 pycares==3.1.1            # via aiodns

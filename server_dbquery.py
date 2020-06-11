@@ -19,8 +19,8 @@ def get_refbindles_pipeline(
   pipeline = [
     {'$match': {'exact': {'$exists': 1}}},
     {'$project': {
-      'prefix': 0, 'suffix': 0, 'exact': 0, 'linked_papers_topics': 0,
-      'linked_papers_ngrams': 0}},
+      'prefix': 0, 'suffix': 0, 'exact': 0, 'topics': 0,
+      'ngrams': 0}},
   ]
 
   pipeline += filter_by_pubs_acc(author, cited, citing)
@@ -81,6 +81,20 @@ def filter_acc_dict(
   return match
 
 
+def filter_by_topic(
+  author:Optional[str], cited:Optional[str], citing:Optional[str], *,
+  as_field:str='topic'
+):
+  pipeline = [
+    {
+    '$match': {
+      "$or": [
+        {f'{as_field}.uni_{fld}': val} for fld, val in
+          (('author', author), ('cited', cited), ('citing', citing),)
+        if val]}}, ]
+  return pipeline
+
+
 def get_refauthors_pipeline(
   topn: Optional[int], author:Optional[str], cited:Optional[str],
   citing:Optional[str]
@@ -88,8 +102,8 @@ def get_refauthors_pipeline(
   pipeline = [
     {'$match': {'exact': {'$exists': 1}}},
     {'$project': {
-      'prefix': 0, 'suffix': 0, 'exact': 0, 'linked_papers_topics': 0,
-      'linked_papers_ngrams': 0}},
+      'prefix': 0, 'suffix': 0, 'exact': 0, 'topics': 0,
+      'ngrams': 0}},
     {'$unwind': '$bundles'},
   ]
 
@@ -159,8 +173,8 @@ def get_top_cocitauthors_publications_pipeline(
   pipeline = [
     {'$match': {'cocit_authors': {'$exists': 1}}},
     {'$project': {
-      'prefix': 0, 'suffix': 0, 'exact': 0, 'linked_papers_ngrams': 0,
-      "linked_papers_topics": 0}}, ]
+      'prefix': 0, 'suffix': 0, 'exact': 0, 'ngrams': 0,
+      "topics": 0}}, ]
   pipeline += filter_by_pubs_acc(author, cited, citing)
 
   pipeline += [
@@ -234,24 +248,23 @@ def get_top_ngramms_publications_pipeline(
   citing: Optional[str], nka:Optional[int], ltype:Optional[LType]
 ):
   pipeline = [
-    {'$match': {"linked_papers_ngrams": {'$exists': 1}}},
+    {'$match': {"ngrams": {'$exists': 1}}},
     {'$project': {
       'prefix': 0, 'suffix': 0, 'exact': 0, 'cocit_authors': 0,
-      "linked_papers_topics": 0}}, ]
+      "topics": 0}}, ]
   pipeline += filter_by_pubs_acc(author, cited, citing)
 
   pipeline += [
-    {'$unwind': '$linked_papers_ngrams'},
+    {'$unwind': '$ngrams'},
     {'$lookup': {
-      'from': 'n_gramms', 'localField': 'linked_papers_ngrams._id',
+      'from': 'n_gramms', 'localField': 'ngrams._id',
       'foreignField': '_id', 'as': 'ngrm'}},
     {'$unwind': '$ngrm'},]
   if nka or ltype:
     pipeline += [get_ngramm_filter(nka, ltype, 'ngrm')]
   pipeline += [
     {'$group': {
-      '_id': '$linked_papers_ngrams._id',
-      'count': {'$sum': '$linked_papers_ngrams.cnt'},
+      '_id': '$ngrams._id', 'count': {'$sum': '$ngrams.cnt'},
       "ngrm": {"$first": "$ngrm"}, "pubs": {'$addToSet': '$pubid'}, }},
     {'$sort': {'count': -1, '_id': 1}}]
   if topn:
@@ -269,23 +282,24 @@ def get_top_topics_publications_pipeline(
   citing: Optional[str], probability:Optional[float]
 ):
   pipeline = [
-    {'$match': {"linked_papers_topics": {'$exists': 1}}},
+    {'$match': {"topics": {'$exists': 1}}},
     {'$project': {
       'prefix': 0, 'suffix': 0, 'exact': 0, 'cocit_authors': 0,
-      "linked_papers_ngrams": 0}}, ]
+      "ngrams": 0}}, ]
   pipeline += filter_by_pubs_acc(author, cited, citing)
 
-  pipeline += [{'$unwind': '$linked_papers_topics'},]
+  pipeline += [{'$unwind': '$topics'},]
 
   if probability:
     pipeline += [
-      {'$match': {"linked_papers_topics.probability": {'$gte': probability}}},]
+      {'$match': {"topics.probability": {'$gte': probability}}},]
 
+  pipeline += _add_topic_pipeline(author, cited, citing)
   pipeline += [
     {'$group': {
-      '_id': '$linked_papers_topics._id', 'count': {'$sum': 1},
-      'probability_avg': {'$avg': '$linked_papers_topics.probability'},
-      'probability_stddev': {'$stdDevPop': '$linked_papers_topics.probability'},
+      '_id': '$topics.title', 'count': {'$sum': 1},
+      'probability_avg': {'$avg': '$topics.probability'},
+      'probability_stddev': {'$stdDevPop': '$topics.probability'},
       "pubs": {'$addToSet': '$pubid'}, }},
     {'$sort': {'count': -1, '_id': 1}}]
   if topn:
@@ -308,22 +322,24 @@ def get_top_topics_pipeline(
   pipeline = [
     {'$match': {'exact': {'$exists': 1}}},
     {'$project': {
-      'prefix': 0, 'suffix': 0, 'exact': 0, 'linked_papers_ngrams': 0}},
+      'prefix': 0, 'suffix': 0, 'exact': 0, 'ngrams': 0}},
   ]
   pipeline += filter_by_pubs_acc(author, cited, citing)
 
   pipeline += [
-    {'$unwind': '$linked_papers_topics'},
+    {'$unwind': '$topics'},
   ]
   if probability :
     pipeline += [
-      {'$match': {'linked_papers_topics.probability': {'$gte': probability}}},]
+      {'$match': {'topics.probability': {'$gte': probability}}},]
+
+  pipeline += _add_topic_pipeline(author, cited, citing)
 
   pipeline += [
     {'$group': {
-      '_id': '$linked_papers_topics._id', 'count': {'$sum': 1},
-      'probability_avg': {'$avg': '$linked_papers_topics.probability'},
-      'probability_stddev': {'$stdDevPop': '$linked_papers_topics.probability'},
+      '_id': '$topic.title', 'count': {'$sum': 1},
+      'probability_avg': {'$avg': '$topics.probability'},
+      'probability_stddev': {'$stdDevPop': '$topics.probability'},
       'conts': {'$addToSet': '$_id'}, }},
     {'$sort': {'count': -1, '_id': 1}}
   ]
@@ -340,22 +356,34 @@ def get_top_topics_pipeline(
   return pipeline
 
 
+def _add_topic_pipeline(
+  author:Optional[str], cited:Optional[str], citing:Optional[str],
+  *, localField:str='topics._id', as_field:str='topic'
+):
+  pipeline = [
+    {'$lookup': {
+      'from': 'topics', 'localField': localField, 'foreignField': '_id',
+      'as': as_field}},
+    {"$unwind": "$" + as_field}, ]
+  if any([author, cited, citing]):
+    pipeline += filter_by_topic(author, cited, citing)
+  return pipeline
+
+
 def get_top_ngramms_pipeline(
   topn:Optional[int], author:Optional[str], cited:Optional[str],
   citing:Optional[str], nka:Optional[int], ltype:Optional[LType]
 ):
   pipeline = [
-    {'$match': {'linked_papers_ngrams._id': {'$exists': True}}},
-    {'$project': {
-      'prefix': False, 'suffix': False, 'exact': False,
-      'linked_papers_topics': False}},
+    {'$match': {'ngrams._id': {'$exists': 1}}},
+    {'$project': {'prefix': 0, 'suffix': 0, 'exact': 0, 'topics': 0}},
   ]
   pipeline += filter_by_pubs_acc(author, cited, citing)
 
   pipeline += [
-    {'$unwind': '$linked_papers_ngrams'},
+    {'$unwind': '$ngrams'},
     {'$lookup': {
-      'from': 'n_gramms', 'localField': 'linked_papers_ngrams._id',
+      'from': 'n_gramms', 'localField': 'ngrams._id',
       'foreignField': '_id', 'as': 'ngrm'}},
     {'$unwind': '$ngrm'},
   ]
@@ -366,10 +394,10 @@ def get_top_ngramms_pipeline(
   pipeline += [
   {'$group': {
       '_id': {'title': '$ngrm.title', 'type': '$ngrm.type'},
-      'count': {'$sum': '$linked_papers_ngrams.cnt'},
+      'count': {'$sum': '$ngrams.cnt'},
       'count_cont': {'$sum': 1},
       'conts': {
-        '$push': {'cont_id': '$_id', 'cnt': '$linked_papers_ngrams.cnt'}}}},
+        '$push': {'cont_id': '$_id', 'cnt': '$ngrams.cnt'}}}},
     {'$sort': {'count': -1, '_id': 1}},
   ]
 
@@ -402,7 +430,7 @@ def get_top_cocitauthors_pipeline(
     {'$match': {'frag_num': {'$gt': 0}, 'cocit_authors': {'$exists': 1}}},
     {'$project': {
       'prefix': 0, 'suffix': 0, 'exact': 0, 'positive_negative': 0,
-      'bundles': 0, 'linked_papers_ngrams': 0, 'linked_papers_topics': 0}},]
+      'bundles': 0, 'ngrams': 0, 'topics': 0}},]
 
   pipeline += filter_by_pubs_acc(author, cited, citing)
 
@@ -426,7 +454,7 @@ def get_top_cocitrefs_pipeline(
     {'$match': {'frag_num': {'$gt': 0}, 'bundles': {'$exists': 1}}},
     {'$project': {
       'prefix': 0, 'suffix': 0, 'exact': 0, 'positive_negative': 0,
-      'linked_papers_ngrams': 0, 'linked_papers_topics': 0}},]
+      'ngrams': 0, 'topics': 0}},]
 
   pipeline += filter_by_pubs_acc(author, cited, citing)
   pipeline += [
@@ -454,8 +482,8 @@ def get_refauthors_part_pipeline(
   pipeline = [
     {'$match': {'exact': {'$exists': 1}}},
     {'$project': {
-      'prefix': 0, 'suffix': 0, 'exact': 0, 'linked_papers_topics': 0,
-      'linked_papers_ngrams': 0}},]
+      'prefix': 0, 'suffix': 0, 'exact': 0, 'topics': 0,
+      'ngrams': 0}},]
   pipeline += filter_by_pubs_acc(author, cited, citing)
   pipeline += [
     {'$unwind': '$bundles'},
@@ -492,8 +520,8 @@ def get_ref_auth4ngramm_tops_pipeline(
   citing:Optional[str]
 ):
   pipeline = [
-    {'$match': {'exact': {'$exists': True}}},
-    {'$project': {'prefix': False, 'suffix': False, 'exact': False, }},]
+    {'$match': {'exact': {'$exists': 1}}},
+    {'$project': {'prefix': 0, 'suffix': 0, 'exact': 0, }},]
 
   pipeline += filter_by_pubs_acc(author, cited, citing)
   pipeline += [
@@ -507,10 +535,9 @@ def get_ref_auth4ngramm_tops_pipeline(
     {'$group': {
         '_id': '$bundle.authors', 'pubs': {'$addToSet': '$pubid'}, 'conts': {
           '$addToSet': {
-            'cid': '$_id', 'topics': '$linked_papers_topics',
-            'ngrams': '$linked_papers_ngrams'}}}},
+            'cid': '$_id', 'topics': '$topics', 'ngrams': '$ngrams'}}}},
     {'$project': {
-        '_id': False, 'aurhor': '$_id', 'cits': {'$size': '$conts'},
+        '_id': 0, 'aurhor': '$_id', 'cits': {'$size': '$conts'},
         'pubs': {'$size': '$pubs'}, 'pubs_ids': '$pubs', 'conts': '$conts',
         'total_cits': '$bundle.total_cits', 'total_pubs': '$bundle.total_pubs',
         'year': '$bundle.year', 'authors': '$bundle.authors',
@@ -538,8 +565,8 @@ def get_ref_bund4ngramm_tops_pipeline(
       '_id': '$bundles', 'cits': {'$sum': 1},
       'pubs': {'$addToSet': '$pubid'}, 'conts': {
         '$addToSet': {
-          'cid': '$_id', 'topics': '$linked_papers_topics',
-          'ngrams': '$linked_papers_ngrams'}}}},
+          'cid': '$_id', 'topics': '$topics',
+          'ngrams': '$ngrams'}}}},
     {'$lookup': {
       'from': 'bundles', 'localField': '_id', 'foreignField': '_id',
       'as': 'bundle'}},
@@ -596,25 +623,15 @@ def get_frags_cocitauthors_cocitauthors_pipeline(
       "pubid": 1,"cocit_authors": 1,"frag_num": 1,"cont.cocit_authors": 1}},
     {"$unwind": "$cont"},
     {"$unwind": "$cont.cocit_authors"},
-    {"$match": {"$expr": {"$ne": ["$cocit_authors", "$cont.cocit_authors"]}}},
-    {"$group": {
+    {"$match": {"$expr": {"$lt": ["$cocit_authors", "$cont.cocit_authors"]}}},
+    {"$project": {
       "_id": {
-        "cocitauthor1": {
-          "$cond": [
-            {"$gte": ["$cocit_authors", "$cont.cocit_authors"]},
-            "$cont.cocit_authors", "$cocit_authors"]},
-        "cocitauthor2": {
-          "$cond": [
-            {"$gte": ["$cocit_authors", "$cont.cocit_authors"]},
-            "$cocit_authors", "$cont.cocit_authors"]},
+        "author1": "$cocit_authors", "author2": "$cont.cocit_authors",
         "cont_id": "$_id"},
-      "cont": {"$first": {"pubid": "$pubid", "frag_num": "$frag_num"}}}
-    },
+      "cont": {"pubid": "$pubid", "frag_num": "$frag_num"}}},
     {"$sort": {"_id": 1}},
     {"$group": {
-      "_id": {
-        "cocitauthor1": "$_id.cocitauthor1",
-        "cocitauthor2": "$_id.cocitauthor2"},
+      "_id": {"author1": "$_id.author1","author2": "$_id.author2"},
       "count": {"$sum": 1},
       "conts": {
         "$push": {
@@ -623,9 +640,7 @@ def get_frags_cocitauthors_cocitauthors_pipeline(
     {"$sort": {"count": -1, "_id": 1}},
     {"$project": {
         "_id": 1,
-        "cocitpair": {
-          "author1": "$_id.cocitauthor1",
-          "author2": "$_id.cocitauthor2"},
+        "cocitpair": {"author1": "$_id.author1", "author2": "$_id.author2"},
         "count": "$count", "conts": "$conts"}},
   ]
   if topn:
@@ -640,16 +655,16 @@ def get_frags_cocitauthors_ngramms_pipeline(
   pipeline = [
     {"$match": {
       "cocit_authors": {"$exists": 1}, "frag_num": {"$exists": 1},
-      "linked_papers_ngrams": {'$exists': 1}}},
+      "ngrams": {'$exists': 1}}},
     {"$project": {
       "pubid": 1, "cocit_authors": 1, "frag_num": 1,
-      "linked_papers_ngrams": 1}},]
+      "ngrams": 1}},]
   pipeline += filter_by_pubs_acc(author, cited, citing)
   pipeline += [
     {"$unwind": "$cocit_authors"},
-    {"$unwind": "$linked_papers_ngrams"},
+    {"$unwind": "$ngrams"},
     {'$lookup': {
-      'from': 'n_gramms', 'localField': 'linked_papers_ngrams._id',
+      'from': 'n_gramms', 'localField': 'ngrams._id',
       'foreignField': '_id', 'as': 'ngrm'}},
     {'$unwind': '$ngrm'},]
   if nka or ltype:
@@ -657,10 +672,10 @@ def get_frags_cocitauthors_ngramms_pipeline(
   pipeline += [
     {"$group": {
       "_id": {
-        "cocit_authors": "$cocit_authors", "ngram": "$linked_papers_ngrams._id",
+        "cocit_authors": "$cocit_authors", "ngram": "$ngrams._id",
         "cont_id": "$_id"},
       "cont": {"$first": {"pubid": "$pubid", "frag_num": "$frag_num"}},
-      'count': {'$sum': "$linked_papers_ngrams.cnt"},
+      'count': {'$sum': "$ngrams.cnt"},
       'ngrm': {'$first': "$ngrm"},}},
     {"$sort": {"_id": 1}},
     {"$group": {
@@ -699,21 +714,24 @@ def get_frags_cocitauthors_topics_pipeline(
   pipeline = [
     {"$match": {
       "cocit_authors": {"$exists": 1}, "frag_num": {"$exists": 1},
-      "linked_papers_topics": {'$exists': 1}}},
+      "topics": {'$exists': 1}}},
     {"$project": {
       "pubid": 1, "cocit_authors": 1, "frag_num": 1,
-      "linked_papers_topics": 1}},]
+      "topics": 1}},]
   pipeline += filter_by_pubs_acc(author, cited, citing)
   pipeline += [
     {"$unwind": "$cocit_authors"},
-    {"$unwind": "$linked_papers_topics"},]
+    {"$unwind": "$topics"},]
   if probability:
     pipeline += [
-      {"$match": {"linked_papers_topics.probability": {"$gte": probability}}, }]
+      {"$match": {"topics.probability": {"$gte": probability}}, }]
+
+  pipeline = _add_topic_pipeline(author, cited, citing)
+
   pipeline += [
     {"$group": {
       "_id": {
-        "cocit_authors": "$cocit_authors", "topic": "$linked_papers_topics._id",
+        "cocit_authors": "$cocit_authors", "topic": "$topic.title",
         "cont_id": "$_id"},
       "cont": {"$first": {"pubid": "$pubid", "frag_num": "$frag_num"}},}},
     {"$sort": {"_id": 1}},
@@ -751,9 +769,9 @@ def get_frags_ngramms_pipeline(
 ):
   pipeline = [
     {'$match': {
-      'frag_num': {'$exists': 1}, 'linked_papers_ngrams': {'$exists': 1}}},
+      'frag_num': {'$exists': 1}, 'ngrams': {'$exists': 1}}},
     {'$project': {
-      'pubid': 1, 'frag_num': 1, 'linked_paper': '$linked_papers_ngrams'}},]
+      'pubid': 1, 'frag_num': 1, 'linked_paper': '$ngrams'}},]
   pipeline += filter_by_pubs_acc(author, cited, citing)
   pipeline += [
     {'$unwind': '$linked_paper'},
@@ -790,16 +808,16 @@ def get_frags_ngramms_cocitauthors_pipeline(
   pipeline = [
     {"$match": {
       "cocit_authors": {"$exists": 1}, "frag_num": {"$exists": 1},
-      "linked_papers_ngrams": {'$exists': 1}}},
+      "ngrams": {'$exists': 1}}},
     {"$project": {
       "pubid": 1, "cocit_authors": 1, "frag_num": 1,
-      "linked_papers_ngrams": 1}},]
+      "ngrams": 1}},]
   pipeline += filter_by_pubs_acc(author, cited, citing)
   pipeline += [
     {"$unwind": "$cocit_authors"},
-    {"$unwind": "$linked_papers_ngrams"},
+    {"$unwind": "$ngrams"},
     {'$lookup': {
-      'from': 'n_gramms', 'localField': 'linked_papers_ngrams._id',
+      'from': 'n_gramms', 'localField': 'ngrams._id',
       'foreignField': '_id', 'as': 'ngrm'}},
     {'$unwind': '$ngrm'},]
   if nka or ltype:
@@ -807,10 +825,10 @@ def get_frags_ngramms_cocitauthors_pipeline(
   pipeline += [
     {"$group": {
       "_id": {
-        "ngram": "$linked_papers_ngrams._id", "cocit_authors": "$cocit_authors",
+        "ngram": "$ngrams._id", "cocit_authors": "$cocit_authors",
         "cont_id": "$_id"},
       "cont": {"$first": {"pubid": "$pubid", "frag_num": "$frag_num"}},
-      'count': {'$sum': "$linked_papers_ngrams.cnt"},
+      'count': {'$sum': "$ngrams.cnt"},
       'ngrm': {'$first': "$ngrm"},}},
     {"$sort": {"_id": 1}},
     {"$group": {
@@ -841,11 +859,11 @@ def get_frags_ngramms_ngramms_branch_root(
   citing:Optional[str], nka: Optional[int], ltype: Optional[LType]
 ):
   pipeline = [
-    {'$match': {'linked_papers_ngrams': {'$exists': 1}}},]
+    {'$match': {'ngrams': {'$exists': 1}, 'frag_num': {'$gt': 0}}},]
 
   pipeline += filter_by_pubs_acc(author, cited, citing)
   pipeline += [
-    {'$project': {'linked_paper': '$linked_papers_ngrams'}},
+    {'$project': {'linked_paper': '$ngrams'}},
     {'$unwind': '$linked_paper'},
     {'$group': {
       '_id': '$linked_paper._id', 'count': {'$sum': '$linked_paper.cnt'},
@@ -876,9 +894,9 @@ def get_frags_ngramms_ngramms_branch_pipeline(
   pipeline = [
     {'$project': {
       'prefix': 0, 'suffix': 0, 'exact': 0, 'positive_negative': 0,
-      'linked_papers_topics': 0, 'bundles': 0}},
+      'topics': 0, 'bundles': 0}},
     {'$lookup': {
-      'from': 'n_gramms', 'localField': 'linked_papers_ngrams._id',
+      'from': 'n_gramms', 'localField': 'ngrams._id',
       'foreignField': '_id', 'as': 'cont'}},
     {'$unwind': '$cont'},
   ]
@@ -887,8 +905,8 @@ def get_frags_ngramms_ngramms_branch_pipeline(
     pipeline += [get_ngramm_filter(nka, ltype, 'cont')]
 
   pipeline += [
-    {'$unwind': '$linked_papers_ngrams'},
-    {'$match': {'$expr': {'$eq': ['$linked_papers_ngrams._id', '$cont._id']}}},
+    {'$unwind': '$ngrams'},
+    {'$match': {'$expr': {'$eq': ['$ngrams._id', '$cont._id']}}},
   ]
   return pipeline
 
@@ -900,36 +918,36 @@ def get_frags_ngramms_topics_pipeline(
 ):
   pipeline = [
     {"$match": {
-      "linked_papers_topics": {"$exists": 1}, "frag_num": {"$exists": 1},
-      "linked_papers_ngrams": {'$exists': 1}}},
+      "topics": {"$exists": 1}, "frag_num": {"$exists": 1},
+      "ngrams": {'$exists': 1}}},
     {"$project": {
-      "pubid": 1, "frag_num": 1, "linked_papers_topics": 1,
-      "linked_papers_ngrams": 1}},]
+      "pubid": 1, "frag_num": 1, "topics": 1,
+      "ngrams": 1}},]
   pipeline += filter_by_pubs_acc(author, cited, citing)
   pipeline += [
-    {"$unwind": "$linked_papers_ngrams"},
+    {"$unwind": "$ngrams"},
     {'$lookup': {
-      'from': 'n_gramms', 'localField': 'linked_papers_ngrams._id',
+      'from': 'n_gramms', 'localField': 'ngrams._id',
       'foreignField': '_id', 'as': 'ngrm'}},
     {'$unwind': '$ngrm'},
   ]
   if nka or ltype:
     pipeline += [get_ngramm_filter(nka, ltype, 'ngrm')]
   pipeline += [
-    {"$unwind": "$linked_papers_topics"},
+    {"$unwind": "$topics"},
   ]
   if probability:
     pipeline += [
-      {'$match': {'linked_papers_topics.probability': {'$gte': probability}}},
+      {'$match': {'topics.probability': {'$gte': probability}}},
     ]
   pipeline += [
     {"$group": {
       "_id": {
-        "ngram": "$linked_papers_ngrams._id",
-        "topic": "$linked_papers_topics._id",
+        "ngram": "$ngrams._id",
+        "topic": "$topics._id",
         "cont_id": "$_id"},
       "cont": {"$first": {"pubid": "$pubid", "frag_num": "$frag_num"}},
-      'count': {'$sum': "$linked_papers_ngrams.cnt"},
+      'count': {'$sum': "$ngrams.cnt"},
       'ngrm': {'$first': "$ngrm"},}},
     {"$sort": {"_id": 1}},
     {"$group": {
@@ -937,7 +955,11 @@ def get_frags_ngramms_topics_pipeline(
         "ngram": "$_id.ngram", "topic": "$_id.topic"},
       "count": {"$sum": "$count"},
       "frags": {'$push': {"fn": "$cont.frag_num", "cnt": "$count"}},
-      'ngrm': {'$first': "$ngrm"},}},
+      'ngrm': {'$first': "$ngrm"},}},]
+
+  pipeline += _add_topic_pipeline(author, cited, citing, localField='_id.topic')
+
+  pipeline += [
     {'$group': {
       "_id": "$_id.ngram",
       "title": {"$first": "$ngrm.title"},
@@ -946,7 +968,7 @@ def get_frags_ngramms_topics_pipeline(
       "count": {"$sum": "$count"},
       "topics": {
         "$push": {
-          "topic": "$_id.topic", "count": "$count", "frags": "$frags"}},}},
+          "topic": "$topic.title", "count": "$count", "frags": "$frags"}},}},
     {"$project": {"_id": 0,}},
     {"$sort": {"count": -1, "title": 1, 'type': 1}},
   ]
@@ -976,24 +998,19 @@ def get_frag_pos_neg_cocitauthors2(
       'cont.cocit_authors': 1}},
     {'$unwind': '$cont'},
     {'$unwind': '$cont.cocit_authors'},
-    {'$match': {'$expr': {'$ne': ['$cocit_authors', '$cont.cocit_authors']}}},
-    {'$group': {
-      '_id': {
-        'cocitauthor1': {'$cond': [
-          {'$gte': ['$cocit_authors', '$cont.cocit_authors'],},
-          '$cont.cocit_authors', '$cocit_authors']},
-        'cocitauthor2': {'$cond': [
-          {'$gte': ['$cocit_authors', '$cont.cocit_authors'],},
-          '$cocit_authors', '$cont.cocit_authors']},
-        'cont_id': '$_id'},
-      'cont': {'$first': {
-        'pubid': '$pubid', 'frag_num': '$frag_num',
-        'positive_negative': '$positive_negative'}},}},
+    {"$match": {"$expr": {"$lt": ["$cocit_authors", "$cont.cocit_authors"]}}},
+    {"$project": {
+      "_id": {
+        "author1": "$cocit_authors", "author2": "$cont.cocit_authors",
+        "cont_id": "$_id"},
+      "cont": {
+        "pubid": "$pubid", "frag_num": "$frag_num",
+        'positive_negative': '$positive_negative'}}},
     {'$sort': {'_id': 1}},
     {'$group': {
       '_id': {
-        'cocitauthor1': '$_id.cocitauthor1',
-        'cocitauthor2': '$_id.cocitauthor2'},
+        'author1': '$_id.author1',
+        'author2': '$_id.author2'},
       'count': {'$sum': 1},
       'conts': {'$push': {
         'cont_id': '$_id.cont_id', 'pubid': '$cont.pubid',
@@ -1003,7 +1020,7 @@ def get_frag_pos_neg_cocitauthors2(
     {'$project': {
       '_id': False,
       'cocitpair': {
-        'author1': '$_id.cocitauthor1', 'author2': '$_id.cocitauthor2'},
+        'author1': '$_id.author1', 'author2': '$_id.author2'},
       'count': '$count', 'conts': '$conts', }},
   ]
   if topn:
@@ -1049,20 +1066,20 @@ def get_frags_topics_pipeline(
 ):
   pipeline = [
     {'$match': {
-      'frag_num': {'$exists': 1}, 'linked_papers_topics': {'$exists': 1}}},
-    {'$project': {
-      'pubid': 1, 'frag_num': 1, 'linked_paper': '$linked_papers_topics'}},]
+      'frag_num': {'$exists': 1}, 'topics': {'$exists': 1}}},
+    {'$project': {'pubid': 1, 'frag_num': 1, 'topics': 1}},]
   pipeline += filter_by_pubs_acc(author, cited, citing)
   pipeline += [
-    {'$unwind': '$linked_paper'},
+    {'$unwind': '$topics'},
   ]
   if probability :
     pipeline += [
-      {'$match': {'linked_paper.probability': {'$gte': probability}}},]
+      {'$match': {'topics.probability': {'$gte': probability}}},]
 
+  pipeline += _add_topic_pipeline(author, cited, citing)
   pipeline += [
     {'$group': {
-      '_id': {'_id': '$linked_paper._id', 'frag_num': '$frag_num'},
+      '_id': {'_id': '$topic.title', 'frag_num': '$frag_num'},
       'count': {'$sum': 1,}}},
     {'$group': {
       '_id': '$_id._id', 'count': {'$sum': '$count'},
@@ -1081,21 +1098,23 @@ def get_frags_topics_cocitauthors_pipeline(
   pipeline = [
     {"$match": {
       "cocit_authors": {"$exists": 1}, "frag_num": {"$exists": 1},
-      "linked_papers_topics": {'$exists': 1}}},
+      "topics": {'$exists': 1}}},
     {"$project": {
       "pubid": 1, "cocit_authors": 1, "frag_num": 1,
-      "linked_papers_topics": 1}},]
+      "topics": 1}},]
   pipeline += filter_by_pubs_acc(author, cited, citing)
   pipeline += [
     {"$unwind": "$cocit_authors"},
-    {"$unwind": "$linked_papers_topics"},]
+    {"$unwind": "$topics"},]
   if probability:
     pipeline += [
-      {"$match": {"linked_papers_topics.probability": {"$gte": probability}}, }]
+      {"$match": {"topics.probability": {"$gte": probability}}, }]
+
+  pipeline += _add_topic_pipeline(author, cited, citing)
   pipeline += [
     {"$group": {
       "_id": {
-        "cocit_authors": "$cocit_authors", "topic": "$linked_papers_topics._id",
+        "cocit_authors": "$cocit_authors", "topic": "$topic.title",
         "cont_id": "$_id"},
       "cont": {"$first": {"pubid": "$pubid", "frag_num": "$frag_num"}},}},
     {"$sort": {"_id": 1}},
@@ -1133,36 +1152,35 @@ def get_frags_topics_ngramms_pipeline(
 ):
   pipeline = [
     {"$match": {
-      "linked_papers_topics": {"$exists": 1}, "frag_num": {"$exists": 1},
-      "linked_papers_ngrams": {'$exists': 1}}},
-    {"$project": {
-      "pubid": 1, "linked_papers_topics": 1, "frag_num": 1,
-      "linked_papers_ngrams": 1}},]
+      "topics": {"$exists": 1}, "frag_num": {"$exists": 1},
+      "ngrams": {'$exists': 1}}},
+    {"$project": {"pubid": 1, "topics": 1, "frag_num": 1, "ngrams": 1}},]
   pipeline += filter_by_pubs_acc(author, cited, citing)
   pipeline += [
-    {"$unwind": "$linked_papers_ngrams"},
+    {"$unwind": "$ngrams"},
     {'$lookup': {
-      'from': 'n_gramms', 'localField': 'linked_papers_ngrams._id',
+      'from': 'n_gramms', 'localField': 'ngrams._id',
       'foreignField': '_id', 'as': 'ngrm'}},
     {'$unwind': '$ngrm'},
   ]
   if nka or ltype:
     pipeline += [get_ngramm_filter(nka, ltype, 'ngrm')]
   pipeline += [
-    {"$unwind": "$linked_papers_topics"},
+    {"$unwind": "$topics"},
   ]
   if probability:
     pipeline += [
-      {'$match': {'linked_papers_topics.probability': {'$gte': probability}}},
+      {'$match': {'topics.probability': {'$gte': probability}}},
     ]
+  pipeline += _add_topic_pipeline(author, cited, citing)
   pipeline += [
     {"$group": {
       "_id": {
-        "topic": "$linked_papers_topics._id",
-        "ngram": "$linked_papers_ngrams._id",
+        "topic": "$topic.title",
+        "ngram": "$ngrams._id",
         "cont_id": "$_id"},
       "cont": {"$first": {"pubid": "$pubid", "frag_num": "$frag_num"}},
-      'count': {'$sum': "$linked_papers_ngrams.cnt"},
+      'count': {'$sum': "$ngrams.cnt"},
       'ngrm': {'$first': "$ngrm"},}},
     {"$sort": {"_id": 1}},
     {"$group": {
@@ -1197,31 +1215,34 @@ def get_frags_topics_topics_pipeline(
 ):
   pipeline = [
     {"$match": {
-      "frag_num": {"$exists": 1}, "linked_papers_topics": {'$exists': 1}}},
-    {"$project": {"pubid": 1, "frag_num": 1, "linked_papers_topics": 1}},
+      "frag_num": {"$exists": 1}, "topics": {'$exists': 1}}},
+    {"$project": {"pubid": 1, "frag_num": 1, "topics": 1}},
   ]
   pipeline += filter_by_pubs_acc(author, cited, citing)
   pipeline += [
     {"$project": {"pub": 0}},
-    {"$unwind": "$linked_papers_topics"},]
+    {"$unwind": "$topics"},]
   if probability:
     pipeline += [
       {"$match": {
-        "linked_papers_topics.probability": {"$gte": probability}}, }]
+        "topics.probability": {"$gte": probability}}, }]
+  pipeline += _add_topic_pipeline(author, cited, citing)
   pipeline += [
     {'$lookup': {
       'from': 'contexts', 'localField': '_id', 'foreignField': '_id',
       'as': 'cont'}},
     {'$unwind': "$cont"},
-    {'$unwind': "$cont.linked_papers_topics"},]
+    {'$unwind': "$cont.topics"},]
   if probability:
     pipeline += [
       {"$match": {
-        "cont.linked_papers_topics.probability": {"$gte": probability}}, }]
+        "cont.topics.probability": {"$gte": probability}}, }]
+  pipeline += _add_topic_pipeline(
+    author, cited, citing, localField='cont.topics._id', as_field='cont_topic')
   pipeline += [
     {'$project': {
-      "frag_num": 1, "topic1": "$linked_papers_topics._id",
-      "topic2": "$cont.linked_papers_topics._id"}},
+      "frag_num": 1, "topic1": "$topic.title",
+      "topic2": "$cont_topic.title"}},
     {'$match': {'$expr': {'$ne': ["$topic1", "$topic2"]}}},
     {'$group': {
       "_id": {
@@ -1316,14 +1337,14 @@ def get_pos_neg_ngramms_pipeline(
   pipeline = [
     {'$match': {
       'positive_negative': {'$exists': True},
-      'linked_papers_ngrams': {'$exists': True},}},
+      'ngrams': {'$exists': True},}},
     {'$project': {
-      'pubid': True, 'positive_negative': True, 'linked_papers_ngrams': True}},]
+      'pubid': True, 'positive_negative': True, 'ngrams': True}},]
   pipeline += filter_by_pubs_acc(author, cited, citing)
   pipeline += [
-    {'$unwind': '$linked_papers_ngrams'},
+    {'$unwind': '$ngrams'},
     {'$lookup': {
-      'from': 'n_gramms', 'localField': 'linked_papers_ngrams._id',
+      'from': 'n_gramms', 'localField': 'ngrams._id',
       'foreignField': '_id', 'as': 'ngrm'}},
     {'$unwind': '$ngrm'},]
   if nka or ltype:
@@ -1336,7 +1357,7 @@ def get_pos_neg_ngramms_pipeline(
             ['neutral', 'positive', 'positive', 'negative', 'negative'],
             '$positive_negative.val']},
         'title': '$ngrm.title', 'nka': '$ngrm.nka', 'ltype': '$ngrm.type'},
-      'ngrm_cnt': {'$sum': '$linked_papers_ngrams.cnt'}}},
+      'ngrm_cnt': {'$sum': '$ngrams.cnt'}}},
     {'$sort': {'ngrm_cnt': -1, '_id.title': 1}},
     {'$group': {
       '_id': '$_id.pos_neg',
@@ -1393,22 +1414,24 @@ def get_pos_neg_topics_pipeline(
   pipeline = [
     {'$match': {
       'positive_negative': {'$exists': 1},
-      'linked_papers_topics': {'$exists': 1}}},
+      'topics': {'$exists': 1}}},
     {'$project': {
-      'pubid': 1, 'positive_negative': 1, 'linked_papers_topics': 1}},]
+      'pubid': 1, 'positive_negative': 1, 'topics': 1}},]
   if filter_pipeline := filter_by_pubs_acc(author, cited, citing):
     pipeline += filter_pipeline
 
   pipeline += [
-    {'$unwind': '$linked_papers_topics'},
-    {'$match': {'linked_papers_topics.probability': {'$gte': probability}}},
+    {'$unwind': '$topics'},
+    {'$match': {'topics.probability': {'$gte': probability}}},]
+  pipeline += _add_topic_pipeline(author, cited, citing)
+  pipeline += [
     {'$group': {
       '_id': {
         'pos_neg': {
           '$arrayElemAt': [
             ['neutral', 'positive', 'positive', 'negative', 'negative'],
             '$positive_negative.val']},
-        'topic': '$linked_papers_topics._id'},
+        'topic': '$topic.title'},
       'topic_cnt': {'$sum': 1}}},
     {'$sort': {'topic_cnt': -1}},
     {'$group': {
@@ -1477,7 +1500,7 @@ def get_publications_ngramms_pipeline(
   topn_gramm:Optional[int]
 ):
   pipeline = [
-    {"$match": {"linked_papers_ngrams": {"$exists": 1}}}]
+    {"$match": {"ngrams": {"$exists": 1}}}]
   if filter_pipeline := filter_by_pubs_acc(author, cited, citing):
     pipeline += filter_pipeline
   else:
@@ -1489,9 +1512,9 @@ def get_publications_ngramms_pipeline(
     ]
 
   pipeline += [
-    {'$unwind': '$linked_papers_ngrams'},
+    {'$unwind': '$ngrams'},
     {'$lookup': {
-      'from': 'n_gramms', 'localField': 'linked_papers_ngrams._id',
+      'from': 'n_gramms', 'localField': 'ngrams._id',
       'foreignField': '_id', 'as': 'ngrm'}},
     {'$unwind': '$ngrm'}, ]
   if nka or ltype:
@@ -1499,7 +1522,7 @@ def get_publications_ngramms_pipeline(
 
   pipeline += [
     {'$group': {
-        '_id': {"pubid": "$pubid", "ngrm": '$linked_papers_ngrams._id'},
+        '_id': {"pubid": "$pubid", "ngrm": '$ngrams._id'},
         'count': {'$sum': 1}, "name": {"$first": "$pub.name"},
         'conts': {'$addToSet': '$_id'}}},
     {'$sort': {'count': -1, '_id': 1}},
@@ -1549,27 +1572,32 @@ def get_publications_topics_topics_pipeline(
 ):
   pipeline = [
     {"$match": {
-      "pubid": {"$exists": 1}, "linked_papers_topics": {'$exists': 1}}},
-    {"$project": {"pubid": 1, "linked_papers_topics": 1}}, ]
+      "pubid": {"$exists": 1}, "topics": {'$exists': 1}}},
+    {"$project": {"pubid": 1, "topics": 1}}, ]
   pipeline += filter_by_pubs_acc(author, cited, citing)
-  pipeline += [{"$project": {"pub": 0}}, {"$unwind": "$linked_papers_topics"}, ]
+  pipeline += [
+    {"$project": {"pub": 0}},
+    {"$unwind": "$topics"}, ]
   if probability:
     pipeline += [{
       "$match": {
-        "linked_papers_topics.probability": {"$gte": probability}}, }]
+        "topics.probability": {"$gte": probability}}, }]
+  pipeline += _add_topic_pipeline(author, cited, citing)
   pipeline += [{
     '$lookup': {
       'from': 'contexts', 'localField': '_id', 'foreignField': '_id',
       'as': 'cont'}}, {'$unwind': "$cont"},
-    {'$unwind': "$cont.linked_papers_topics"}, ]
+    {'$unwind': "$cont.topics"}, ]
   if probability:
     pipeline += [{
       "$match": {
-        "cont.linked_papers_topics.probability": {"$gte": probability}}, }]
+        "cont.topics.probability": {"$gte": probability}}, }]
+  pipeline += _add_topic_pipeline(
+    author, cited, citing, localField='cont.topics._id', as_field='cont_topic')
   pipeline += [{
     '$project': {
-      "pubid": 1, "topic1": "$linked_papers_topics._id",
-      "topic2": "$cont.linked_papers_topics._id"}},
+      "pubid": 1, "topic1": "$topic.title",
+      "topic2": "$cont_topic.title"}},
     {'$match': {'$expr': {'$ne': ["$topic1", "$topic2"]}}}, {
       '$group': {
         "_id": {
@@ -1612,8 +1640,8 @@ def get_top_detail_bund_refauthors(
 
   pipeline += [
     {'$project': {
-      'prefix': 0, 'suffix': 0, 'exact': 0, 'linked_papers_topics': 0,
-      'linked_papers_ngrams': 0}},
+      'prefix': 0, 'suffix': 0, 'exact': 0, 'topics': 0,
+      'ngrams': 0}},
     {'$unwind': '$bundles'},
     {'$match': {'bundles': {'$ne': 'nUSJrP'}}},
     {'$lookup': {
