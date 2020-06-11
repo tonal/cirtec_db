@@ -40,7 +40,7 @@ from server_dbquery_dev import (
   get_top_detail_bund_refauthors, get_top_ngramms_pipeline,
   get_top_ngramms_publications_pipeline, get_top_topics_pipeline,
   get_top_topics_publications_pipeline)
-from server_utils import cvt_oid, to_out_typed
+from server_utils import _init_logging, cvt_oid, to_out_typed
 from utils import load_config
 
 
@@ -66,7 +66,7 @@ router = APIRouter()
 
 
 def main():
-  # _init_logging()
+  _init_logging()
 
   # app, conf = create_srv()
   # srv_run_args = conf['srv_run_args']
@@ -88,7 +88,7 @@ def main():
   uvicorn.run(
     app, host=conf_app.get('host') or '0.0.0.0',
     port=conf_app.get('port') or 8668,
-    use_colors=True) # , log_config=None)
+    use_colors=True, log_config=None)
 
 
 def _load_conf() -> dict:
@@ -115,8 +115,10 @@ async def _close_app():
 @router.get('/db/bundle/',
   summary='Данные по указанному бандлу (bundles) из mongodb')
 async def _db_bundle(id:str):
+  _logger.info('start func(%s)', id)
   coll:Collection = slot.mdb.bundles
   doc:dict = await coll.find_one(dict(_id=id))
+  _logger.info('end func(%s)->%s', id, doc)
   return doc
 
 
