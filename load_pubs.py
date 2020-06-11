@@ -140,7 +140,7 @@ def load_xml(
       from_pdf = ref.xpath('from_pdf/text()').get()
 
       start_refs = min(start_refs, start)
-      bib_bib = bib2bib(author, year, title)
+      bib_bib = bib2bib(author, year, title, doi)
       ref_doc = dict(num=num, **bib_bib)
       ref_doc.update(start=start, end=end, from_pdf=from_pdf)
       if bundle:
@@ -150,10 +150,16 @@ def load_xml(
       refs[num] = ref_doc
 
       if bundle:
-        bundle_doc = dict(**bib_bib)
-        mbnds_update(dict(_id=bundle), {
-          '$set': bundle_doc, '$addToSet': {'bibs_new': bib_bib},
-          '$unset': {'for_del': 1}})
+        if not bib_bib.keys() & {'authors', 'title'}:
+          print(
+            f'  !!! пустая билиография для {num=}, {bundle=}, {bib_bib=}, '
+            f'{pub_id=}, {xml_uri}')
+        else:
+          bundle_doc = dict(**bib_bib)
+          mbnds_update(
+            dict(_id=bundle), {
+            '$set': bundle_doc, '$addToSet': {'bibs_new': bib_bib},
+            '$unset': {'for_del': 1}})
 
         for iref_inp in ref.xpath('all_intext_ref/intext_ref/text()'):
           iref = iref_inp.get().split('@', 1)[1]
@@ -295,7 +301,13 @@ def calc_totals(mpubs:Collection, mbnds:Collection, mbnds_update):
   print(now(), 'calc_totals end', i)
 
 
-def bib2bib(a:str, y:str, t:str):
+def bib2bib(a:str, y:str, t:str, d:str=None):
+  """
+  :param a: author
+  :param y: year
+  :param t: title
+  :param d: doi
+  """
   res = {}
   if authors := a.strip():
     res.update(authors=tuple(sorted(set(authors.split()))))
@@ -305,6 +317,8 @@ def bib2bib(a:str, y:str, t:str):
       res.update(year=year)
   if title := norm_spaces(t):
     res.update(title=title)
+  if doi := norm_spaces(d):
+    res.update(doi=doi)
   return res
 
 
@@ -335,7 +349,9 @@ def best_bibs(mbnds:Collection, mbnds_update):
     1
   ):
     # 'ss'.isu
-    bibs = bundle['bibs_new']
+    bibs = tuple(filter(None, bundle['bibs_new']))
+    if not bibs:
+      continue
     best = max(bibs, key=bkey)
     real_bib = {k: v for k, v in bundle.items() if
       v and k in {'title', 'authors', 'year'}}
