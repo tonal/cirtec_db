@@ -80,5 +80,11 @@ def to_out_typed(_id, *, type:str, **kwds):
 
 
 def cvt_oid(_id, **kwd):
+  # bson.json_util.default (732)
   # {"$oid": str(obj)}
   return {'_id': {"$oid": str(_id)}, **kwd}
+
+
+def oid2dict(oid):
+  # bson.json_util.default (732)
+  return {"$oid": str(oid)}

@@ -9,8 +9,9 @@ import logging
 from operator import itemgetter
 from typing import Optional
 
-from bson import ObjectId, json_util
+from bson import ObjectId #, json_util
 from fastapi import APIRouter, FastAPI, Query
+from fastapi.encoders import jsonable_encoder
 from motor.motor_asyncio import AsyncIOMotorClient
 from pymongo import ASCENDING
 from pymongo.collection import Collection
@@ -40,7 +41,7 @@ from server_dbquery_dev import (
   get_top_detail_bund_refauthors, get_top_ngramms_pipeline,
   get_top_ngramms_publications_pipeline, get_top_topics_pipeline,
   get_top_topics_publications_pipeline)
-from server_utils import _init_logging, cvt_oid, to_out_typed
+from server_utils import _init_logging, oid2dict, to_out_typed
 from utils import load_config
 
 
@@ -127,8 +128,7 @@ async def _db_bundle(id:str):
 async def _db_context(id: str):
   coll:Collection = slot.mdb.contexts
   doc:dict = await coll.find_one(dict(_id=id))
-  if doc and 'topics' in doc:
-    doc['topics'] = [cvt_oid(**t) for t in doc['topics']]
+  doc = jsonable_encoder(doc, custom_encoder={ObjectId: oid2dict})
   return doc
 
 
@@ -154,7 +154,7 @@ async def _db_topic(id: str):
   coll: Collection = slot.mdb.topics
   doc: dict = await coll.find_one(dict(_id=ObjectId(id)))
   if doc:
-    return cvt_oid(**doc)
+    doc = jsonable_encoder(doc, custom_encoder={ObjectId: oid2dict})
   return doc
 
 

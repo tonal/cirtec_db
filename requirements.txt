@@ -18,24 +18,24 @@ cssselect==1.1.0          # via parsel
 dawg-python==0.7.2        # via pymorphy2
 dnspython==1.16.0         # via pymongo
 docopt==0.6.2             # via pymorphy2
-fastapi==0.58.0           # via -r requirements.in
+fastapi==0.59.0           # via -r requirements.in
 fastnumbers==3.0.0        # via -r requirements.in
 h11==0.9.0                # via uvicorn
 html-text==0.5.1          # via -r requirements.in
 httptools==0.1.1          # via uvicorn
-idna==2.9                 # via requests, yarl
-joblib==0.15.1            # via -r requirements.in, scikit-learn
-lxml==4.5.1               # via -r requirements.in, html-text, parsel
+idna==2.10                # via requests, yarl
+joblib==0.16.0            # via -r requirements.in, scikit-learn
+lxml==4.5.2               # via -r requirements.in, html-text, parsel
 more-itertools==8.4.0     # via -r requirements.in
 motor==2.1.0              # via -r requirements.in
 multidict==4.7.6          # via aiohttp, yarl
 numpy==1.19.0             # via pandas, scikit-learn, scipy
-orjson==3.1.1             # via -r requirements.in
+orjson==3.2.2             # via -r requirements.in
 pandas==1.0.5             # via -r requirements.in
 parsel==1.6.0             # via -r requirements.in
 pycares==3.1.1            # via aiodns
 pycparser==2.20           # via cffi
-pydantic==1.5.1           # via fastapi
+pydantic==1.6             # via fastapi
 pymongo[snappy,srv,zstd]==3.10.1  # via -r requirements.in, motor
 pymorphy2-dicts-ru==2.4.404381.4453942  # via -r requirements.in
 pymorphy2-dicts==2.4.393442.3710985  # via pymorphy2
@@ -46,7 +46,7 @@ pytz==2020.1              # via pandas
 pyyaml==5.3.1             # via -r requirements.in
 requests==2.24.0          # via -r requirements.in
 scikit-learn==0.23.1      # via sklearn
-scipy==1.5.0              # via scikit-learn
+scipy==1.5.1              # via scikit-learn
 six==1.15.0               # via parsel, python-dateutil, w3lib
 sklearn==0.0              # via -r requirements.in
 starlette==0.13.4         # via fastapi
