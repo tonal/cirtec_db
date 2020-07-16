@@ -5,8 +5,8 @@ from typing import Optional
 from fastapi import APIRouter, Depends
 from pymongo.collection import Collection
 
-from server_common_devf import DebugOption, Slot, depNgrammParam
-from server_dbquery_dev import (
+from routers_dev.common import DebugOption, Slot, depNgrammParam
+from models_dev.dbquery import (
   AuthorParam, NgrammParam, get_pos_neg_cocitauthors_pipeline,
   get_pos_neg_contexts_pipeline, get_pos_neg_ngramms_pipeline,
   get_pos_neg_pubs_pipeline, get_pos_neg_topics_pipeline,

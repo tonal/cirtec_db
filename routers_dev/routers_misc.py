@@ -7,8 +7,8 @@ from typing import Optional
 from fastapi import APIRouter, Depends
 from pymongo.collection import Collection
 
-from server_common_devf import DebugOption, Slot
-from server_dbquery_dev import (
+from routers_dev.common import DebugOption, Slot
+from models_dev.dbquery import (
   AuthorParam, get_ref_auth4ngramm_tops_pipeline,
   get_ref_bund4ngramm_tops_pipeline, get_refauthors_part_pipeline,
   get_top_detail_bund_refauthors)

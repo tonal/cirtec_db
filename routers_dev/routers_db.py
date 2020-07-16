@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends
 from fastapi.encoders import jsonable_encoder
 from pymongo.collection import Collection
 
-from server_common_devf import Slot
+from routers_dev.common import Slot
 from server_utils import oid2dict
 
 

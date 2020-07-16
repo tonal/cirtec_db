@@ -9,8 +9,8 @@ from fastapi import APIRouter, Depends
 from pymongo import ASCENDING
 from pymongo.collection import Collection
 
-from server_common_devf import DebugOption, Slot, depNgrammParam
-from server_dbquery_dev import (
+from routers_dev.common import DebugOption, Slot, depNgrammParam
+from models_dev.dbquery import (
   AuthorParam, NgrammParam, filter_acc_dict,
   get_frags_ngramms_ngramms_branch_pipeline,
   get_frags_ngramms_ngramms_branch_root, get_publications_cocitauthors_pipeline,

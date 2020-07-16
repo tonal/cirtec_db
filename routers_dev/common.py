@@ -8,7 +8,7 @@ from fastapi import Query, Request
 from motor.motor_asyncio import AsyncIOMotorClient
 from pymongo.database import Database
 
-from server_dbquery_dev import LType, NgrammParam
+from models_dev.dbquery import LType, NgrammParam
 
 
 DEF_AUTHOR = 'Sergey-Sinelnikov-Murylev'

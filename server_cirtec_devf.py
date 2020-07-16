@@ -6,13 +6,10 @@ from typing import Optional
 from fastapi import FastAPI, Request
 import uvicorn
 
-from server_common_devf import Slot
-import server_routers_db_devf
-import server_routers_frags_devf
-import server_routers_misc_devf
-import server_routers_posneg_devf
-import server_routers_publ_devf
-import server_routers_top_devf
+from routers_dev.common import Slot
+from routers_dev import (
+  routers_db, routers_frags, routers_misc, routers_posneg, routers_publ,
+  routers_top)
 from server_utils import _init_logging
 from utils import load_config
 
@@ -50,18 +47,12 @@ def main():
     nonlocal slot
     await slot.close()
 
-  app.include_router(
-    server_routers_db_devf.router, prefix=cummon_prefix + '/db')
-  app.include_router(
-    server_routers_frags_devf.router, prefix=cummon_prefix + '/frags')
-  app.include_router(
-    server_routers_posneg_devf.router, prefix=cummon_prefix + '/pos_neg')
-  app.include_router(
-    server_routers_publ_devf.router, prefix=cummon_prefix + '/publ')
-  app.include_router(
-    server_routers_top_devf.router, prefix=cummon_prefix + '/top')
-  app.include_router(
-    server_routers_misc_devf.router, prefix=cummon_prefix + '/')
+  app.include_router(routers_db.router, prefix=cummon_prefix + '/db')
+  app.include_router(routers_frags.router, prefix=cummon_prefix + '/frags')
+  app.include_router(routers_posneg.router, prefix=cummon_prefix + '/pos_neg')
+  app.include_router(routers_publ.router, prefix=cummon_prefix + '/publ')
+  app.include_router(routers_top.router, prefix=cummon_prefix + '/top')
+  app.include_router(routers_misc.router, prefix=cummon_prefix + '/')
 
   @app.middleware("http")
   async def db_session_middleware(request:Request, call_next):
