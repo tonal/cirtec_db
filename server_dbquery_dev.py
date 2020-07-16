@@ -1,21 +1,109 @@
 # -*- codong: utf-8 -*-
+from dataclasses import dataclass
 import enum
 import logging
-from typing import Optional
-
+from typing import Dict, List, Optional
 
 _logger = logging.getLogger('cirtec')
 
 
-class LType(enum.Enum):
+@dataclass(eq=False, order=False, frozen=True)
+class AuthorParam:
+  author:Optional[str]=None
+  cited:Optional[str]=None
+  citing:Optional[str]=None
+
+  def is_empty(self):
+    return not any([self.author, self.cited, self.citing])
+
+
+class LType(str, enum.Enum):
   lemmas = 'lemmas'
   nolemmas = 'nolemmas'
 
 
-def get_refbindles_pipeline(
-  topn:Optional[int], author:Optional[str], cited:Optional[str],
-  citing:Optional[str]
+@dataclass(eq=False, order=False, frozen=True)
+class NgrammParam:
+  nka:Optional[int]=None
+  ltype:Optional[LType]=None
+
+  def is_empty(self):
+    return not any([self.nka, self.ltype])
+
+
+def filter_by_pubs_acc(authParams:AuthorParam) -> List[dict]:
+  if authParams.is_empty():
+    return []
+  match = filter_acc_dict(authParams)
+  pipeline = [
+    {'$lookup': {
+      'from': 'publications', 'localField': 'pubid', 'foreignField': '_id',
+      'as': 'pub'}},
+    {'$unwind': '$pub'},
+    # {'$match': {'pub.uni_authors': {'$exists': 1}}},
+    {'$match': {f'pub.{key}': val for key, val in match.items()}},
+  ]
+  return pipeline
+
+
+def filter_acc_dict(ap:AuthorParam) -> Dict[str, str]:
+  """Фильтр по author, cited, citing"""
+  if ap.is_empty():
+    return {}
+  match = {
+    f'uni_{key}': val for key, val in
+    (('authors', ap.author), ('cited', ap.cited), ('citing', ap.citing))
+    if val}
+  return match
+
+
+def get_ngramm_filter(
+  np:NgrammParam, ngrm_field:Optional[str]=None
+) -> Dict[str, dict]:
+  if np.is_empty():
+    return {}
+
+  ltype_str:str = np.ltype.value if np.ltype is not None else ''
+
+  if not ngrm_field:
+    return {
+      '$match': {
+        f: v for f, v in (('nka', np.nka), ('type', ltype_str)) if v}}
+
+  return {
+    '$match': {
+      f'{ngrm_field}.{f}': v
+      for f, v in (('nka', np.nka), ('type', ltype_str)) if v}}
+
+
+def _add_topic_pipeline(
+  authorParams:AuthorParam, *, localField:str='topics._id', as_field:str='topic'
 ):
+  pipeline = [
+    {'$lookup': {
+      'from': 'topics', 'localField': localField, 'foreignField': '_id',
+      'as': as_field}},
+    {"$unwind": "$" + as_field}, ]
+  pipeline += filter_by_topic(authorParams)
+  return pipeline
+
+
+def filter_by_topic(
+  ap:AuthorParam, *, as_field:str='topic'
+):
+  if ap.is_empty():
+    return []
+  pipeline = [
+    {
+      '$match': {
+        "$or": [
+          {f'{as_field}.uni_{fld}': val} for fld, val in
+          (('author', ap.author), ('cited', ap.cited), ('citing', ap.citing),)
+          if val]}}, ]
+  return pipeline
+
+
+def get_refbindles_pipeline(topn:Optional[int], authorParams:AuthorParam):
   pipeline = [
     {'$match': {'exact': {'$exists': 1}}},
     {'$project': {
@@ -23,7 +111,7 @@ def get_refbindles_pipeline(
       'ngrams': 0}},
   ]
 
-  pipeline += filter_by_pubs_acc(author, cited, citing)
+  pipeline += filter_by_pubs_acc(authorParams)
 
   pipeline += [
     {'$unwind': '$bundles'},
@@ -52,53 +140,7 @@ def get_refbindles_pipeline(
   return pipeline
 
 
-def filter_by_pubs_acc(
-  author:Optional[str], cited:Optional[str], citing:Optional[str],
-):
-  if not any([author, cited, citing]):
-    return []
-  match = filter_acc_dict(author, cited, citing)
-  pipeline = [
-    {'$lookup': {
-      'from': 'publications', 'localField': 'pubid', 'foreignField': '_id',
-      'as': 'pub'}},
-    {'$unwind': '$pub'},
-    # {'$match': {'pub.uni_authors': {'$exists': 1}}},
-    {'$match': {f'pub.{key}': val for key, val in match.items()}},
-  ]
-  return pipeline
-
-
-def filter_acc_dict(
-  author:Optional[str], cited:Optional[str], citing:Optional[str],
-):
-  """Фильтр по author, cited, citing"""
-  if not any([author, cited, citing]):
-    return {}
-  match = {
-    f'uni_{key}': val for key, val in
-      (('authors', author), ('cited', cited), ('citing', citing)) if val}
-  return match
-
-
-def filter_by_topic(
-  author:Optional[str], cited:Optional[str], citing:Optional[str], *,
-  as_field:str='topic'
-):
-  pipeline = [
-    {
-    '$match': {
-      "$or": [
-        {f'{as_field}.uni_{fld}': val} for fld, val in
-          (('author', author), ('cited', cited), ('citing', citing),)
-        if val]}}, ]
-  return pipeline
-
-
-def get_refauthors_pipeline(
-  topn: Optional[int], author:Optional[str], cited:Optional[str],
-  citing:Optional[str]
-):
+def get_refauthors_pipeline(topn: Optional[int], authorParams:AuthorParam):
   pipeline = [
     {'$match': {'exact': {'$exists': 1}}},
     {'$project': {
@@ -107,7 +149,7 @@ def get_refauthors_pipeline(
     {'$unwind': '$bundles'},
   ]
 
-  pipeline += filter_by_pubs_acc(author, cited, citing)
+  pipeline += filter_by_pubs_acc(authorParams)
 
   pipeline += [
     # {'$match': {'bundles': {'$ne': 'nUSJrP'}}},
@@ -138,14 +180,12 @@ def get_refauthors_pipeline(
   return pipeline
 
 
-def get_frag_publications(
-  author: Optional[str], cited: Optional[str], citing: Optional[str]
-):
+def get_frag_publications(authorParams:AuthorParam):
   pipeline = [
     {'$match': {'name': {'$exists': 1}}},
   ]
 
-  if filter := filter_acc_dict(author, cited, citing):
+  if filter := filter_acc_dict(authorParams):
     pipeline += [{'$match': filter},]
 
   pipeline += [
@@ -167,15 +207,14 @@ def get_frag_publications(
 
 
 def get_top_cocitauthors_publications_pipeline(
-  topn: Optional[int], author: Optional[str], cited: Optional[str],
-  citing: Optional[str]
+  topn: Optional[int], authorParams:AuthorParam
 ):
   pipeline = [
     {'$match': {'cocit_authors': {'$exists': 1}}},
     {'$project': {
       'prefix': 0, 'suffix': 0, 'exact': 0, 'ngrams': 0,
       "topics": 0}}, ]
-  pipeline += filter_by_pubs_acc(author, cited, citing)
+  pipeline += filter_by_pubs_acc(authorParams)
 
   pipeline += [
     {'$unwind': '$cocit_authors'},
@@ -193,14 +232,13 @@ def get_top_cocitauthors_publications_pipeline(
 
 
 def get_top_cocitrefs2_pipeline(
-  topn: Optional[int], author: Optional[str], cited: Optional[str],
-  citing: Optional[str]
+  topn: Optional[int], authorParams:AuthorParam
 ):
   pipeline = [
     {'$match': {'bundles': {'$exists': 1}, 'frag_num': {'$exists': 1}}},
     {'$project': {'pubid': 1, 'bundles': 1, 'frag_num': 1}},]
 
-  if filter := filter_by_pubs_acc(author, cited, citing):
+  if filter := filter_by_pubs_acc(authorParams):
     pipeline += filter
 
   pipeline += [
@@ -244,15 +282,14 @@ def get_top_cocitrefs2_pipeline(
 
 
 def get_top_ngramms_publications_pipeline(
-  topn: Optional[int], author: Optional[str], cited: Optional[str],
-  citing: Optional[str], nka:Optional[int], ltype:Optional[LType]
+  topn: Optional[int], authorParams:AuthorParam, ngrammParam:NgrammParam
 ):
   pipeline = [
     {'$match': {"ngrams": {'$exists': 1}}},
     {'$project': {
       'prefix': 0, 'suffix': 0, 'exact': 0, 'cocit_authors': 0,
       "topics": 0}}, ]
-  pipeline += filter_by_pubs_acc(author, cited, citing)
+  pipeline += filter_by_pubs_acc(authorParams)
 
   pipeline += [
     {'$unwind': '$ngrams'},
@@ -260,8 +297,8 @@ def get_top_ngramms_publications_pipeline(
       'from': 'n_gramms', 'localField': 'ngrams._id',
       'foreignField': '_id', 'as': 'ngrm'}},
     {'$unwind': '$ngrm'},]
-  if nka or ltype:
-    pipeline += [get_ngramm_filter(nka, ltype, 'ngrm')]
+  if nf := get_ngramm_filter(ngrammParam, 'ngrm'):
+    pipeline += [nf]
   pipeline += [
     {'$group': {
       '_id': '$ngrams._id', 'count': {'$sum': '$ngrams.cnt'},
@@ -278,15 +315,14 @@ def get_top_ngramms_publications_pipeline(
 
 
 def get_top_topics_publications_pipeline(
-  topn: Optional[int], author: Optional[str], cited: Optional[str],
-  citing: Optional[str], probability:Optional[float]
+  topn: Optional[int], authorParams:AuthorParam, probability:Optional[float]
 ):
   pipeline = [
     {'$match': {"topics": {'$exists': 1}}},
     {'$project': {
       'prefix': 0, 'suffix': 0, 'exact': 0, 'cocit_authors': 0,
       "ngrams": 0}}, ]
-  pipeline += filter_by_pubs_acc(author, cited, citing)
+  pipeline += filter_by_pubs_acc(authorParams)
 
   pipeline += [{'$unwind': '$topics'},]
 
@@ -294,7 +330,7 @@ def get_top_topics_publications_pipeline(
     pipeline += [
       {'$match': {"topics.probability": {'$gte': probability}}},]
 
-  pipeline += _add_topic_pipeline(author, cited, citing)
+  pipeline += _add_topic_pipeline(authorParams)
   pipeline += [
     {'$group': {
       '_id': '$topics.title', 'count': {'$sum': 1},
@@ -316,15 +352,14 @@ def get_top_topics_publications_pipeline(
 
 
 def get_top_topics_pipeline(
-  topn:Optional[int], author:Optional[str], cited:Optional[str],
-  citing:Optional[str], probability:Optional[float]
+  topn:Optional[int], authorParams:AuthorParam, probability:Optional[float]
 ):
   pipeline = [
     {'$match': {'exact': {'$exists': 1}}},
     {'$project': {
       'prefix': 0, 'suffix': 0, 'exact': 0, 'ngrams': 0}},
   ]
-  pipeline += filter_by_pubs_acc(author, cited, citing)
+  pipeline += filter_by_pubs_acc(authorParams)
 
   pipeline += [
     {'$unwind': '$topics'},
@@ -333,7 +368,7 @@ def get_top_topics_pipeline(
     pipeline += [
       {'$match': {'topics.probability': {'$gte': probability}}},]
 
-  pipeline += _add_topic_pipeline(author, cited, citing)
+  pipeline += _add_topic_pipeline(authorParams)
 
   pipeline += [
     {'$group': {
@@ -356,29 +391,14 @@ def get_top_topics_pipeline(
   return pipeline
 
 
-def _add_topic_pipeline(
-  author:Optional[str], cited:Optional[str], citing:Optional[str],
-  *, localField:str='topics._id', as_field:str='topic'
-):
-  pipeline = [
-    {'$lookup': {
-      'from': 'topics', 'localField': localField, 'foreignField': '_id',
-      'as': as_field}},
-    {"$unwind": "$" + as_field}, ]
-  if any([author, cited, citing]):
-    pipeline += filter_by_topic(author, cited, citing)
-  return pipeline
-
-
 def get_top_ngramms_pipeline(
-  topn:Optional[int], author:Optional[str], cited:Optional[str],
-  citing:Optional[str], nka:Optional[int], ltype:Optional[LType]
+  topn:Optional[int], authorParams:AuthorParam, ngrammParam:NgrammParam
 ):
   pipeline = [
     {'$match': {'ngrams._id': {'$exists': 1}}},
     {'$project': {'prefix': 0, 'suffix': 0, 'exact': 0, 'topics': 0}},
   ]
-  pipeline += filter_by_pubs_acc(author, cited, citing)
+  pipeline += filter_by_pubs_acc(authorParams)
 
   pipeline += [
     {'$unwind': '$ngrams'},
@@ -388,8 +408,8 @@ def get_top_ngramms_pipeline(
     {'$unwind': '$ngrm'},
   ]
 
-  if nka or ltype:
-    pipeline += [get_ngramm_filter(nka, ltype, 'ngrm')]
+  if nf := get_ngramm_filter(ngrammParam, 'ngrm'):
+    pipeline += [nf]
 
   pipeline += [
   {'$group': {
@@ -407,24 +427,8 @@ def get_top_ngramms_pipeline(
   return pipeline
 
 
-def get_ngramm_filter(
-  nka: Optional[int], ltype:Optional[LType], ngrm_field:Optional[str]=None
-):
-  ltype_str:str = ltype.value if ltype is not None else ''
-
-  if not ngrm_field:
-    return {
-      '$match': {f: v for f, v in (('nka', nka), ('type', ltype_str)) if v}}
-
-  return {
-    '$match': {
-      f'{ngrm_field}.{f}': v
-      for f, v in (('nka', nka), ('type', ltype_str)) if v}}
-
-
 def get_top_cocitauthors_pipeline(
-  topn:Optional[int], author:Optional[str], cited:Optional[str],
-  citing:Optional[str]
+  topn:Optional[int], authorParams:AuthorParam
 ):
   pipeline = [
     {'$match': {'frag_num': {'$gt': 0}, 'cocit_authors': {'$exists': 1}}},
@@ -432,7 +436,7 @@ def get_top_cocitauthors_pipeline(
       'prefix': 0, 'suffix': 0, 'exact': 0, 'positive_negative': 0,
       'bundles': 0, 'ngrams': 0, 'topics': 0}},]
 
-  pipeline += filter_by_pubs_acc(author, cited, citing)
+  pipeline += filter_by_pubs_acc(authorParams)
 
   pipeline += [
     {'$unwind': '$cocit_authors'},
@@ -447,8 +451,7 @@ def get_top_cocitauthors_pipeline(
 
 
 def get_top_cocitrefs_pipeline(
-  topn:Optional[int], author:Optional[str], cited:Optional[str],
-  citing:Optional[str]
+  topn:Optional[int], authorParams:AuthorParam
 ):
   pipeline = [
     {'$match': {'frag_num': {'$gt': 0}, 'bundles': {'$exists': 1}}},
@@ -456,7 +459,7 @@ def get_top_cocitrefs_pipeline(
       'prefix': 0, 'suffix': 0, 'exact': 0, 'positive_negative': 0,
       'ngrams': 0, 'topics': 0}},]
 
-  pipeline += filter_by_pubs_acc(author, cited, citing)
+  pipeline += filter_by_pubs_acc(authorParams)
   pipeline += [
     {'$unwind': '$bundles'},
     {'$group': {
@@ -476,15 +479,13 @@ def get_top_cocitrefs_pipeline(
   return pipeline
 
 
-def get_refauthors_part_pipeline(
-  topn:int, author:Optional[str], cited:Optional[str], citing:Optional[str]
-):
+def get_refauthors_part_pipeline(topn:int, authorParams:AuthorParam):
   pipeline = [
     {'$match': {'exact': {'$exists': 1}}},
     {'$project': {
       'prefix': 0, 'suffix': 0, 'exact': 0, 'topics': 0,
       'ngrams': 0}},]
-  pipeline += filter_by_pubs_acc(author, cited, citing)
+  pipeline += filter_by_pubs_acc(authorParams)
   pipeline += [
     {'$unwind': '$bundles'},
     {'$match': {'bundles': {'$ne': 'nUSJrP'}}},
@@ -516,14 +517,13 @@ def get_refauthors_part_pipeline(
 
 
 def get_ref_auth4ngramm_tops_pipeline(
-  topn:Optional[int], author:Optional[str], cited:Optional[str],
-  citing:Optional[str]
+  topn:Optional[int], authorParams:AuthorParam
 ):
   pipeline = [
     {'$match': {'exact': {'$exists': 1}}},
     {'$project': {'prefix': 0, 'suffix': 0, 'exact': 0, }},]
 
-  pipeline += filter_by_pubs_acc(author, cited, citing)
+  pipeline += filter_by_pubs_acc(authorParams)
   pipeline += [
     {'$unwind': '$bundles'},
     {'$match': {'bundles': {'$ne': 'nUSJrP'}}},
@@ -550,14 +550,13 @@ def get_ref_auth4ngramm_tops_pipeline(
 
 
 def get_ref_bund4ngramm_tops_pipeline(
-  topn:Optional[int], author:Optional[str], cited:Optional[str],
-  citing:Optional[str]
+  topn:Optional[int], authorParams:AuthorParam
 ):
   pipeline = [
-    {'$match': {'exact': {'$exists': True}}},
-    {'$project': {'prefix': False, 'suffix': False, 'exact': False, }},]
+    {'$match': {'exact': {'$exists': 1}}},
+    {'$project': {'prefix': 0, 'suffix': 0, 'exact': 0, }},]
 
-  pipeline += filter_by_pubs_acc(author, cited, citing)
+  pipeline += filter_by_pubs_acc(authorParams)
   pipeline += [
     {'$unwind': '$bundles'},
     {'$match': {'bundles': {'$ne': 'nUSJrP'}}},
@@ -572,8 +571,8 @@ def get_ref_bund4ngramm_tops_pipeline(
       'as': 'bundle'}},
     {'$unwind': '$bundle'},
     {'$project': {
-      '_id': False, 'bundle': '$_id', 'cits': True,
-      'pubs': {'$size': '$pubs'}, 'pubs_ids': '$pubs', 'conts': True,
+      '_id': 0, 'bundle': '$_id', 'cits': 1,
+      'pubs': {'$size': '$pubs'}, 'pubs_ids': '$pubs', 'conts': 1,
       'total_cits': '$bundle.total_cits', 'total_pubs': '$bundle.total_pubs',
       'year': '$bundle.year', 'authors': '$bundle.authors',
       'title': '$bundle.title', }},
@@ -584,13 +583,12 @@ def get_ref_bund4ngramm_tops_pipeline(
 
 
 def get_frags_cocitauthors_pipeline(
-  topn:Optional[int], author:Optional[str], cited:Optional[str],
-  citing:Optional[str]
-):
+  topn:Optional[int], authParams:AuthorParam
+) -> List[dict]:
   pipeline = [
     {'$match': {'frag_num': {'$gt': 0}, 'cocit_authors': {'$exists': True}}},
     {'$project': {'prefix': False, 'suffix': False, 'exact': False}},]
-  pipeline += filter_by_pubs_acc(author, cited, citing)
+  pipeline += filter_by_pubs_acc(authParams)
   pipeline += [
     {'$unwind': '$cocit_authors'},
     {'$group': {
@@ -604,14 +602,13 @@ def get_frags_cocitauthors_pipeline(
 
 
 def get_frags_cocitauthors_cocitauthors_pipeline(
-  topn:Optional[int], author:Optional[str], cited:Optional[str],
-  citing:Optional[str]
+  topn:Optional[int], authorParams:AuthorParam
 ):
   pipeline = [
     {'$match': {
       'cocit_authors': {'$exists': 1}, 'frag_num': {'$exists': 1},}},
     {'$project': {'pubid': 1, 'cocit_authors': 1, 'frag_num': 1}},]
-  if filter_pipiline := filter_by_pubs_acc(author, cited, citing):
+  if filter_pipiline := filter_by_pubs_acc(authorParams):
     pipeline += filter_pipiline
     pipeline += [{'$project': {'pub': 0}},]
   pipeline += [
@@ -649,8 +646,7 @@ def get_frags_cocitauthors_cocitauthors_pipeline(
 
 
 def get_frags_cocitauthors_ngramms_pipeline(
-  topn: Optional[int], author: Optional[str], cited: Optional[str],
-  citing: Optional[str], nka: Optional[int], ltype: Optional[LType]
+  topn: Optional[int], authorParams:AuthorParam, ngrammParam:NgrammParam
 ):
   pipeline = [
     {"$match": {
@@ -659,7 +655,7 @@ def get_frags_cocitauthors_ngramms_pipeline(
     {"$project": {
       "pubid": 1, "cocit_authors": 1, "frag_num": 1,
       "ngrams": 1}},]
-  pipeline += filter_by_pubs_acc(author, cited, citing)
+  pipeline += filter_by_pubs_acc(authorParams)
   pipeline += [
     {"$unwind": "$cocit_authors"},
     {"$unwind": "$ngrams"},
@@ -667,8 +663,8 @@ def get_frags_cocitauthors_ngramms_pipeline(
       'from': 'n_gramms', 'localField': 'ngrams._id',
       'foreignField': '_id', 'as': 'ngrm'}},
     {'$unwind': '$ngrm'},]
-  if nka or ltype:
-    pipeline += [get_ngramm_filter(nka, ltype, 'ngrm')]
+  if not ngrammParam.is_empty():
+    pipeline += [get_ngramm_filter(ngrammParam, 'ngrm')]
   pipeline += [
     {"$group": {
       "_id": {
@@ -708,8 +704,7 @@ def get_frags_cocitauthors_ngramms_pipeline(
 
 
 def get_frags_cocitauthors_topics_pipeline(
-  topn:Optional[int], author:Optional[str], cited:Optional[str],
-  citing:Optional[str], probability:Optional[float]
+  topn:Optional[int], authorParams:AuthorParam, probability:Optional[float]
 ):
   pipeline = [
     {"$match": {
@@ -718,7 +713,7 @@ def get_frags_cocitauthors_topics_pipeline(
     {"$project": {
       "pubid": 1, "cocit_authors": 1, "frag_num": 1,
       "topics": 1}},]
-  pipeline += filter_by_pubs_acc(author, cited, citing)
+  pipeline += filter_by_pubs_acc(authorParams)
   pipeline += [
     {"$unwind": "$cocit_authors"},
     {"$unwind": "$topics"},]
@@ -726,7 +721,7 @@ def get_frags_cocitauthors_topics_pipeline(
     pipeline += [
       {"$match": {"topics.probability": {"$gte": probability}}, }]
 
-  pipeline = _add_topic_pipeline(author, cited, citing)
+  pipeline = _add_topic_pipeline(authorParams)
 
   pipeline += [
     {"$group": {
@@ -764,15 +759,14 @@ def get_frags_cocitauthors_topics_pipeline(
 
 
 def get_frags_ngramms_pipeline(
-  topn:Optional[int], author:Optional[str], cited:Optional[str],
-  citing:Optional[str], nka:Optional[int], ltype:Optional[LType]
+  topn:Optional[int], authorParams:AuthorParam, ngrammParam:NgrammParam
 ):
   pipeline = [
     {'$match': {
       'frag_num': {'$exists': 1}, 'ngrams': {'$exists': 1}}},
     {'$project': {
       'pubid': 1, 'frag_num': 1, 'linked_paper': '$ngrams'}},]
-  pipeline += filter_by_pubs_acc(author, cited, citing)
+  pipeline += filter_by_pubs_acc(authorParams)
   pipeline += [
     {'$unwind': '$linked_paper'},
     {'$group': {
@@ -788,8 +782,8 @@ def get_frags_ngramms_pipeline(
     {'$unwind': '$ngramm'},
   ]
 
-  if nka or ltype:
-    pipeline += [get_ngramm_filter(nka, ltype, 'ngramm')]
+  if not ngrammParam.is_empty():
+    pipeline += [get_ngramm_filter(ngrammParam, 'ngramm')]
 
   pipeline += [
     {'$project': {
@@ -802,8 +796,7 @@ def get_frags_ngramms_pipeline(
 
 
 def get_frags_ngramms_cocitauthors_pipeline(
-  topn: Optional[int], author: Optional[str], cited: Optional[str],
-  citing: Optional[str], nka: Optional[int], ltype: Optional[LType]
+  topn: Optional[int], authorParams:AuthorParam, ngrammParam:NgrammParam
 ):
   pipeline = [
     {"$match": {
@@ -812,7 +805,7 @@ def get_frags_ngramms_cocitauthors_pipeline(
     {"$project": {
       "pubid": 1, "cocit_authors": 1, "frag_num": 1,
       "ngrams": 1}},]
-  pipeline += filter_by_pubs_acc(author, cited, citing)
+  pipeline += filter_by_pubs_acc(authorParams)
   pipeline += [
     {"$unwind": "$cocit_authors"},
     {"$unwind": "$ngrams"},
@@ -820,8 +813,8 @@ def get_frags_ngramms_cocitauthors_pipeline(
       'from': 'n_gramms', 'localField': 'ngrams._id',
       'foreignField': '_id', 'as': 'ngrm'}},
     {'$unwind': '$ngrm'},]
-  if nka or ltype:
-    pipeline += [get_ngramm_filter(nka, ltype, 'ngrm')]
+  if not ngrammParam.is_empty():
+    pipeline += [get_ngramm_filter(ngrammParam, 'ngrm')]
   pipeline += [
     {"$group": {
       "_id": {
@@ -855,13 +848,12 @@ def get_frags_ngramms_cocitauthors_pipeline(
 
 
 def get_frags_ngramms_ngramms_branch_root(
-  topn:Optional[int], author:Optional[str], cited:Optional[str],
-  citing:Optional[str], nka: Optional[int], ltype: Optional[LType]
+  topn:Optional[int], authorParams:AuthorParam, ngrammParam:NgrammParam
 ):
   pipeline = [
     {'$match': {'ngrams': {'$exists': 1}, 'frag_num': {'$gt': 0}}},]
 
-  pipeline += filter_by_pubs_acc(author, cited, citing)
+  pipeline += filter_by_pubs_acc(authorParams)
   pipeline += [
     {'$project': {'linked_paper': '$ngrams'}},
     {'$unwind': '$linked_paper'},
@@ -875,8 +867,8 @@ def get_frags_ngramms_ngramms_branch_root(
     {'$unwind': '$ngramm'},
   ]
 
-  if nka or ltype:
-    pipeline += [get_ngramm_filter(nka, ltype, 'ngramm')]
+  if nf := get_ngramm_filter(ngrammParam, 'ngramm'):
+    pipeline += [nf]
 
   pipeline += [
     {'$project': {
@@ -888,9 +880,7 @@ def get_frags_ngramms_ngramms_branch_root(
   return pipeline
 
 
-def get_frags_ngramms_ngramms_branch_pipeline(
-  nka: Optional[int], ltype: Optional[LType]
-):
+def get_frags_ngramms_ngramms_branch_pipeline(ngrammParam:NgrammParam):
   pipeline = [
     {'$project': {
       'prefix': 0, 'suffix': 0, 'exact': 0, 'positive_negative': 0,
@@ -901,8 +891,8 @@ def get_frags_ngramms_ngramms_branch_pipeline(
     {'$unwind': '$cont'},
   ]
 
-  if nka or ltype:
-    pipeline += [get_ngramm_filter(nka, ltype, 'cont')]
+  if nf := get_ngramm_filter(ngrammParam, 'cont'):
+    pipeline += [nf]
 
   pipeline += [
     {'$unwind': '$ngrams'},
@@ -912,8 +902,7 @@ def get_frags_ngramms_ngramms_branch_pipeline(
 
 
 def get_frags_ngramms_topics_pipeline(
-  topn: Optional[int], author: Optional[str], cited: Optional[str],
-  citing: Optional[str], nka: Optional[int], ltype: Optional[LType],
+  topn: Optional[int], authorParams:AuthorParam, ngrammParam:NgrammParam,
   probability: Optional[float]
 ):
   pipeline = [
@@ -923,7 +912,7 @@ def get_frags_ngramms_topics_pipeline(
     {"$project": {
       "pubid": 1, "frag_num": 1, "topics": 1,
       "ngrams": 1}},]
-  pipeline += filter_by_pubs_acc(author, cited, citing)
+  pipeline += filter_by_pubs_acc(authorParams)
   pipeline += [
     {"$unwind": "$ngrams"},
     {'$lookup': {
@@ -931,8 +920,9 @@ def get_frags_ngramms_topics_pipeline(
       'foreignField': '_id', 'as': 'ngrm'}},
     {'$unwind': '$ngrm'},
   ]
-  if nka or ltype:
-    pipeline += [get_ngramm_filter(nka, ltype, 'ngrm')]
+  if nf := get_ngramm_filter(ngrammParam, 'ngrm'):
+    pipeline += [nf]
+
   pipeline += [
     {"$unwind": "$topics"},
   ]
@@ -957,7 +947,7 @@ def get_frags_ngramms_topics_pipeline(
       "frags": {'$push': {"fn": "$cont.frag_num", "cnt": "$count"}},
       'ngrm': {'$first': "$ngrm"},}},]
 
-  pipeline += _add_topic_pipeline(author, cited, citing, localField='_id.topic')
+  pipeline += _add_topic_pipeline(authorParams, localField='_id.topic')
 
   pipeline += [
     {'$group': {
@@ -978,15 +968,14 @@ def get_frags_ngramms_topics_pipeline(
 
 
 def get_frag_pos_neg_cocitauthors2(
-  topn: Optional[int], author: Optional[str],
-  cited: Optional[str], citing: Optional[str]
+  topn: Optional[int], authorParams:AuthorParam
 ):
   pipeline = [
     {'$match': {
       'positive_negative': {'$exists': 1}, 'cocit_authors': {'$exists': 1}}},
     {'$project': {
       'pubid': 1, 'positive_negative': 1, 'cocit_authors': 1, 'frag_num': 1}},]
-  pipeline += filter_by_pubs_acc(author, cited, citing)
+  pipeline += filter_by_pubs_acc(authorParams)
   pipeline += [
     {'$project': {'pub': 0}},
     {'$unwind': '$cocit_authors'},
@@ -1018,7 +1007,7 @@ def get_frag_pos_neg_cocitauthors2(
         'positive_negative': '$cont.positive_negative',},},}},
     {'$sort': {'count': -1, '_id': 1}},
     {'$project': {
-      '_id': False,
+      '_id': 0,
       'cocitpair': {
         'author1': '$_id.author1', 'author2': '$_id.author2'},
       'count': '$count', 'conts': '$conts', }},
@@ -1028,16 +1017,13 @@ def get_frag_pos_neg_cocitauthors2(
   return pipeline
 
 
-def get_frag_pos_neg_contexts(
-  author:Optional[str], cited:Optional[str],
-  citing:Optional[str]
-):
+def get_frag_pos_neg_contexts(authorParams:AuthorParam):
   pipeline = [
     {'$match': {
       'positive_negative': {'$exists': 1}, 'frag_num': {'$exists': 1}}},
     {'$project': {'pubid': 1, 'positive_negative': 1, 'frag_num': 1}},
   ]
-  pipeline += filter_by_pubs_acc(author, cited, citing)
+  pipeline += filter_by_pubs_acc(authorParams)
   pipeline += [
     {'$group': {
       '_id': {
@@ -1061,14 +1047,13 @@ def get_frag_pos_neg_contexts(
 
 
 def get_frags_topics_pipeline(
-  topn:Optional[int], author:Optional[str], cited:Optional[str],
-  citing:Optional[str], probability:Optional[float]
+  topn:Optional[int], authorParams:AuthorParam, probability:Optional[float]
 ):
   pipeline = [
     {'$match': {
       'frag_num': {'$exists': 1}, 'topics': {'$exists': 1}}},
     {'$project': {'pubid': 1, 'frag_num': 1, 'topics': 1}},]
-  pipeline += filter_by_pubs_acc(author, cited, citing)
+  pipeline += filter_by_pubs_acc(authorParams)
   pipeline += [
     {'$unwind': '$topics'},
   ]
@@ -1076,7 +1061,7 @@ def get_frags_topics_pipeline(
     pipeline += [
       {'$match': {'topics.probability': {'$gte': probability}}},]
 
-  pipeline += _add_topic_pipeline(author, cited, citing)
+  pipeline += _add_topic_pipeline(authorParams)
   pipeline += [
     {'$group': {
       '_id': {'_id': '$topic.title', 'frag_num': '$frag_num'},
@@ -1092,8 +1077,7 @@ def get_frags_topics_pipeline(
 
 
 def get_frags_topics_cocitauthors_pipeline(
-  author:Optional[str], cited:Optional[str], citing:Optional[str],
-  probability:Optional[float]
+  authorParams:AuthorParam, probability:Optional[float]
 ):
   pipeline = [
     {"$match": {
@@ -1102,7 +1086,7 @@ def get_frags_topics_cocitauthors_pipeline(
     {"$project": {
       "pubid": 1, "cocit_authors": 1, "frag_num": 1,
       "topics": 1}},]
-  pipeline += filter_by_pubs_acc(author, cited, citing)
+  pipeline += filter_by_pubs_acc(authorParams)
   pipeline += [
     {"$unwind": "$cocit_authors"},
     {"$unwind": "$topics"},]
@@ -1110,7 +1094,7 @@ def get_frags_topics_cocitauthors_pipeline(
     pipeline += [
       {"$match": {"topics.probability": {"$gte": probability}}, }]
 
-  pipeline += _add_topic_pipeline(author, cited, citing)
+  pipeline += _add_topic_pipeline(authorParams)
   pipeline += [
     {"$group": {
       "_id": {
@@ -1146,16 +1130,15 @@ def get_frags_topics_cocitauthors_pipeline(
 
 
 def get_frags_topics_ngramms_pipeline(
-  author: Optional[str], cited: Optional[str], citing: Optional[str],
-  nka: Optional[int], ltype: Optional[LType], probability: Optional[float],
-  topn_crpssgramm:Optional[int]
+  authorParams:AuthorParam, ngrammParam:NgrammParam,
+  probability: Optional[float], topn_crpssgramm:Optional[int]
 ):
   pipeline = [
     {"$match": {
       "topics": {"$exists": 1}, "frag_num": {"$exists": 1},
       "ngrams": {'$exists': 1}}},
     {"$project": {"pubid": 1, "topics": 1, "frag_num": 1, "ngrams": 1}},]
-  pipeline += filter_by_pubs_acc(author, cited, citing)
+  pipeline += filter_by_pubs_acc(authorParams)
   pipeline += [
     {"$unwind": "$ngrams"},
     {'$lookup': {
@@ -1163,8 +1146,8 @@ def get_frags_topics_ngramms_pipeline(
       'foreignField': '_id', 'as': 'ngrm'}},
     {'$unwind': '$ngrm'},
   ]
-  if nka or ltype:
-    pipeline += [get_ngramm_filter(nka, ltype, 'ngrm')]
+  if nf := get_ngramm_filter(ngrammParam, 'ngrm'):
+    pipeline += [nf]
   pipeline += [
     {"$unwind": "$topics"},
   ]
@@ -1172,7 +1155,7 @@ def get_frags_topics_ngramms_pipeline(
     pipeline += [
       {'$match': {'topics.probability': {'$gte': probability}}},
     ]
-  pipeline += _add_topic_pipeline(author, cited, citing)
+  pipeline += _add_topic_pipeline(authorParams)
   pipeline += [
     {"$group": {
       "_id": {
@@ -1210,15 +1193,14 @@ def get_frags_topics_ngramms_pipeline(
 
 
 def get_frags_topics_topics_pipeline(
-  author: Optional[str], cited: Optional[str], citing: Optional[str],
-  probability: Optional[float]
+  authorParams:AuthorParam, probability: Optional[float]
 ):
   pipeline = [
     {"$match": {
       "frag_num": {"$exists": 1}, "topics": {'$exists': 1}}},
     {"$project": {"pubid": 1, "frag_num": 1, "topics": 1}},
   ]
-  pipeline += filter_by_pubs_acc(author, cited, citing)
+  pipeline += filter_by_pubs_acc(authorParams)
   pipeline += [
     {"$project": {"pub": 0}},
     {"$unwind": "$topics"},]
@@ -1226,7 +1208,7 @@ def get_frags_topics_topics_pipeline(
     pipeline += [
       {"$match": {
         "topics.probability": {"$gte": probability}}, }]
-  pipeline += _add_topic_pipeline(author, cited, citing)
+  pipeline += _add_topic_pipeline(authorParams)
   pipeline += [
     {'$lookup': {
       'from': 'contexts', 'localField': '_id', 'foreignField': '_id',
@@ -1238,7 +1220,7 @@ def get_frags_topics_topics_pipeline(
       {"$match": {
         "cont.topics.probability": {"$gte": probability}}, }]
   pipeline += _add_topic_pipeline(
-    author, cited, citing, localField='cont.topics._id', as_field='cont_topic')
+    authorParams, localField='cont.topics._id', as_field='cont_topic')
   pipeline += [
     {'$project': {
       "frag_num": 1, "topic1": "$topic.title",
@@ -1268,8 +1250,7 @@ def get_frags_topics_topics_pipeline(
 
 
 def get_pos_neg_cocitauthors_pipeline(
-  topn:Optional[int], author:Optional[str], cited:Optional[str],
-  citing:Optional[str]
+  topn:Optional[int], authorParams:AuthorParam
 ):
   pipeline = [
     {'$match': {
@@ -1277,7 +1258,7 @@ def get_pos_neg_cocitauthors_pipeline(
       'cocit_authors': {'$exists': True}}},
     {'$project': {
       'pubid': True, 'positive_negative': True, 'cocit_authors': True}},]
-  pipeline += filter_by_pubs_acc(author, cited, citing)
+  pipeline += filter_by_pubs_acc(authorParams)
   pipeline += [
     {'$unwind': '$cocit_authors'},
     {'$group': {
@@ -1306,13 +1287,11 @@ def get_pos_neg_cocitauthors_pipeline(
   return pipeline
 
 
-def get_pos_neg_contexts_pipeline(
-  author:Optional[str], cited:Optional[str], citing:Optional[str]
-):
+def get_pos_neg_contexts_pipeline(authorParams:AuthorParam):
   pipeline = [
     {'$match': {'positive_negative': {'$exists': True}}},
     {'$project': {'pubid': True, 'positive_negative': True}},]
-  pipeline += filter_by_pubs_acc(author, cited, citing)
+  pipeline += filter_by_pubs_acc(authorParams)
   pipeline += [
     {'$group': {
       '_id': {
@@ -1331,8 +1310,7 @@ def get_pos_neg_contexts_pipeline(
 
 
 def get_pos_neg_ngramms_pipeline(
-  topn: Optional[int], author: Optional[str], cited: Optional[str],
-  citing: Optional[str], nka:Optional[int], ltype:Optional[LType]
+  topn: Optional[int], authorParams:AuthorParam, ngrammParam:NgrammParam
 ):
   pipeline = [
     {'$match': {
@@ -1340,15 +1318,15 @@ def get_pos_neg_ngramms_pipeline(
       'ngrams': {'$exists': True},}},
     {'$project': {
       'pubid': True, 'positive_negative': True, 'ngrams': True}},]
-  pipeline += filter_by_pubs_acc(author, cited, citing)
+  pipeline += filter_by_pubs_acc(authorParams)
   pipeline += [
     {'$unwind': '$ngrams'},
     {'$lookup': {
       'from': 'n_gramms', 'localField': 'ngrams._id',
       'foreignField': '_id', 'as': 'ngrm'}},
     {'$unwind': '$ngrm'},]
-  if nka or ltype:
-    pipeline += [get_ngramm_filter(nka, ltype, 'ngrm')]
+  if nf := get_ngramm_filter(ngrammParam, 'ngrm'):
+    pipeline += [nf]
   pipeline += [
     {'$group': {
       '_id': {
@@ -1381,12 +1359,10 @@ def get_pos_neg_ngramms_pipeline(
   return pipeline
 
 
-def get_pos_neg_pubs_pipeline(
-  author: Optional[str], cited: Optional[str], citing: Optional[str]
-):
+def get_pos_neg_pubs_pipeline(authorParams:AuthorParam):
   pipeline = [
     {'$match': {'positive_negative': {'$exists': 1}, }},]
-  if filter_pipeline := filter_by_pubs_acc(author, cited, citing):
+  if filter_pipeline := filter_by_pubs_acc(authorParams):
     pipeline += filter_pipeline
   pipeline += [
     {'$group': {
@@ -1408,8 +1384,7 @@ def get_pos_neg_pubs_pipeline(
 
 
 def get_pos_neg_topics_pipeline(
-  author: Optional[str], cited: Optional[str], citing: Optional[str],
-  probability:Optional[float]
+  authorParams:AuthorParam, probability:Optional[float]
 ):
   pipeline = [
     {'$match': {
@@ -1417,13 +1392,13 @@ def get_pos_neg_topics_pipeline(
       'topics': {'$exists': 1}}},
     {'$project': {
       'pubid': 1, 'positive_negative': 1, 'topics': 1}},]
-  if filter_pipeline := filter_by_pubs_acc(author, cited, citing):
+  if filter_pipeline := filter_by_pubs_acc(authorParams):
     pipeline += filter_pipeline
 
   pipeline += [
     {'$unwind': '$topics'},
     {'$match': {'topics.probability': {'$gte': probability}}},]
-  pipeline += _add_topic_pipeline(author, cited, citing)
+  pipeline += _add_topic_pipeline(authorParams)
   pipeline += [
     {'$group': {
       '_id': {
@@ -1446,12 +1421,11 @@ def get_pos_neg_topics_pipeline(
 
 
 def get_publications_cocitauthors_pipeline(
-  author: Optional[str], cited: Optional[str], citing: Optional[str],
-  topn_auth:Optional[int]
+  authorParams:AuthorParam, topn_auth:Optional[int]
 ):
   pipeline = [
     {"$match": {"cocit_authors": {"$exists": 1}}}]
-  if filter_pipeline := filter_by_pubs_acc(author, cited, citing):
+  if filter_pipeline := filter_by_pubs_acc(authorParams):
     pipeline += filter_pipeline
   else:
     pipeline += [
@@ -1495,13 +1469,12 @@ def get_publications_cocitauthors_pipeline(
 
 
 def get_publications_ngramms_pipeline(
-  topn:Optional[int], author: Optional[str], cited: Optional[str],
-  citing: Optional[str], nka:Optional[int], ltype:Optional[LType],
+  topn:Optional[int], authorParams:AuthorParam, ngrammParam:NgrammParam,
   topn_gramm:Optional[int]
 ):
   pipeline = [
     {"$match": {"ngrams": {"$exists": 1}}}]
-  if filter_pipeline := filter_by_pubs_acc(author, cited, citing):
+  if filter_pipeline := filter_by_pubs_acc(authorParams):
     pipeline += filter_pipeline
   else:
     pipeline += [
@@ -1517,8 +1490,8 @@ def get_publications_ngramms_pipeline(
       'from': 'n_gramms', 'localField': 'ngrams._id',
       'foreignField': '_id', 'as': 'ngrm'}},
     {'$unwind': '$ngrm'}, ]
-  if nka or ltype:
-    pipeline += [get_ngramm_filter(nka, ltype, 'ngrm')]
+  if nf := get_ngramm_filter(ngrammParam, 'ngrm'):
+    pipeline += [nf]
 
   pipeline += [
     {'$group': {
@@ -1567,14 +1540,13 @@ def get_publications_ngramms_pipeline(
 
 
 def get_publications_topics_topics_pipeline(
-  author: Optional[str], cited: Optional[str], citing: Optional[str],
-  probability:Optional[float]
+  authorParams:AuthorParam, probability:Optional[float]
 ):
   pipeline = [
     {"$match": {
       "pubid": {"$exists": 1}, "topics": {'$exists': 1}}},
     {"$project": {"pubid": 1, "topics": 1}}, ]
-  pipeline += filter_by_pubs_acc(author, cited, citing)
+  pipeline += filter_by_pubs_acc(authorParams)
   pipeline += [
     {"$project": {"pub": 0}},
     {"$unwind": "$topics"}, ]
@@ -1582,7 +1554,7 @@ def get_publications_topics_topics_pipeline(
     pipeline += [{
       "$match": {
         "topics.probability": {"$gte": probability}}, }]
-  pipeline += _add_topic_pipeline(author, cited, citing)
+  pipeline += _add_topic_pipeline(authorParams)
   pipeline += [{
     '$lookup': {
       'from': 'contexts', 'localField': '_id', 'foreignField': '_id',
@@ -1593,7 +1565,7 @@ def get_publications_topics_topics_pipeline(
       "$match": {
         "cont.topics.probability": {"$gte": probability}}, }]
   pipeline += _add_topic_pipeline(
-    author, cited, citing, localField='cont.topics._id', as_field='cont_topic')
+    authorParams, localField='cont.topics._id', as_field='cont_topic')
   pipeline += [{
     '$project': {
       "pubid": 1, "topic1": "$topic.title",
@@ -1630,12 +1602,11 @@ def get_publications_topics_topics_pipeline(
 
 
 def get_top_detail_bund_refauthors(
-  topn: Optional[int], author: Optional[str], cited: Optional[str],
-  citing: Optional[str]
+  topn: Optional[int], authorParams:AuthorParam
 ):
   pipeline = [
     {'$match': {'exact': {'$exists': 1}, 'bundles': {'$exists': 1}}},]
-  if filter_pipeline := filter_by_pubs_acc(author, cited, citing):
+  if filter_pipeline := filter_by_pubs_acc(authorParams):
     pipeline += filter_pipeline
 
   pipeline += [

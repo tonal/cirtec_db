@@ -35,7 +35,7 @@ pandas==1.0.5             # via -r requirements.in
 parsel==1.6.0             # via -r requirements.in
 pycares==3.1.1            # via aiodns
 pycparser==2.20           # via cffi
-pydantic==1.6             # via fastapi
+pydantic==1.6.1           # via fastapi
 pymongo[snappy,srv,zstd]==3.10.1  # via -r requirements.in, motor
 pymorphy2-dicts-ru==2.4.404381.4453942  # via -r requirements.in
 pymorphy2-dicts==2.4.393442.3710985  # via pymorphy2
