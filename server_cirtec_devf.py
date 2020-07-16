@@ -52,7 +52,7 @@ def main():
   app.include_router(routers_posneg.router, prefix=cummon_prefix + '/pos_neg')
   app.include_router(routers_publ.router, prefix=cummon_prefix + '/publ')
   app.include_router(routers_top.router, prefix=cummon_prefix + '/top')
-  app.include_router(routers_misc.router, prefix=cummon_prefix + '/')
+  app.include_router(routers_misc.router, prefix=cummon_prefix)
 
   @app.middleware("http")
   async def db_session_middleware(request:Request, call_next):
