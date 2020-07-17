@@ -14,7 +14,7 @@ from pymongo import MongoClient
 from pymongo.collection import Collection
 from pymongo.database import Database
 
-from load_utils import AUTHORS, rename_new_field
+from loads.common import AUTHORS, rename_new_field
 from utils import load_config
 
 
@@ -79,6 +79,7 @@ def update_ngramms(
           ngrams = json.load(f)
 
         for title, doc in ngrams.items():
+          # type: title: str
           all_cnt = doc['count']
           # print(' ', title, all_cnt)
           lp_cnt = 0
@@ -98,14 +99,17 @@ def update_ngramms(
               mcont_update(dict(_id=cont_id), {
                 '$set': {'pubid': pub_id, 'start': int(start)},
                 '$addToSet': {
-                  'ngrams_new': {'_id': ngr_id, 'cnt': gcnt},
+                  'ngrams_new': {
+                    '_id': ngr_id, 'type': obj_type, 'nka': nka, 'cnt': gcnt},
                 }})
               cash_cont.add((cont_id, ngr_id))
             lp_cnt += gcnt
           if not lp_cnt:
             continue
-          ngram_doc = dict(_id=ngr_id, title=title, nka=nka, type=obj_type,
-            count_all=all_cnt, count_in_linked_papers=lp_cnt, )
+          ngram_doc = dict(
+            _id=ngr_id, title=title, nka=nka, type=obj_type,
+            words=title.split(), count_all=all_cnt,
+            count_in_linked_papers=lp_cnt, )
           ngrm_update(
             dict(_id=ngr_id), {'$set': ngram_doc, '$unset': {'for_del': 1}})
           cnt += 1

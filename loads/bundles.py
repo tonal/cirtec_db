@@ -13,7 +13,7 @@ from pymongo import MongoClient
 from pymongo.collection import Collection
 from pymongo.database import Database
 
-from load_utils import AUTHORS
+from loads.common import AUTHORS
 from utils import load_config
 
 

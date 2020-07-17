@@ -40,9 +40,9 @@ def update_class_pos_neg(mdb:Database, authors:Iterable[str], for_del:int):
   start = now()
   mcont: Collection = mdb['contexts']
   mcont_update = mcont.update_one
-  cvect: CountVectorizer = jl_load('positive_negative_cvect.joblib')
+  cvect: CountVectorizer = jl_load('../positive_negative_cvect.joblib')
   print(now(), 'cvect')
-  model: LogisticRegression = jl_load('positive_negative_model.joblib')
+  model: LogisticRegression = jl_load('../positive_negative_model.joblib')
   print(now(), 'model')
   df_need = pd.DataFrame(data=parse_contexts(mcont), columns='cid seq'.split())
   df_need.info()

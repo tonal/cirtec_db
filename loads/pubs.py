@@ -14,7 +14,7 @@ from lxml import etree
 from parsel import Selector
 from pymongo import MongoClient
 
-from load_utils import AUTHORS, rename_new_field
+from loads.common import AUTHORS, rename_new_field
 from utils import load_config, norm_spaces
 
 

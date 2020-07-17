@@ -3,22 +3,20 @@
 """
 Загрузка контекстов цитирования
 """
-from collections import Counter
 from datetime import datetime
 from functools import reduce
-import re
 from typing import Callable, Iterable
 
 from pymongo.database import Database
 from pymongo import MongoClient
 import requests
 
-from load_bundles import BUNDLES, update_bundles
-from load_classif_pos_neg import update_class_pos_neg
-from load_pubs import update_pubs_conts, SOURCE_XML
-from load_ngrams import update_ngramms, NGRAM_ROOT
-from load_topics import update_topics, TOPICS
-from load_utils import AUTHORS
+from loads.bundles import BUNDLES, update_bundles
+from loads.classif_pos_neg import update_class_pos_neg
+from loads.pubs import update_pubs_conts, SOURCE_XML
+from loads.ngrams import update_ngramms, NGRAM_ROOT
+from loads.topics import update_topics, TOPICS
+from loads.common import AUTHORS
 from utils import load_config
 
 

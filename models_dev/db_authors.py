@@ -9,6 +9,7 @@ def get_publics(
   atype:AType, ngpr:NgrammParam, probability:float=.5
 ) -> list:
   assert not ngpr.is_empty()
+  assert probability > 0
   aval = 'authors' if atype == AType.author else atype.value
   field = f'$uni_{aval}' # '$uni_authors'
   pipeline = [

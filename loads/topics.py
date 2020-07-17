@@ -14,7 +14,7 @@ from urllib.request import urlopen
 from pymongo import ASCENDING, MongoClient, ReturnDocument
 from pymongo.database import Database
 
-from load_utils import AUTHORS, rename_new_field
+from loads.common import AUTHORS, rename_new_field
 from utils import load_config
 
 

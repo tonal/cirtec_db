@@ -7,16 +7,13 @@ from collections import Counter
 from datetime import datetime
 from functools import partial, reduce
 import json
-from operator import itemgetter
-from pprint import pprint
-from typing import Sequence
 from urllib.request import urlopen
 
 from pymongo import MongoClient
 from pymongo.database import Database
 from pymongo.errors import DuplicateKeyError
 
-from load_utils import rename_new_field
+from loads.common import rename_new_field
 from utils import load_config
 
 # COCITS_FILE:str = 'linked_papers_cocits_aunas.json'
