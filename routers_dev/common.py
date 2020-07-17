@@ -1,14 +1,13 @@
-#! /usr/bin/env python3
 # -*- codong: utf-8 -*-
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict as dc_asdict
 import enum
 from typing import ClassVar, Optional
 
-from fastapi import Query, Request
+from fastapi import Depends, Query, Request
 from motor.motor_asyncio import AsyncIOMotorClient
 from pymongo.database import Database
 
-from models_dev.dbquery import LType, NgrammParam
+from models_dev.models import AuthorParam, LType, NgrammParam
 
 
 DEF_AUTHOR = 'Sergey-Sinelnikov-Murylev'
@@ -54,6 +53,23 @@ def depNgrammParam(
   nka:Optional[int]=Query(None, ge=0, le=6),
   ltype:Optional[LType]=Query(
     None, title='Тип фразы',
-    description='Может быть одно из значений "lemmas", "nolemmas" или пустой')
+    description='Тип фразы. Может быть одно из значений "lemmas", "nolemmas" или пустой')
 ):
   return NgrammParam(nka, ltype)
+
+
+def depNgrammParamReq(
+  nka:int=Query(..., ge=0, le=6),
+  ltype:LType=Query(
+    ...,
+    title='Тип фразы',
+    description='Тип фразы. Может быть одно из значений "lemmas", "nolemmas"')
+):
+  return NgrammParam(nka, ltype)
+
+
+def depAuthorParamOnlyOne(authorParams:AuthorParam=Depends()):
+  if not authorParams.only_one():
+    raise ValueError(
+      f'Должно быть заполнено только одно поле: {dc_asdict(authorParams)}')
+  return authorParams

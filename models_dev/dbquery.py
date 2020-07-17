@@ -1,109 +1,15 @@
 # -*- codong: utf-8 -*-
-from dataclasses import dataclass
-import enum
 import logging
-from typing import Dict, List, Optional
+from typing import List, Optional
+
+from models_dev.common import (
+  filter_by_pubs_acc, filter_acc_dict, get_ngramm_filter, _add_topic_pipeline)
+from models_dev.models import AuthorParam, NgrammParam
 
 _logger = logging.getLogger('cirtec')
 
 
-@dataclass(eq=False, order=False, frozen=True)
-class AuthorParam:
-  author:Optional[str]=None
-  cited:Optional[str]=None
-  citing:Optional[str]=None
-
-  def is_empty(self):
-    return not any([self.author, self.cited, self.citing])
-
-
-class LType(str, enum.Enum):
-  lemmas = 'lemmas'
-  nolemmas = 'nolemmas'
-
-
-@dataclass(eq=False, order=False, frozen=True)
-class NgrammParam:
-  nka:Optional[int]=None
-  ltype:Optional[LType]=None
-
-  def is_empty(self):
-    return not any([self.nka, self.ltype])
-
-
-def filter_by_pubs_acc(authParams:AuthorParam) -> List[dict]:
-  if authParams.is_empty():
-    return []
-  match = filter_acc_dict(authParams)
-  pipeline = [
-    {'$lookup': {
-      'from': 'publications', 'localField': 'pubid', 'foreignField': '_id',
-      'as': 'pub'}},
-    {'$unwind': '$pub'},
-    # {'$match': {'pub.uni_authors': {'$exists': 1}}},
-    {'$match': {f'pub.{key}': val for key, val in match.items()}},
-  ]
-  return pipeline
-
-
-def filter_acc_dict(ap:AuthorParam) -> Dict[str, str]:
-  """Фильтр по author, cited, citing"""
-  if ap.is_empty():
-    return {}
-  match = {
-    f'uni_{key}': val for key, val in
-    (('authors', ap.author), ('cited', ap.cited), ('citing', ap.citing))
-    if val}
-  return match
-
-
-def get_ngramm_filter(
-  np:NgrammParam, ngrm_field:Optional[str]=None
-) -> Dict[str, dict]:
-  if np.is_empty():
-    return {}
-
-  ltype_str:str = np.ltype.value if np.ltype is not None else ''
-
-  if not ngrm_field:
-    return {
-      '$match': {
-        f: v for f, v in (('nka', np.nka), ('type', ltype_str)) if v}}
-
-  return {
-    '$match': {
-      f'{ngrm_field}.{f}': v
-      for f, v in (('nka', np.nka), ('type', ltype_str)) if v}}
-
-
-def _add_topic_pipeline(
-  authorParams:AuthorParam, *, localField:str='topics._id', as_field:str='topic'
-):
-  pipeline = [
-    {'$lookup': {
-      'from': 'topics', 'localField': localField, 'foreignField': '_id',
-      'as': as_field}},
-    {"$unwind": "$" + as_field}, ]
-  pipeline += filter_by_topic(authorParams)
-  return pipeline
-
-
-def filter_by_topic(
-  ap:AuthorParam, *, as_field:str='topic'
-):
-  if ap.is_empty():
-    return []
-  pipeline = [
-    {
-      '$match': {
-        "$or": [
-          {f'{as_field}.uni_{fld}': val} for fld, val in
-          (('author', ap.author), ('cited', ap.cited), ('citing', ap.citing),)
-          if val]}}, ]
-  return pipeline
-
-
-def get_refbindles_pipeline(topn:Optional[int], authorParams:AuthorParam):
+def get_refbindles_pipeline(topn:Optional[int], authorParams: AuthorParam):
   pipeline = [
     {'$match': {'exact': {'$exists': 1}}},
     {'$project': {
@@ -140,7 +46,7 @@ def get_refbindles_pipeline(topn:Optional[int], authorParams:AuthorParam):
   return pipeline
 
 
-def get_refauthors_pipeline(topn: Optional[int], authorParams:AuthorParam):
+def get_refauthors_pipeline(topn: Optional[int], authorParams: AuthorParam):
   pipeline = [
     {'$match': {'exact': {'$exists': 1}}},
     {'$project': {
@@ -180,7 +86,7 @@ def get_refauthors_pipeline(topn: Optional[int], authorParams:AuthorParam):
   return pipeline
 
 
-def get_frag_publications(authorParams:AuthorParam):
+def get_frag_publications(authorParams: AuthorParam):
   pipeline = [
     {'$match': {'name': {'$exists': 1}}},
   ]
@@ -207,7 +113,7 @@ def get_frag_publications(authorParams:AuthorParam):
 
 
 def get_top_cocitauthors_publications_pipeline(
-  topn: Optional[int], authorParams:AuthorParam
+  topn: Optional[int], authorParams: AuthorParam
 ):
   pipeline = [
     {'$match': {'cocit_authors': {'$exists': 1}}},
@@ -232,7 +138,7 @@ def get_top_cocitauthors_publications_pipeline(
 
 
 def get_top_cocitrefs2_pipeline(
-  topn: Optional[int], authorParams:AuthorParam
+  topn: Optional[int], authorParams: AuthorParam
 ):
   pipeline = [
     {'$match': {'bundles': {'$exists': 1}, 'frag_num': {'$exists': 1}}},
@@ -282,7 +188,7 @@ def get_top_cocitrefs2_pipeline(
 
 
 def get_top_ngramms_publications_pipeline(
-  topn: Optional[int], authorParams:AuthorParam, ngrammParam:NgrammParam
+  topn: Optional[int], authorParams: AuthorParam, ngrammParam: NgrammParam
 ):
   pipeline = [
     {'$match': {"ngrams": {'$exists': 1}}},
@@ -315,7 +221,7 @@ def get_top_ngramms_publications_pipeline(
 
 
 def get_top_topics_publications_pipeline(
-  topn: Optional[int], authorParams:AuthorParam, probability:Optional[float]
+  topn: Optional[int], authorParams: AuthorParam, probability:Optional[float]
 ):
   pipeline = [
     {'$match': {"topics": {'$exists': 1}}},
@@ -352,7 +258,7 @@ def get_top_topics_publications_pipeline(
 
 
 def get_top_topics_pipeline(
-  topn:Optional[int], authorParams:AuthorParam, probability:Optional[float]
+  topn:Optional[int], authorParams: AuthorParam, probability:Optional[float]
 ):
   pipeline = [
     {'$match': {'exact': {'$exists': 1}}},
@@ -392,7 +298,7 @@ def get_top_topics_pipeline(
 
 
 def get_top_ngramms_pipeline(
-  topn:Optional[int], authorParams:AuthorParam, ngrammParam:NgrammParam
+  topn:Optional[int], authorParams: AuthorParam, ngrammParam: NgrammParam
 ):
   pipeline = [
     {'$match': {'ngrams._id': {'$exists': 1}}},
@@ -428,7 +334,7 @@ def get_top_ngramms_pipeline(
 
 
 def get_top_cocitauthors_pipeline(
-  topn:Optional[int], authorParams:AuthorParam
+  topn:Optional[int], authorParams: AuthorParam
 ):
   pipeline = [
     {'$match': {'frag_num': {'$gt': 0}, 'cocit_authors': {'$exists': 1}}},
@@ -451,7 +357,7 @@ def get_top_cocitauthors_pipeline(
 
 
 def get_top_cocitrefs_pipeline(
-  topn:Optional[int], authorParams:AuthorParam
+  topn:Optional[int], authorParams: AuthorParam
 ):
   pipeline = [
     {'$match': {'frag_num': {'$gt': 0}, 'bundles': {'$exists': 1}}},
@@ -479,7 +385,7 @@ def get_top_cocitrefs_pipeline(
   return pipeline
 
 
-def get_refauthors_part_pipeline(topn:int, authorParams:AuthorParam):
+def get_refauthors_part_pipeline(topn:int, authorParams: AuthorParam):
   pipeline = [
     {'$match': {'exact': {'$exists': 1}}},
     {'$project': {
@@ -517,7 +423,7 @@ def get_refauthors_part_pipeline(topn:int, authorParams:AuthorParam):
 
 
 def get_ref_auth4ngramm_tops_pipeline(
-  topn:Optional[int], authorParams:AuthorParam
+  topn:Optional[int], authorParams: AuthorParam
 ):
   pipeline = [
     {'$match': {'exact': {'$exists': 1}}},
@@ -550,7 +456,7 @@ def get_ref_auth4ngramm_tops_pipeline(
 
 
 def get_ref_bund4ngramm_tops_pipeline(
-  topn:Optional[int], authorParams:AuthorParam
+  topn:Optional[int], authorParams: AuthorParam
 ):
   pipeline = [
     {'$match': {'exact': {'$exists': 1}}},
@@ -583,7 +489,7 @@ def get_ref_bund4ngramm_tops_pipeline(
 
 
 def get_frags_cocitauthors_pipeline(
-  topn:Optional[int], authParams:AuthorParam
+  topn:Optional[int], authParams: AuthorParam
 ) -> List[dict]:
   pipeline = [
     {'$match': {'frag_num': {'$gt': 0}, 'cocit_authors': {'$exists': True}}},
@@ -602,7 +508,7 @@ def get_frags_cocitauthors_pipeline(
 
 
 def get_frags_cocitauthors_cocitauthors_pipeline(
-  topn:Optional[int], authorParams:AuthorParam
+  topn:Optional[int], authorParams: AuthorParam
 ):
   pipeline = [
     {'$match': {
@@ -646,7 +552,7 @@ def get_frags_cocitauthors_cocitauthors_pipeline(
 
 
 def get_frags_cocitauthors_ngramms_pipeline(
-  topn: Optional[int], authorParams:AuthorParam, ngrammParam:NgrammParam
+  topn: Optional[int], authorParams: AuthorParam, ngrammParam: NgrammParam
 ):
   pipeline = [
     {"$match": {
@@ -704,7 +610,7 @@ def get_frags_cocitauthors_ngramms_pipeline(
 
 
 def get_frags_cocitauthors_topics_pipeline(
-  topn:Optional[int], authorParams:AuthorParam, probability:Optional[float]
+  topn:Optional[int], authorParams: AuthorParam, probability:Optional[float]
 ):
   pipeline = [
     {"$match": {
@@ -759,7 +665,7 @@ def get_frags_cocitauthors_topics_pipeline(
 
 
 def get_frags_ngramms_pipeline(
-  topn:Optional[int], authorParams:AuthorParam, ngrammParam:NgrammParam
+  topn:Optional[int], authorParams: AuthorParam, ngrammParam: NgrammParam
 ):
   pipeline = [
     {'$match': {
@@ -796,7 +702,7 @@ def get_frags_ngramms_pipeline(
 
 
 def get_frags_ngramms_cocitauthors_pipeline(
-  topn: Optional[int], authorParams:AuthorParam, ngrammParam:NgrammParam
+  topn: Optional[int], authorParams: AuthorParam, ngrammParam: NgrammParam
 ):
   pipeline = [
     {"$match": {
@@ -848,7 +754,7 @@ def get_frags_ngramms_cocitauthors_pipeline(
 
 
 def get_frags_ngramms_ngramms_branch_root(
-  topn:Optional[int], authorParams:AuthorParam, ngrammParam:NgrammParam
+  topn:Optional[int], authorParams: AuthorParam, ngrammParam: NgrammParam
 ):
   pipeline = [
     {'$match': {'ngrams': {'$exists': 1}, 'frag_num': {'$gt': 0}}},]
@@ -880,7 +786,7 @@ def get_frags_ngramms_ngramms_branch_root(
   return pipeline
 
 
-def get_frags_ngramms_ngramms_branch_pipeline(ngrammParam:NgrammParam):
+def get_frags_ngramms_ngramms_branch_pipeline(ngrammParam: NgrammParam):
   pipeline = [
     {'$project': {
       'prefix': 0, 'suffix': 0, 'exact': 0, 'positive_negative': 0,
@@ -902,7 +808,7 @@ def get_frags_ngramms_ngramms_branch_pipeline(ngrammParam:NgrammParam):
 
 
 def get_frags_ngramms_topics_pipeline(
-  topn: Optional[int], authorParams:AuthorParam, ngrammParam:NgrammParam,
+  topn: Optional[int], authorParams: AuthorParam, ngrammParam: NgrammParam,
   probability: Optional[float]
 ):
   pipeline = [
@@ -968,7 +874,7 @@ def get_frags_ngramms_topics_pipeline(
 
 
 def get_frag_pos_neg_cocitauthors2(
-  topn: Optional[int], authorParams:AuthorParam
+  topn: Optional[int], authorParams: AuthorParam
 ):
   pipeline = [
     {'$match': {
@@ -1017,7 +923,7 @@ def get_frag_pos_neg_cocitauthors2(
   return pipeline
 
 
-def get_frag_pos_neg_contexts(authorParams:AuthorParam):
+def get_frag_pos_neg_contexts(authorParams: AuthorParam):
   pipeline = [
     {'$match': {
       'positive_negative': {'$exists': 1}, 'frag_num': {'$exists': 1}}},
@@ -1047,7 +953,7 @@ def get_frag_pos_neg_contexts(authorParams:AuthorParam):
 
 
 def get_frags_topics_pipeline(
-  topn:Optional[int], authorParams:AuthorParam, probability:Optional[float]
+  topn:Optional[int], authorParams: AuthorParam, probability:Optional[float]
 ):
   pipeline = [
     {'$match': {
@@ -1077,7 +983,7 @@ def get_frags_topics_pipeline(
 
 
 def get_frags_topics_cocitauthors_pipeline(
-  authorParams:AuthorParam, probability:Optional[float]
+  authorParams: AuthorParam, probability:Optional[float]
 ):
   pipeline = [
     {"$match": {
@@ -1130,7 +1036,7 @@ def get_frags_topics_cocitauthors_pipeline(
 
 
 def get_frags_topics_ngramms_pipeline(
-  authorParams:AuthorParam, ngrammParam:NgrammParam,
+  authorParams: AuthorParam, ngrammParam: NgrammParam,
   probability: Optional[float], topn_crpssgramm:Optional[int]
 ):
   pipeline = [
@@ -1193,7 +1099,7 @@ def get_frags_topics_ngramms_pipeline(
 
 
 def get_frags_topics_topics_pipeline(
-  authorParams:AuthorParam, probability: Optional[float]
+  authorParams: AuthorParam, probability: Optional[float]
 ):
   pipeline = [
     {"$match": {
@@ -1250,7 +1156,7 @@ def get_frags_topics_topics_pipeline(
 
 
 def get_pos_neg_cocitauthors_pipeline(
-  topn:Optional[int], authorParams:AuthorParam
+  topn:Optional[int], authorParams: AuthorParam
 ):
   pipeline = [
     {'$match': {
@@ -1287,7 +1193,7 @@ def get_pos_neg_cocitauthors_pipeline(
   return pipeline
 
 
-def get_pos_neg_contexts_pipeline(authorParams:AuthorParam):
+def get_pos_neg_contexts_pipeline(authorParams: AuthorParam):
   pipeline = [
     {'$match': {'positive_negative': {'$exists': True}}},
     {'$project': {'pubid': True, 'positive_negative': True}},]
@@ -1310,7 +1216,7 @@ def get_pos_neg_contexts_pipeline(authorParams:AuthorParam):
 
 
 def get_pos_neg_ngramms_pipeline(
-  topn: Optional[int], authorParams:AuthorParam, ngrammParam:NgrammParam
+  topn: Optional[int], authorParams: AuthorParam, ngrammParam: NgrammParam
 ):
   pipeline = [
     {'$match': {
@@ -1359,7 +1265,7 @@ def get_pos_neg_ngramms_pipeline(
   return pipeline
 
 
-def get_pos_neg_pubs_pipeline(authorParams:AuthorParam):
+def get_pos_neg_pubs_pipeline(authorParams: AuthorParam):
   pipeline = [
     {'$match': {'positive_negative': {'$exists': 1}, }},]
   if filter_pipeline := filter_by_pubs_acc(authorParams):
@@ -1384,7 +1290,7 @@ def get_pos_neg_pubs_pipeline(authorParams:AuthorParam):
 
 
 def get_pos_neg_topics_pipeline(
-  authorParams:AuthorParam, probability:Optional[float]
+  authorParams: AuthorParam, probability:Optional[float]
 ):
   pipeline = [
     {'$match': {
@@ -1421,7 +1327,7 @@ def get_pos_neg_topics_pipeline(
 
 
 def get_publications_cocitauthors_pipeline(
-  authorParams:AuthorParam, topn_auth:Optional[int]
+  authorParams: AuthorParam, topn_auth:Optional[int]
 ):
   pipeline = [
     {"$match": {"cocit_authors": {"$exists": 1}}}]
@@ -1469,7 +1375,7 @@ def get_publications_cocitauthors_pipeline(
 
 
 def get_publications_ngramms_pipeline(
-  topn:Optional[int], authorParams:AuthorParam, ngrammParam:NgrammParam,
+  topn:Optional[int], authorParams: AuthorParam, ngrammParam: NgrammParam,
   topn_gramm:Optional[int]
 ):
   pipeline = [
@@ -1540,7 +1446,7 @@ def get_publications_ngramms_pipeline(
 
 
 def get_publications_topics_topics_pipeline(
-  authorParams:AuthorParam, probability:Optional[float]
+  authorParams: AuthorParam, probability:Optional[float]
 ):
   pipeline = [
     {"$match": {
@@ -1602,7 +1508,7 @@ def get_publications_topics_topics_pipeline(
 
 
 def get_top_detail_bund_refauthors(
-  topn: Optional[int], authorParams:AuthorParam
+  topn: Optional[int], authorParams: AuthorParam
 ):
   pipeline = [
     {'$match': {'exact': {'$exists': 1}, 'bundles': {'$exists': 1}}},]

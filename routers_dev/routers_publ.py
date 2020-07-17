@@ -1,4 +1,3 @@
-#! /usr/bin/env python3
 # -*- codong: utf-8 -*-
 from collections import defaultdict
 from functools import partial
@@ -11,11 +10,12 @@ from pymongo.collection import Collection
 
 from routers_dev.common import DebugOption, Slot, depNgrammParam
 from models_dev.dbquery import (
-  AuthorParam, NgrammParam, filter_acc_dict,
-  get_frags_ngramms_ngramms_branch_pipeline,
+    get_frags_ngramms_ngramms_branch_pipeline,
   get_frags_ngramms_ngramms_branch_root, get_publications_cocitauthors_pipeline,
   get_publications_ngramms_pipeline, get_publications_topics_topics_pipeline,
   get_refauthors_part_pipeline)
+from models_dev.common import filter_acc_dict
+from models_dev.models import AuthorParam, NgrammParam
 from server_utils import to_out_typed
 
 router = APIRouter()
@@ -28,7 +28,7 @@ async def _req_publ_ngramm_ngramm(
   authorParams:AuthorParam=Depends(),
   ngrammParam:NgrammParam=Depends(depNgrammParam),
   topn_ngramm:Optional[int]=10,
-  _debug_option:DebugOption=None,
+  _debug_option:Optional[DebugOption]=None,
   slot:Slot=Depends(Slot.req2slot)
 ):
   pipeline_root = get_frags_ngramms_ngramms_branch_root(
@@ -90,7 +90,7 @@ async def _req_publ_ngramm_ngramm(
   summary='Публикации')
 async def _req_publications(
   authorParams:AuthorParam=Depends(),
-  _debug_option:DebugOption=None,
+  _debug_option:Optional[DebugOption]=None,
   slot:Slot=Depends(Slot.req2slot)
 ):
   query = {
@@ -116,7 +116,7 @@ async def _req_publications(
 async def _req_publ_publications_cocitauthors(
   authorParams:AuthorParam=Depends(),
   topn_auth:Optional[int]=None,
-  _debug_option:DebugOption=None,
+  _debug_option:Optional[DebugOption]=None,
   slot:Slot=Depends(Slot.req2slot)
 ):
   pipeline = get_publications_cocitauthors_pipeline(
@@ -137,7 +137,7 @@ async def _req_publ_publications_ngramms(
   authorParams:AuthorParam=Depends(),
   ngrammParam:NgrammParam=Depends(depNgrammParam),
   topn_gramm:Optional[int]=10,
-  _debug_option:DebugOption=None,
+  _debug_option:Optional[DebugOption]=None,
   slot:Slot=Depends(Slot.req2slot)
 ):
   pipeline = get_publications_ngramms_pipeline(
@@ -156,7 +156,7 @@ async def _req_publ_publications_ngramms(
 async def _req_publ_topics_topics(
   authorParams:AuthorParam=Depends(),
   probability:Optional[float]=.4,
-  _debug_option:DebugOption=None,
+  _debug_option:Optional[DebugOption]=None,
   slot:Slot=Depends(Slot.req2slot)
 ):
   pipeline = get_publications_topics_topics_pipeline(
@@ -177,7 +177,7 @@ async def _req_publ_topics_topics(
 async def _req_pubs_refauthors(
   top_auth:Optional[int]=3,
   authorParams:AuthorParam=Depends(),
-  _debug_option:DebugOption=None,
+  _debug_option:Optional[DebugOption]=None,
   slot:Slot=Depends(Slot.req2slot)
 ):
   pipeline = get_refauthors_part_pipeline(top_auth, AuthorParam())

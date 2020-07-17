@@ -1,4 +1,3 @@
-#! /usr/bin/env python3
 # -*- codong: utf-8 -*-
 from bson import ObjectId
 from fastapi import APIRouter, Depends

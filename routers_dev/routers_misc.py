@@ -1,4 +1,3 @@
-#! /usr/bin/env python3
 # -*- codong: utf-8 -*-
 from itertools import chain, groupby, islice
 from operator import itemgetter
@@ -9,9 +8,10 @@ from pymongo.collection import Collection
 
 from routers_dev.common import DebugOption, Slot
 from models_dev.dbquery import (
-  AuthorParam, get_ref_auth4ngramm_tops_pipeline,
+  get_ref_auth4ngramm_tops_pipeline,
   get_ref_bund4ngramm_tops_pipeline, get_refauthors_part_pipeline,
   get_top_detail_bund_refauthors)
+from models_dev.models import AuthorParam
 
 router = APIRouter()
 

@@ -1,4 +1,3 @@
-#! /usr/bin/env python3
 # -*- codong: utf-8 -*-
 from collections import Counter
 from operator import itemgetter
@@ -9,12 +8,12 @@ from pymongo.collection import Collection
 
 from routers_dev.common import DebugOption, Slot, depNgrammParam
 from models_dev.dbquery import (
-  AuthorParam, NgrammParam, get_refauthors_pipeline, get_refbindles_pipeline,
+  get_refauthors_pipeline, get_refbindles_pipeline,
   get_top_cocitauthors_pipeline, get_top_cocitauthors_publications_pipeline,
   get_top_cocitrefs2_pipeline, get_top_cocitrefs_pipeline,
   get_top_ngramms_pipeline, get_top_ngramms_publications_pipeline,
   get_top_topics_pipeline, get_top_topics_publications_pipeline)
-
+from models_dev.models import AuthorParam, NgrammParam
 
 router = APIRouter()
 
@@ -80,7 +79,7 @@ async def _req_top_cocitrefs(
 async def _req_top_cocitauthors_pubs(
   topn:Optional[int]=None,
   authorParams:AuthorParam=Depends(),
-  _debug_option:DebugOption=None,
+  _debug_option:Optional[DebugOption]=None,
   slot:Slot=Depends(Slot.req2slot)
 ):
   pipeline = get_top_cocitauthors_publications_pipeline(

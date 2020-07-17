@@ -1,4 +1,3 @@
-#! /usr/bin/env python3
 # -*- codong: utf-8 -*-
 from typing import Optional
 
@@ -7,11 +6,11 @@ from pymongo.collection import Collection
 
 from routers_dev.common import DebugOption, Slot, depNgrammParam
 from models_dev.dbquery import (
-  AuthorParam, NgrammParam, get_pos_neg_cocitauthors_pipeline,
+  get_pos_neg_cocitauthors_pipeline,
   get_pos_neg_contexts_pipeline, get_pos_neg_ngramms_pipeline,
   get_pos_neg_pubs_pipeline, get_pos_neg_topics_pipeline,
   get_refauthors_pipeline, get_refbindles_pipeline)
-
+from models_dev.models import AuthorParam, NgrammParam
 
 router = APIRouter()
 
@@ -21,7 +20,7 @@ router = APIRouter()
 async def _req_pos_neg_cocitauthors(
   topn:Optional[int]=None,
   authorParams:AuthorParam=Depends(),
-  _debug_option: DebugOption=None,
+  _debug_option:Optional[DebugOption]=None,
   slot:Slot=Depends(Slot.req2slot)
 ):
   pipeline = get_pos_neg_cocitauthors_pipeline(topn, authorParams)
@@ -37,7 +36,7 @@ async def _req_pos_neg_cocitauthors(
   summary='для каждого класса тональности показать общее количество контекстов')
 async def _req_pos_neg_contexts(
   authorParams:AuthorParam=Depends(),
-  _debug_option: DebugOption = None,
+  _debug_option:Optional[DebugOption]=None,
   slot:Slot=Depends(Slot.req2slot)
 ):
   pipeline = get_pos_neg_contexts_pipeline(authorParams)
@@ -55,7 +54,7 @@ async def _req_pos_neg_ngramms(
   topn:Optional[int]=10,
   authorParams:AuthorParam=Depends(),
   ngrammParam:NgrammParam=Depends(depNgrammParam),
-  _debug_option: DebugOption =None,
+  _debug_option:Optional[DebugOption]=None,
   slot:Slot=Depends(Slot.req2slot)
 ):
   pipeline = get_pos_neg_ngramms_pipeline(
@@ -71,7 +70,7 @@ async def _req_pos_neg_ngramms(
 @router.get('/pubs/',) # summary='Топ N со-цитируемых референсов')
 async def _req_pos_neg_pubs(
   authorParams:AuthorParam=Depends(),
-  _debug_option: DebugOption=None,
+  _debug_option:Optional[DebugOption]=None,
   slot:Slot=Depends(Slot.req2slot)
 ):
   pipeline = get_pos_neg_pubs_pipeline(authorParams)
@@ -100,7 +99,7 @@ async def _req_pos_neg_pubs(
 async def _req_pos_neg_refauthors(
   topn:Optional[int]=None,
   authorParams:AuthorParam=Depends(),
-  _debug_option: DebugOption=None,
+  _debug_option:Optional[DebugOption]=None,
   slot:Slot=Depends(Slot.req2slot)
 ):
   pipeline = get_refauthors_pipeline(topn, authorParams)
@@ -131,7 +130,7 @@ async def _req_pos_neg_refauthors(
 async def _req_pos_neg_refbundles(
   topn:Optional[int]=None,
   authorParams:AuthorParam=Depends(),
-  _debug_option: DebugOption=None,
+  _debug_option:Optional[DebugOption]=None,
   slot:Slot=Depends(Slot.req2slot)
 ):
   pipeline = get_refbindles_pipeline(topn, authorParams)
@@ -162,7 +161,7 @@ async def _req_pos_neg_refbundles(
 async def _req_pos_neg_topics(
   authorParams:AuthorParam=Depends(),
   probability:Optional[float]=.5,
-  _debug_option: DebugOption=None,
+  _debug_option:Optional[DebugOption]=None,
   slot:Slot=Depends(Slot.req2slot)
 ):
   pipeline = get_pos_neg_topics_pipeline(authorParams, probability)

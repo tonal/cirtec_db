@@ -1,4 +1,3 @@
-#! /usr/bin/env python3
 # -*- codong: utf-8 -*-
 from collections import Counter, defaultdict
 from functools import reduce
@@ -11,7 +10,7 @@ from pymongo.collection import Collection
 
 from routers_dev.common import DebugOption, Slot, depNgrammParam
 from models_dev.dbquery import (
-  AuthorParam, NgrammParam, get_frag_pos_neg_cocitauthors2,
+  get_frag_pos_neg_cocitauthors2,
   get_frag_pos_neg_contexts, get_frag_publications,
   get_frags_cocitauthors_cocitauthors_pipeline,
   get_frags_cocitauthors_ngramms_pipeline, get_frags_cocitauthors_pipeline,
@@ -23,7 +22,7 @@ from models_dev.dbquery import (
   get_frags_topics_ngramms_pipeline, get_frags_topics_pipeline,
   get_frags_topics_topics_pipeline, get_refauthors_pipeline,
   get_refbindles_pipeline)
-
+from models_dev.models import AuthorParam, NgrammParam
 
 router = APIRouter()
 

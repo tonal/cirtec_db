@@ -8,8 +8,8 @@ import uvicorn
 
 from routers_dev.common import Slot
 from routers_dev import (
-  routers_db, routers_frags, routers_misc, routers_posneg, routers_publ,
-  routers_top)
+  routers_author, routers_db, routers_frags, routers_misc, routers_posneg,
+  routers_publ, routers_top)
 from server_utils import _init_logging
 from utils import load_config
 
@@ -48,6 +48,7 @@ def main():
     await slot.close()
 
   app.include_router(routers_db.router, prefix=cummon_prefix + '/db')
+  app.include_router(routers_author.router, prefix=cummon_prefix + '/authors')
   app.include_router(routers_frags.router, prefix=cummon_prefix + '/frags')
   app.include_router(routers_posneg.router, prefix=cummon_prefix + '/pos_neg')
   app.include_router(routers_publ.router, prefix=cummon_prefix + '/publ')
