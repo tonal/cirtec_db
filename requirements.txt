@@ -53,7 +53,7 @@ starlette==0.13.4         # via fastapi
 threadpoolctl==2.1.0      # via scikit-learn
 ujson==3.0.0              # via -r requirements.in
 urllib3==1.25.9           # via requests
-uvicorn==0.11.5           # via -r requirements.in
+uvicorn==0.11.6           # via -r requirements.in
 uvloop==0.14.0            # via -r requirements.in, uvicorn
 w3lib==1.22.0             # via parsel
 websockets==8.1           # via uvicorn
