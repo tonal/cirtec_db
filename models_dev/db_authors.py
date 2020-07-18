@@ -43,13 +43,8 @@ def get_publics(
           'as': 'cont'}},
         {'$unwind': '$cont'},
         {'$unwind': '$cont.ngrams'},
-        {'$lookup': {
-          'from': 'n_gramms', 'localField': 'cont.ngrams._id',
-          'foreignField': '_id', 'as': 'ngrm'}},
-        {'$unwind': '$ngrm'},
-        # {'$match': {'ngrm.nka': 2, 'ngrm.type': 'lemmas'}},
-        get_ngramm_filter(ngpr, 'ngrm'),
-        {'$group': {'_id': {'pub_author': field, 'ngrm': '$ngrm._id'}}},
+        get_ngramm_filter(ngpr, 'cont.ngrams'),
+        {'$group': {'_id': {'pub_author': field, 'ngrm': '$cont.ngrams._id'}}},
         {'$group': {'_id': '$_id.pub_author', 'cnt': {'$sum': 1}}}, ],
       # 'topics': [
       #   {'$lookup': {
@@ -76,7 +71,7 @@ def get_publics(
     {'$project': {
       'author': '$publications._id', 'cnt_pubs': '$publications.cnt',
       'cnt_refs': '$references.cnt', 'cnt_ref_auths': '$ref_authors.cnt',
-      'cnt_conts': '$conts.cnt', 'cnt_ngramms': '$ngramms.cnt',}},
+      'cnt_contexts': '$conts.cnt', 'cnt_ngramms': '$ngramms.cnt',}},
       # 'cnt_topics': '$topics.cnt'}},
     {'$sort': {'author': 1}},
   ]
