@@ -5,17 +5,15 @@ from fastapi import APIRouter, Depends
 from pymongo.collection import Collection
 
 from routers_dev.common import DebugOption, Slot, depNgrammParam
-from models_dev.dbquery import (
-  get_pos_neg_cocitauthors_pipeline,
-  get_pos_neg_contexts_pipeline, get_pos_neg_ngramms_pipeline,
-  get_pos_neg_pubs_pipeline, get_pos_neg_topics_pipeline,
-  get_refauthors_pipeline, get_refbindles_pipeline)
+from models_dev.db_pipelines import (
+  get_pos_neg_cocitauthors, get_pos_neg_contexts, get_pos_neg_ngramms,
+  get_pos_neg_pubs, get_pos_neg_topics, get_refauthors, get_refbindles)
 from models_dev.models import AuthorParam, NgrammParam
 
 router = APIRouter()
 
 
-@router.get('/cocitauthors/',
+@router.get('/cocitauthors/', tags=['pos_neg'],
   summary='для каждого класса тональности привести топ со-цитируемых авторов')
 async def _req_pos_neg_cocitauthors(
   topn:Optional[int]=None,
@@ -23,7 +21,7 @@ async def _req_pos_neg_cocitauthors(
   _debug_option:Optional[DebugOption]=None,
   slot:Slot=Depends(Slot.req2slot)
 ):
-  pipeline = get_pos_neg_cocitauthors_pipeline(topn, authorParams)
+  pipeline = get_pos_neg_cocitauthors(topn, authorParams)
   if _debug_option == DebugOption.pipeline:
     return pipeline
   contexts = slot.mdb.contexts
@@ -32,14 +30,14 @@ async def _req_pos_neg_cocitauthors(
   return out
 
 
-@router.get('/contexts/',
+@router.get('/contexts/', tags=['pos_neg'],
   summary='для каждого класса тональности показать общее количество контекстов')
 async def _req_pos_neg_contexts(
   authorParams:AuthorParam=Depends(),
   _debug_option:Optional[DebugOption]=None,
   slot:Slot=Depends(Slot.req2slot)
 ):
-  pipeline = get_pos_neg_contexts_pipeline(authorParams)
+  pipeline = get_pos_neg_contexts(authorParams)
   if _debug_option == DebugOption.pipeline:
     return pipeline
   contexts = slot.mdb.contexts
@@ -48,7 +46,7 @@ async def _req_pos_neg_contexts(
   return out
 
 
-@router.get('/ngramms/',
+@router.get('/ngramms/', tags=['pos_neg'],
   summary='для каждого класса тональности показать топ фраз с количеством повторов каждой')
 async def _req_pos_neg_ngramms(
   topn:Optional[int]=10,
@@ -57,7 +55,7 @@ async def _req_pos_neg_ngramms(
   _debug_option:Optional[DebugOption]=None,
   slot:Slot=Depends(Slot.req2slot)
 ):
-  pipeline = get_pos_neg_ngramms_pipeline(
+  pipeline = get_pos_neg_ngramms(
     topn, authorParams, ngrammParam)
   if _debug_option == DebugOption.pipeline:
     return pipeline
@@ -67,13 +65,13 @@ async def _req_pos_neg_ngramms(
   return out
 
 
-@router.get('/pubs/',) # summary='Топ N со-цитируемых референсов')
+@router.get('/pubs/', tags=['pos_neg'],) # summary='Топ N со-цитируемых референсов')
 async def _req_pos_neg_pubs(
   authorParams:AuthorParam=Depends(),
   _debug_option:Optional[DebugOption]=None,
   slot:Slot=Depends(Slot.req2slot)
 ):
-  pipeline = get_pos_neg_pubs_pipeline(authorParams)
+  pipeline = get_pos_neg_pubs(authorParams)
   if _debug_option == DebugOption.pipeline:
     return pipeline
   contexts: Collection = slot.mdb.contexts
@@ -95,14 +93,14 @@ async def _req_pos_neg_pubs(
   return out
 
 
-@router.get('/ref_authors/',) # summary='Топ N со-цитируемых референсов')
+@router.get('/ref_authors/', tags=['pos_neg'],) # summary='Топ N со-цитируемых референсов')
 async def _req_pos_neg_refauthors(
   topn:Optional[int]=None,
   authorParams:AuthorParam=Depends(),
   _debug_option:Optional[DebugOption]=None,
   slot:Slot=Depends(Slot.req2slot)
 ):
-  pipeline = get_refauthors_pipeline(topn, authorParams)
+  pipeline = get_refauthors(topn, authorParams)
   if _debug_option == DebugOption.pipeline:
     return pipeline
 
@@ -126,14 +124,14 @@ async def _req_pos_neg_refauthors(
   return out
 
 
-@router.get('/ref_bundles/',) # summary='Топ N со-цитируемых референсов')
+@router.get('/ref_bundles/', tags=['pos_neg'],) # summary='Топ N со-цитируемых референсов')
 async def _req_pos_neg_refbundles(
   topn:Optional[int]=None,
   authorParams:AuthorParam=Depends(),
   _debug_option:Optional[DebugOption]=None,
   slot:Slot=Depends(Slot.req2slot)
 ):
-  pipeline = get_refbindles_pipeline(topn, authorParams)
+  pipeline = get_refbindles(topn, authorParams)
   if _debug_option == DebugOption.pipeline:
     return pipeline
 
@@ -156,7 +154,7 @@ async def _req_pos_neg_refbundles(
   return out
 
 
-@router.get('/topics/',
+@router.get('/topics/', tags=['pos_neg'],
   summary='для каждого класса тональности показать топ топиков с количеством')
 async def _req_pos_neg_topics(
   authorParams:AuthorParam=Depends(),
@@ -164,7 +162,7 @@ async def _req_pos_neg_topics(
   _debug_option:Optional[DebugOption]=None,
   slot:Slot=Depends(Slot.req2slot)
 ):
-  pipeline = get_pos_neg_topics_pipeline(authorParams, probability)
+  pipeline = get_pos_neg_topics(authorParams, probability)
   if _debug_option == DebugOption.pipeline:
     return pipeline
   contexts = slot.mdb.contexts

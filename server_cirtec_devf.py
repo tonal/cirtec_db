@@ -5,6 +5,8 @@ from typing import Optional
 
 from fastapi import FastAPI, Request
 import uvicorn
+from fastapi.exception_handlers import request_validation_exception_handler
+from pydantic import ValidationError
 
 from routers_dev.common import Slot
 from routers_dev import (
@@ -61,6 +63,10 @@ def main():
     Slot.set2request(request)
     response = await call_next(request)
     return response
+
+  @app.exception_handler(ValidationError)
+  async def ex_hdlr(request, exc):
+    return await request_validation_exception_handler(request, exc)
 
   # asgi_app = SentryAsgiMiddleware(app)
 

@@ -50,7 +50,7 @@ def get_ngramm_filter(
       for f, v in (('nka', np.nka), ('type', ltype_str)) if v}}
 
 
-def _add_topic_pipeline(
+def _add_topic2pipeline(
   authorParams: AuthorParam, *, localField:str= 'topics._id', as_field:str= 'topic'
 ):
   pipeline = [

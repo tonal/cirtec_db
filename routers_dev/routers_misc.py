@@ -7,9 +7,8 @@ from fastapi import APIRouter, Depends
 from pymongo.collection import Collection
 
 from routers_dev.common import DebugOption, Slot
-from models_dev.dbquery import (
-  get_ref_auth4ngramm_tops_pipeline,
-  get_ref_bund4ngramm_tops_pipeline, get_refauthors_part_pipeline,
+from models_dev.db_pipelines import (
+  get_ref_auth4ngramm_tops, get_ref_bund4ngramm_tops, get_refauthors_part,
   get_top_detail_bund_refauthors)
 from models_dev.models import AuthorParam
 
@@ -24,7 +23,7 @@ async def _ref_auth4ngramm_tops(
   _debug_option:Optional[DebugOption]=None,
   slot:Slot=Depends(Slot.req2slot)
 ):
-  pipeline = get_ref_auth4ngramm_tops_pipeline(topn, authorParams)
+  pipeline = get_ref_auth4ngramm_tops(topn, authorParams)
   if _debug_option == DebugOption.pipeline:
     return pipeline
 
@@ -85,7 +84,7 @@ async def _req_bund4ngramm_tops(
   _debug_option:Optional[DebugOption]=None,
   slot:Slot=Depends(Slot.req2slot)
 ):
-  pipeline = get_ref_bund4ngramm_tops_pipeline(topn, authorParams)
+  pipeline = get_ref_bund4ngramm_tops(topn, authorParams)
   if _debug_option == DebugOption.pipeline:
     return pipeline
 
@@ -146,7 +145,7 @@ async def _req_by_frags_refauthors(
   _debug_option:Optional[DebugOption]=None,
   slot:Slot=Depends(Slot.req2slot)
 ):
-  pipeline = get_refauthors_part_pipeline(topn, authorParams)
+  pipeline = get_refauthors_part(topn, authorParams)
   if _debug_option == DebugOption.pipeline:
     return pipeline
 

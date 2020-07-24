@@ -9,25 +9,21 @@ from fastapi import APIRouter, Depends
 from pymongo.collection import Collection
 
 from routers_dev.common import DebugOption, Slot, depNgrammParam
-from models_dev.dbquery import (
-  get_frag_pos_neg_cocitauthors2,
-  get_frag_pos_neg_contexts, get_frag_publications,
-  get_frags_cocitauthors_cocitauthors_pipeline,
-  get_frags_cocitauthors_ngramms_pipeline, get_frags_cocitauthors_pipeline,
-  get_frags_cocitauthors_topics_pipeline,
-  get_frags_ngramms_cocitauthors_pipeline,
-  get_frags_ngramms_ngramms_branch_pipeline,
-  get_frags_ngramms_ngramms_branch_root, get_frags_ngramms_pipeline,
-  get_frags_ngramms_topics_pipeline, get_frags_topics_cocitauthors_pipeline,
-  get_frags_topics_ngramms_pipeline, get_frags_topics_pipeline,
-  get_frags_topics_topics_pipeline, get_refauthors_pipeline,
-  get_refbindles_pipeline)
+from models_dev.db_pipelines import (
+  get_frag_pos_neg_cocitauthors2, get_frag_pos_neg_contexts,
+  get_frag_publications, get_frags_cocitauthors_cocitauthors,
+  get_frags_cocitauthors_ngramms, get_frags_cocitauthors,
+  get_frags_cocitauthors_topics, get_frags_ngramms_cocitauthors,
+  get_frags_ngramms_ngramms_branch, get_frags_ngramms_ngramms_branch_root,
+  get_frags_ngramms, get_frags_ngramms_topics, get_frags_topics_cocitauthors,
+  get_frags_topics_ngramms, get_frags_topics, get_frags_topics_topics,
+  get_refauthors, get_refbindles)
 from models_dev.models import AuthorParam, NgrammParam
 
 router = APIRouter()
 
 
-@router.get('/cocitauthors/',
+@router.get('/cocitauthors/', tags=['frags'],
   summary='Распределение «со-цитируемые авторы» по 5-ти фрагментам')
 async def _req_frags_cocitauthors(
   topn:Optional[int]=None,
@@ -35,7 +31,7 @@ async def _req_frags_cocitauthors(
   _debug_option:Optional[DebugOption]=None,
   slot:Slot=Depends(Slot.req2slot)
 ):
-  pipeline = get_frags_cocitauthors_pipeline(topn, authorParams)
+  pipeline = get_frags_cocitauthors(topn, authorParams)
   if _debug_option == DebugOption.pipeline:
     return pipeline
 
@@ -53,7 +49,7 @@ async def _req_frags_cocitauthors(
   return out
 
 
-@router.get('/cocitauthors/cocitauthors/',
+@router.get('/cocitauthors/cocitauthors/', tags=['frags'],
   summary='Кросс-распределение «5 фрагментов» - «со-цитируемые авторы»')
 async def _req_frags_cocitauthors_cocitauthors(
   topn:Optional[int]=100,
@@ -61,7 +57,7 @@ async def _req_frags_cocitauthors_cocitauthors(
   _debug_option:Optional[DebugOption]=None,
   slot:Slot=Depends(Slot.req2slot)
 ):
-  pipeline = get_frags_cocitauthors_cocitauthors_pipeline(
+  pipeline = get_frags_cocitauthors_cocitauthors(
     topn, authorParams)
   if _debug_option == DebugOption.pipeline:
     return pipeline
@@ -83,7 +79,7 @@ async def _req_frags_cocitauthors_cocitauthors(
   return out
 
 
-@router.get('/cocitauthors/ngramms/',
+@router.get('/cocitauthors/ngramms/', tags=['frags'],
   summary='Кросс-распределение «со-цитирования» - «фразы из контекстов цитирований»')
 async def _req_frags_cocitauthors_ngramms(
   topn:Optional[int]=None,
@@ -93,7 +89,7 @@ async def _req_frags_cocitauthors_ngramms(
   _debug_option:Optional[DebugOption]=None,
   slot:Slot=Depends(Slot.req2slot)
 ):
-  pipeline = get_frags_cocitauthors_ngramms_pipeline(
+  pipeline = get_frags_cocitauthors_ngramms(
     topn, authorParams, ngrammParam)
   if _debug_option == DebugOption.pipeline:
     return pipeline
@@ -132,7 +128,7 @@ async def _req_frags_cocitauthors_ngramms(
   return out
 
 
-@router.get('/cocitauthors/topics/',
+@router.get('/cocitauthors/topics/', tags=['frags'],
   summary='Кросс-распределение «со-цитирования» - «топики контекстов цитирований»')
 async def _req_frags_cocitauthors_topics(
   topn:Optional[int]=None,
@@ -141,7 +137,7 @@ async def _req_frags_cocitauthors_topics(
   _debug_option:Optional[DebugOption]=None,
   slot:Slot=Depends(Slot.req2slot)
 ):
-  pipeline = get_frags_cocitauthors_topics_pipeline(
+  pipeline = get_frags_cocitauthors_topics(
     topn, authorParams, probability)
   if _debug_option == DebugOption.pipeline:
     return pipeline
@@ -171,7 +167,7 @@ async def _req_frags_cocitauthors_topics(
   return out
 
 
-@router.get('/ngramms/',
+@router.get('/ngramms/', tags=['frags'],
   summary='Распределение «5 фрагментов» - «фразы из контекстов цитирований»')
 async def _req_frags_ngramms(
   topn:Optional[int]=10,
@@ -180,12 +176,12 @@ async def _req_frags_ngramms(
   _debug_option:Optional[DebugOption]=None,
   slot:Slot=Depends(Slot.req2slot)
 ):
-  pipeline = get_frags_ngramms_pipeline(topn, authorParams, ngrammParam)
-  if _debug_oprion == DebugOption.pipeline:
+  pipeline = get_frags_ngramms(topn, authorParams, ngrammParam)
+  if _debug_option == DebugOption.pipeline:
     return pipeline
   coll: Collection = slot.mdb.contexts
   cursor = coll.aggregate(pipeline)
-  if _debug_oprion == DebugOption.raw_out:
+  if _debug_option == DebugOption.raw_out:
     return [doc async for doc in cursor]
   out = []
   async for doc in cursor:
@@ -198,7 +194,7 @@ async def _req_frags_ngramms(
   return out
 
 
-@router.get('/ngramms/cocitauthors/',
+@router.get('/ngramms/cocitauthors/', tags=['frags'],
   summary='Кросс-распределение «фразы» - «со-цитирования»')
 async def _req_frags_ngramms_cocitauthors(
   topn: Optional[int]=10,
@@ -208,7 +204,7 @@ async def _req_frags_ngramms_cocitauthors(
   _debug_option:Optional[DebugOption]=None,
   slot:Slot=Depends(Slot.req2slot)
 ):
-  pipeline = get_frags_ngramms_cocitauthors_pipeline(
+  pipeline = get_frags_ngramms_cocitauthors(
     topn, authorParams, ngrammParam)
   if _debug_option == DebugOption.pipeline:
     return pipeline
@@ -243,7 +239,7 @@ async def _req_frags_ngramms_cocitauthors(
   return out
 
 
-@router.get('/ngramms/ngramms/',
+@router.get('/ngramms/ngramms/', tags=['frags'],
   summary='Кросс-распределение «5 фрагментов» - «фразы из контекстов цитирований»')
 async def _req_frags_ngramm_ngramm(
   topn: Optional[int]=10,
@@ -255,7 +251,7 @@ async def _req_frags_ngramm_ngramm(
 ):
   pipeline_root = get_frags_ngramms_ngramms_branch_root(
     topn, authorParams, ngrammParam)
-  pipeline_branch = get_frags_ngramms_ngramms_branch_pipeline(ngrammParam)
+  pipeline_branch = get_frags_ngramms_ngramms_branch(ngrammParam)
   if _debug_option == DebugOption.pipeline:
     return dict(pipeline_root=pipeline_root, pipeline_branch=pipeline_branch)
 
@@ -309,7 +305,7 @@ async def _req_frags_ngramm_ngramm(
   return out_list
 
 
-@router.get('/ngramms/topics/',
+@router.get('/ngramms/topics/', tags=['frags'],
   summary='Кросс-распределение «фразы» - «топики контекстов цитирований»')
 async def _req_frags_ngramms_topics(
   topn: Optional[int]=10,
@@ -320,7 +316,7 @@ async def _req_frags_ngramms_topics(
   _debug_option:Optional[DebugOption]=None,
   slot:Slot=Depends(Slot.req2slot)
 ):
-  pipeline = get_frags_ngramms_topics_pipeline(
+  pipeline = get_frags_ngramms_topics(
     topn, authorParams, ngrammParam, probability)
   if _debug_option == DebugOption.pipeline:
     return pipeline
@@ -356,7 +352,7 @@ async def _req_frags_ngramms_topics(
   return out
 
 
-@router.get('/pos_neg/cocitauthors/cocitauthors/',
+@router.get('/pos_neg/cocitauthors/cocitauthors/', tags=['frags'],
   summary='Со-цитируемые авторы, распределение тональности их со-цитирований и распределение по 5-ти фрагментам')
 async def _req_frags_pos_neg_cocitauthors2(
   topn:Optional[int]=100,
@@ -390,7 +386,7 @@ async def _req_frags_pos_neg_cocitauthors2(
   return out
 
 
-@router.get('/pos_neg/contexts/',
+@router.get('/pos_neg/contexts/', tags=['frags'],
   summary='Распределение тональности контекстов по 5-ти фрагментам')
 async def _req_frags_pos_neg_contexts(
   authorParams:AuthorParam=Depends(),
@@ -406,7 +402,7 @@ async def _req_frags_pos_neg_contexts(
   return out
 
 
-@router.get('/publications/',
+@router.get('/publications/', tags=['frags'],
   summary='Распределение цитирований по 5-ти фрагментам для отдельных публикаций.')
 async def _req_frags_pubs(
   authorParams:AuthorParam=Depends(),
@@ -435,14 +431,14 @@ async def _req_frags_pubs(
   return out
 
 
-@router.get('/ref_authors/',) # summary='')
+@router.get('/ref_authors/', tags=['frags'],) # summary='')
 async def _req_frags_refauthors(
   topn:Optional[int]=None,
   authorParams:AuthorParam=Depends(),
   _debug_option:Optional[DebugOption]=None,
   slot:Slot=Depends(Slot.req2slot)
 ):
-  pipeline = get_refauthors_pipeline(topn, authorParams)
+  pipeline = get_refauthors(topn, authorParams)
   if _debug_option == DebugOption.pipeline:
     return pipeline
   coll: Collection = slot.mdb.contexts
@@ -459,14 +455,14 @@ async def _req_frags_refauthors(
   return out
 
 
-@router.get('/ref_bundles/',) # summary='')
+@router.get('/ref_bundles/', tags=['frags'],) # summary='')
 async def _req_frags_refbundles(
   topn:Optional[int]=None,
   authorParams:AuthorParam=Depends(),
   _debug_option:Optional[DebugOption]=None,
   slot:Slot=Depends(Slot.req2slot)
 ):
-  pipeline = get_refbindles_pipeline(topn, authorParams)
+  pipeline = get_refbindles(topn, authorParams)
   if _debug_option == DebugOption.pipeline:
     return pipeline
 
@@ -487,7 +483,7 @@ async def _req_frags_refbundles(
   return out
 
 
-@router.get('/topics/',
+@router.get('/topics/', tags=['frags'],
   summary='Кросс-распределение «5 фрагментов» - «топики контекстов цитирований»')
 async def _req_frags_topics(
   topn:Optional[int]=None,
@@ -496,7 +492,7 @@ async def _req_frags_topics(
   _debug_option:Optional[DebugOption]=None,
   slot:Slot=Depends(Slot.req2slot)
 ):
-  pipeline = get_frags_topics_pipeline(topn, authorParams, probability)
+  pipeline = get_frags_topics(topn, authorParams, probability)
   if _debug_option == DebugOption.pipeline:
     return pipeline
   coll: Collection = slot.mdb.contexts
@@ -513,7 +509,7 @@ async def _req_frags_topics(
   return out
 
 
-@router.get('/topics/cocitauthors/',
+@router.get('/topics/cocitauthors/', tags=['frags'],
   summary='Кросс-распределение «топики» - «со-цитирования»')
 async def _req_frags_topics_cocitauthors(
   authorParams:AuthorParam=Depends(),
@@ -521,7 +517,7 @@ async def _req_frags_topics_cocitauthors(
   _debug_option:Optional[DebugOption]=None,
   slot:Slot=Depends(Slot.req2slot)
 ):
-  pipeline = get_frags_topics_cocitauthors_pipeline(authorParams, probability)
+  pipeline = get_frags_topics_cocitauthors(authorParams, probability)
   if _debug_option == DebugOption.pipeline:
     return pipeline
   contexts = slot.mdb.contexts
@@ -551,7 +547,7 @@ async def _req_frags_topics_cocitauthors(
   return out
 
 
-@router.get('/topics/ngramms/',
+@router.get('/topics/ngramms/', tags=['frags'],
   summary='Кросс-распределение «топики» - «фразы»')
 async def _req_frags_topics_ngramms(
   authorParams:AuthorParam=Depends(),
@@ -561,7 +557,7 @@ async def _req_frags_topics_ngramms(
   _debug_option:Optional[DebugOption]=None,
   slot:Slot=Depends(Slot.req2slot)
 ):
-  pipeline = get_frags_topics_ngramms_pipeline(
+  pipeline = get_frags_topics_ngramms(
     authorParams, ngrammParam, probability, topn_crpssgramm)
   if _debug_option and _debug_option == DebugOption.pipeline:
     return pipeline
@@ -591,7 +587,7 @@ async def _req_frags_topics_ngramms(
   return out
 
 
-@router.get('/topics/topics/',
+@router.get('/topics/topics/', tags=['frags'],
   summary='Кросс-распределение «5 фрагментов» - «топики контекстов цитирований»')
 async def _req_frags_topics_topics(
   authorParams:AuthorParam=Depends(),
@@ -599,7 +595,7 @@ async def _req_frags_topics_topics(
   _debug_option:Optional[DebugOption]=None,
   slot:Slot=Depends(Slot.req2slot)
 ):
-  pipeline = get_frags_topics_topics_pipeline(authorParams, probability)
+  pipeline = get_frags_topics_topics(authorParams, probability)
   if _debug_option == DebugOption.pipeline:
     return pipeline
   contexts = slot.mdb.contexts

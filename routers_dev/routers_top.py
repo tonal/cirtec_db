@@ -7,18 +7,17 @@ from fastapi import APIRouter, Depends
 from pymongo.collection import Collection
 
 from routers_dev.common import DebugOption, Slot, depNgrammParam
-from models_dev.dbquery import (
-  get_refauthors_pipeline, get_refbindles_pipeline,
-  get_top_cocitauthors_pipeline, get_top_cocitauthors_publications_pipeline,
-  get_top_cocitrefs2_pipeline, get_top_cocitrefs_pipeline,
-  get_top_ngramms_pipeline, get_top_ngramms_publications_pipeline,
-  get_top_topics_pipeline, get_top_topics_publications_pipeline)
+from models_dev.db_pipelines import (
+  get_refauthors, get_refbindles, get_top_cocitauthors,
+  get_top_cocitauthors_publications, get_top_cocitrefs2, get_top_cocitrefs,
+  get_top_ngramms, get_top_ngramms_publications, get_top_topics,
+  get_top_topics_publications)
 from models_dev.models import AuthorParam, NgrammParam
 
 router = APIRouter()
 
 
-@router.get('/cocitauthors/',
+@router.get('/cocitauthors/', tags=['top'],
   summary='Топ N со-цитируемых авторов')
 async def _req_top_cocitauthors(
   topn:Optional[int]=None,
@@ -26,7 +25,7 @@ async def _req_top_cocitauthors(
   _debug_option:Optional[DebugOption]=None,
   slot:Slot=Depends(Slot.req2slot)
 ):
-  pipeline = get_top_cocitauthors_pipeline(topn, authorParams)
+  pipeline = get_top_cocitauthors(topn, authorParams)
   if _debug_option == DebugOption.pipeline:
     return pipeline
 
@@ -43,7 +42,7 @@ async def _req_top_cocitauthors(
   return out
 
 
-@router.get('/cocitrefs/',
+@router.get('/cocitrefs/', tags=['top'],
   summary='Топ N со-цитируемых референсов')
 async def _req_top_cocitrefs(
   topn:Optional[int]=None,
@@ -51,7 +50,7 @@ async def _req_top_cocitrefs(
   _debug_option:Optional[DebugOption]=None,
   slot:Slot=Depends(Slot.req2slot)
 ):
-  pipeline = get_top_cocitrefs_pipeline(topn, authorParams)
+  pipeline = get_top_cocitrefs(topn, authorParams)
   if _debug_option == DebugOption.pipeline:
     return pipeline
   coll: Collection = slot.mdb.contexts
@@ -74,7 +73,7 @@ async def _req_top_cocitrefs(
   return out
 
 
-@router.get('/cocitauthors/publications/',
+@router.get('/cocitauthors/publications/', tags=['top'],
   summary='Топ N со-цитируемых авторов по публикациям')
 async def _req_top_cocitauthors_pubs(
   topn:Optional[int]=None,
@@ -82,8 +81,7 @@ async def _req_top_cocitauthors_pubs(
   _debug_option:Optional[DebugOption]=None,
   slot:Slot=Depends(Slot.req2slot)
 ):
-  pipeline = get_top_cocitauthors_publications_pipeline(
-    topn, authorParams)
+  pipeline = get_top_cocitauthors_publications(topn, authorParams)
   if _debug_option == DebugOption.pipeline:
     return pipeline
 
@@ -92,7 +90,7 @@ async def _req_top_cocitauthors_pubs(
   return out
 
 
-@router.get('/cocitrefs/cocitrefs/',
+@router.get('/cocitrefs/cocitrefs/', tags=['top'],
   summary='Топ N со-цитируемых авторов по публикациям')
 async def _req_top_cocitrefs2(
   topn:Optional[int]=None,
@@ -100,7 +98,7 @@ async def _req_top_cocitrefs2(
   _debug_option:Optional[DebugOption]=None,
   slot:Slot=Depends(Slot.req2slot)
 ):
-  pipeline = get_top_cocitrefs2_pipeline(topn, authorParams)
+  pipeline = get_top_cocitrefs2(topn, authorParams)
   if _debug_option == DebugOption.pipeline:
     return pipeline
 
@@ -116,7 +114,7 @@ async def _req_top_cocitrefs2(
   return out
 
 
-@router.get('/ngramms/',
+@router.get('/ngramms/', tags=['top'],
   summary='Топ N фраз по публикациям')
 async def _req_top_ngramms(
   topn:Optional[int]=10,
@@ -125,7 +123,7 @@ async def _req_top_ngramms(
   _debug_option:Optional[DebugOption]=None,
   slot:Slot=Depends(Slot.req2slot)
 ):
-  pipeline = get_top_ngramms_pipeline(topn, authorParams, ngrammParam)
+  pipeline = get_top_ngramms(topn, authorParams, ngrammParam)
   if _debug_option == DebugOption.pipeline:
     return pipeline
   coll: Collection = slot.mdb.contexts
@@ -156,7 +154,7 @@ async def _req_top_ngramms(
   return out
 
 
-@router.get('/ngramms/publications/',
+@router.get('/ngramms/publications/', tags=['top'],
   summary='Топ N фраз по публикациям')
 async def _req_top_ngramm_pubs(
   topn:Optional[int]=10,
@@ -165,8 +163,7 @@ async def _req_top_ngramm_pubs(
   _debug_option:Optional[DebugOption]=None,
   slot:Slot=Depends(Slot.req2slot)
 ):
-  pipeline = get_top_ngramms_publications_pipeline(
-    topn, authorParams, ngrammParam)
+  pipeline = get_top_ngramms_publications(topn, authorParams, ngrammParam)
   if _debug_option == DebugOption.pipeline:
     return pipeline
 
@@ -175,7 +172,7 @@ async def _req_top_ngramm_pubs(
   return out
 
 
-@router.get('/ref_authors/',
+@router.get('/ref_authors/', tags=['top'],
   summary='Топ N авторов бандлов')
 async def _req_top_ref_authors(
   topn:Optional[int]=None,
@@ -183,7 +180,7 @@ async def _req_top_ref_authors(
   _debug_option:Optional[DebugOption]=None,
   slot:Slot=Depends(Slot.req2slot)
 ):
-  pipeline = get_refauthors_pipeline(topn, authorParams)
+  pipeline = get_refauthors(topn, authorParams)
   if _debug_option == DebugOption.pipeline:
     return pipeline
   coll: Collection = slot.mdb.contexts
@@ -198,7 +195,7 @@ async def _req_top_ref_authors(
   return out
 
 
-@router.get('/top/ref_bundles/',
+@router.get('/ref_bundles/', tags=['top'],
   summary='Топ N бандлов')
 async def _req_top_ref_bundles(
   topn:Optional[int]=None,
@@ -206,7 +203,7 @@ async def _req_top_ref_bundles(
   _debug_option:Optional[DebugOption]=None,
   slot:Slot=Depends(Slot.req2slot)
 ):
-  pipeline = get_refbindles_pipeline(topn, authorParams)
+  pipeline = get_refbindles(topn, authorParams)
   if _debug_option == DebugOption.pipeline:
     return pipeline
 
@@ -226,7 +223,7 @@ async def _req_top_ref_bundles(
   return out
 
 
-@router.get('/top/topics/',
+@router.get('/topics/', tags=['top'],
   summary='Топ N топиков')
 async def _req_top_topics(
   topn:Optional[int]=None,
@@ -235,7 +232,7 @@ async def _req_top_topics(
   _debug_option:Optional[DebugOption]=None,
   slot:Slot=Depends(Slot.req2slot)
 ):
-  pipeline = get_top_topics_pipeline(topn, authorParams, probability)
+  pipeline = get_top_topics(topn, authorParams, probability)
   if _debug_option == DebugOption.pipeline:
     return pipeline
 
@@ -244,7 +241,7 @@ async def _req_top_topics(
   return out
 
 
-@router.get('/top/topics/publications/',
+@router.get('/topics/publications/', tags=['top'],
   summary='Топ N топиков')
 async def _req_top_topics_pubs(
   topn:Optional[int]=None,
@@ -253,8 +250,7 @@ async def _req_top_topics_pubs(
   _debug_option:Optional[DebugOption]=None,
   slot:Slot=Depends(Slot.req2slot)
 ):
-  pipeline = get_top_topics_publications_pipeline(
-    topn, authorParams, probability)
+  pipeline = get_top_topics_publications(topn, authorParams, probability)
   if _debug_option == DebugOption.pipeline:
     return pipeline
 

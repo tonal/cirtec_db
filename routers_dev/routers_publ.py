@@ -9,11 +9,10 @@ from pymongo import ASCENDING
 from pymongo.collection import Collection
 
 from routers_dev.common import DebugOption, Slot, depNgrammParam
-from models_dev.dbquery import (
-    get_frags_ngramms_ngramms_branch_pipeline,
-  get_frags_ngramms_ngramms_branch_root, get_publications_cocitauthors_pipeline,
-  get_publications_ngramms_pipeline, get_publications_topics_topics_pipeline,
-  get_refauthors_part_pipeline)
+from models_dev.db_pipelines import (
+  get_frags_ngramms_ngramms_branch, get_frags_ngramms_ngramms_branch_root,
+  get_publications_cocitauthors, get_publications_ngramms,
+  get_publications_topics_topics, get_refauthors_part)
 from models_dev.common import filter_acc_dict
 from models_dev.models import AuthorParam, NgrammParam
 from server_utils import to_out_typed
@@ -21,7 +20,7 @@ from server_utils import to_out_typed
 router = APIRouter()
 
 
-@router.get('/ngramms/ngramms/',
+@router.get('/ngramms/ngramms/', tags=['publ'],
   summary='Кросс-распределение «публикации» - «фразы из контекстов цитирований»')
 async def _req_publ_ngramm_ngramm(
   topn:Optional[int]=10,
@@ -33,7 +32,7 @@ async def _req_publ_ngramm_ngramm(
 ):
   pipeline_root = get_frags_ngramms_ngramms_branch_root(
     topn, authorParams, ngrammParam)
-  pipeline_branch = get_frags_ngramms_ngramms_branch_pipeline(ngrammParam)
+  pipeline_branch = get_frags_ngramms_ngramms_branch(ngrammParam)
   if _debug_option == DebugOption.pipeline:
     return dict(pipeline_root=pipeline_root, pipeline_branch=pipeline_branch)
 
@@ -86,7 +85,7 @@ async def _req_publ_ngramm_ngramm(
   return out_list
 
 
-@router.get('/publications/',
+@router.get('/publications/', tags=['publ'],
   summary='Публикации')
 async def _req_publications(
   authorParams:AuthorParam=Depends(),
@@ -111,7 +110,7 @@ async def _req_publications(
   return out
 
 
-@router.get('/publications/cocitauthors/',
+@router.get('/publications/cocitauthors/', tags=['publ'],
   summary='Кросс-распределение «со-цитируемые авторы» по публикациям')
 async def _req_publ_publications_cocitauthors(
   authorParams:AuthorParam=Depends(),
@@ -119,7 +118,7 @@ async def _req_publ_publications_cocitauthors(
   _debug_option:Optional[DebugOption]=None,
   slot:Slot=Depends(Slot.req2slot)
 ):
-  pipeline = get_publications_cocitauthors_pipeline(
+  pipeline = get_publications_cocitauthors(
     authorParams, topn_auth)
   if _debug_option == DebugOption.pipeline:
     return pipeline
@@ -130,7 +129,7 @@ async def _req_publ_publications_cocitauthors(
   return out
 
 
-@router.get('/publications/ngramms/',
+@router.get('/publications/ngramms/', tags=['publ'],
   summary='Кросс-распределение «фразы из контекстов цитирований» по публикациям')
 async def _req_publ_publications_ngramms(
   topn:Optional[int]=None,
@@ -140,7 +139,7 @@ async def _req_publ_publications_ngramms(
   _debug_option:Optional[DebugOption]=None,
   slot:Slot=Depends(Slot.req2slot)
 ):
-  pipeline = get_publications_ngramms_pipeline(
+  pipeline = get_publications_ngramms(
     topn, authorParams, ngrammParam, topn_gramm)
   if _debug_option == DebugOption.pipeline:
     return pipeline
@@ -151,7 +150,7 @@ async def _req_publ_publications_ngramms(
   return out
 
 
-@router.get('/topics/topics/',
+@router.get('/topics/topics/', tags=['publ'],
   summary='Кросс-распределение «публикации» - «топики контекстов цитирований»')
 async def _req_publ_topics_topics(
   authorParams:AuthorParam=Depends(),
@@ -159,7 +158,7 @@ async def _req_publ_topics_topics(
   _debug_option:Optional[DebugOption]=None,
   slot:Slot=Depends(Slot.req2slot)
 ):
-  pipeline = get_publications_topics_topics_pipeline(
+  pipeline = get_publications_topics_topics(
     authorParams, probability)
   if _debug_option == DebugOption.pipeline:
     return pipeline
@@ -173,14 +172,14 @@ async def _req_publ_topics_topics(
   return out
 
 
-@router.get('/ref_authors/',) # summary='Топ N со-цитируемых референсов')
+@router.get('/ref_authors/', tags=['publ'],) # summary='Топ N со-цитируемых референсов')
 async def _req_pubs_refauthors(
   top_auth:Optional[int]=3,
   authorParams:AuthorParam=Depends(),
   _debug_option:Optional[DebugOption]=None,
   slot:Slot=Depends(Slot.req2slot)
 ):
-  pipeline = get_refauthors_part_pipeline(top_auth, AuthorParam())
+  pipeline = get_refauthors_part(top_auth, AuthorParam())
   if _debug_option == DebugOption.pipeline:
     return pipeline
 

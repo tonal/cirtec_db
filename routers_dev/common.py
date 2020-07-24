@@ -1,16 +1,14 @@
 # -*- codong: utf-8 -*-
-from dataclasses import dataclass, asdict as dc_asdict
+from dataclasses import dataclass
 import enum
 from typing import ClassVar, Optional
 
 from fastapi import Depends, Query, Request
 from motor.motor_asyncio import AsyncIOMotorClient
+from pydantic import BaseModel, root_validator
 from pymongo.database import Database
 
 from models_dev.models import AuthorParam, LType, NgrammParam
-
-
-DEF_AUTHOR = 'Sergey-Sinelnikov-Murylev'
 
 
 @dataclass(eq=False, order=False)
@@ -68,8 +66,44 @@ def depNgrammParamReq(
   return NgrammParam(nka, ltype)
 
 
-def depAuthorParamOnlyOne(authorParams:AuthorParam=Depends()):
-  if not authorParams.only_one():
-    raise ValueError(
-      f'Должно быть заполнено только одно поле: {dc_asdict(authorParams)}')
-  return authorParams
+class _OnlyOne(BaseModel):
+  @root_validator(pre=True)
+  def params_strip(cls, values):
+    for k, v in values.items():
+      newv = v.strip() if v else None
+      if newv != v:
+        values[k] = newv if newv else None
+    return values
+
+  @root_validator
+  def check_only_one(cls, values):
+    if sum(1 for k, v in values.items() if v) != 1:
+      raise ValueError(
+        f'Должно быть заполнено одно и только одно поле: {values}')
+    return values
+
+
+class AuthorParamOnlyOne(_OnlyOne):
+  author: Optional[str]=None
+  cited: Optional[str]=None
+  citing: Optional[str]=None
+
+
+def depAuthorParamOnlyOne(
+  authorParams:AuthorParamOnlyOne=Depends()
+) -> AuthorParam:
+  res = AuthorParam(**authorParams.dict())
+  return res
+
+
+class AuthorParamOnlyOne2(_OnlyOne):
+  author2:Optional[str]=None
+  cited2:Optional[str]=None
+  citing2:Optional[str]=None
+
+
+def depAuthorParamOnlyOne2(
+    ap:AuthorParamOnlyOne2=Depends()
+) -> AuthorParam:
+  params = AuthorParam(author=ap.author2, cited=ap.cited2, citing=ap.citing2)
+  return params

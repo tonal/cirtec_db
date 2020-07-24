@@ -18,10 +18,10 @@ cssselect==1.1.0          # via parsel
 dawg-python==0.7.2        # via pymorphy2
 dnspython==1.16.0         # via pymongo
 docopt==0.6.2             # via pymorphy2
-fastapi==0.59.0           # via -r requirements.in
+fastapi==0.60.1           # via -r requirements.in
 fastnumbers==3.0.0        # via -r requirements.in
 h11==0.9.0                # via uvicorn
-html-text==0.5.1          # via -r requirements.in
+html-text==0.5.2          # via -r requirements.in
 httptools==0.1.1          # via uvicorn
 idna==2.10                # via requests, yarl
 joblib==0.16.0            # via -r requirements.in, scikit-learn
@@ -29,8 +29,8 @@ lxml==4.5.2               # via -r requirements.in, html-text, parsel
 more-itertools==8.4.0     # via -r requirements.in, pytest
 motor==2.1.0              # via -r requirements.in
 multidict==4.7.6          # via aiohttp, yarl
-numpy==1.19.0             # via pandas, scikit-learn, scipy
-orjson==3.2.2             # via -r requirements.in
+numpy==1.19.1             # via pandas, scikit-learn, scipy
+orjson==3.3.0             # via -r requirements.in
 packaging==20.4           # via pytest
 pandas==1.0.5             # via -r requirements.in
 parsel==1.6.0             # via -r requirements.in
@@ -52,13 +52,13 @@ pytz==2020.1              # via pandas
 pyyaml==5.3.1             # via -r requirements.in
 requests==2.24.0          # via -r requirements.in
 scikit-learn==0.23.1      # via sklearn
-scipy==1.5.1              # via scikit-learn
+scipy==1.5.2              # via scikit-learn
 six==1.15.0               # via packaging, parsel, python-dateutil, w3lib
 sklearn==0.0              # via -r requirements.in
-starlette==0.13.4         # via fastapi
+starlette==0.13.6         # via fastapi
 threadpoolctl==2.1.0      # via scikit-learn
 ujson==3.0.0              # via -r requirements.in
-urllib3==1.25.9           # via requests
+urllib3==1.25.10          # via requests
 uvicorn==0.11.6           # via -r requirements.in
 uvloop==0.14.0            # via -r requirements.in, uvicorn
 w3lib==1.22.0             # via parsel

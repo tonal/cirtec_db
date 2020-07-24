@@ -3,13 +3,13 @@ import logging
 from typing import List, Optional
 
 from models_dev.common import (
-  filter_by_pubs_acc, filter_acc_dict, get_ngramm_filter, _add_topic_pipeline)
+  filter_by_pubs_acc, filter_acc_dict, get_ngramm_filter, _add_topic2pipeline)
 from models_dev.models import AuthorParam, NgrammParam
 
 _logger = logging.getLogger('cirtec')
 
 
-def get_refbindles_pipeline(topn:Optional[int], authorParams: AuthorParam):
+def get_refbindles(topn:Optional[int], authorParams: AuthorParam):
   pipeline = [
     {'$match': {'exact': {'$exists': 1}}},
     {'$project': {
@@ -46,7 +46,7 @@ def get_refbindles_pipeline(topn:Optional[int], authorParams: AuthorParam):
   return pipeline
 
 
-def get_refauthors_pipeline(topn: Optional[int], authorParams: AuthorParam):
+def get_refauthors(topn: Optional[int], authorParams: AuthorParam):
   pipeline = [
     {'$match': {'exact': {'$exists': 1}}},
     {'$project': {
@@ -112,7 +112,7 @@ def get_frag_publications(authorParams: AuthorParam):
   return pipeline
 
 
-def get_top_cocitauthors_publications_pipeline(
+def get_top_cocitauthors_publications(
   topn: Optional[int], authorParams: AuthorParam
 ):
   pipeline = [
@@ -137,7 +137,7 @@ def get_top_cocitauthors_publications_pipeline(
   return pipeline
 
 
-def get_top_cocitrefs2_pipeline(
+def get_top_cocitrefs2(
   topn: Optional[int], authorParams: AuthorParam
 ):
   pipeline = [
@@ -187,7 +187,7 @@ def get_top_cocitrefs2_pipeline(
   return pipeline
 
 
-def get_top_ngramms_publications_pipeline(
+def get_top_ngramms_publications(
   topn: Optional[int], authorParams: AuthorParam, ngrammParam: NgrammParam
 ):
   pipeline = [
@@ -220,7 +220,7 @@ def get_top_ngramms_publications_pipeline(
   return pipeline
 
 
-def get_top_topics_publications_pipeline(
+def get_top_topics_publications(
   topn: Optional[int], authorParams: AuthorParam, probability:Optional[float]
 ):
   pipeline = [
@@ -236,7 +236,7 @@ def get_top_topics_publications_pipeline(
     pipeline += [
       {'$match': {"topics.probability": {'$gte': probability}}},]
 
-  pipeline += _add_topic_pipeline(authorParams)
+  pipeline += _add_topic2pipeline(authorParams)
   pipeline += [
     {'$group': {
       '_id': '$topics.title', 'count': {'$sum': 1},
@@ -257,7 +257,7 @@ def get_top_topics_publications_pipeline(
   return pipeline
 
 
-def get_top_topics_pipeline(
+def get_top_topics(
   topn:Optional[int], authorParams: AuthorParam, probability:Optional[float]
 ):
   pipeline = [
@@ -274,7 +274,7 @@ def get_top_topics_pipeline(
     pipeline += [
       {'$match': {'topics.probability': {'$gte': probability}}},]
 
-  pipeline += _add_topic_pipeline(authorParams)
+  pipeline += _add_topic2pipeline(authorParams)
 
   pipeline += [
     {'$group': {
@@ -297,7 +297,7 @@ def get_top_topics_pipeline(
   return pipeline
 
 
-def get_top_ngramms_pipeline(
+def get_top_ngramms(
   topn:Optional[int], authorParams: AuthorParam, ngrammParam: NgrammParam
 ):
   pipeline = [
@@ -333,7 +333,7 @@ def get_top_ngramms_pipeline(
   return pipeline
 
 
-def get_top_cocitauthors_pipeline(
+def get_top_cocitauthors(
   topn:Optional[int], authorParams: AuthorParam
 ):
   pipeline = [
@@ -356,7 +356,7 @@ def get_top_cocitauthors_pipeline(
   return pipeline
 
 
-def get_top_cocitrefs_pipeline(
+def get_top_cocitrefs(
   topn:Optional[int], authorParams: AuthorParam
 ):
   pipeline = [
@@ -385,7 +385,7 @@ def get_top_cocitrefs_pipeline(
   return pipeline
 
 
-def get_refauthors_part_pipeline(topn:int, authorParams: AuthorParam):
+def get_refauthors_part(topn:int, authorParams: AuthorParam):
   pipeline = [
     {'$match': {'exact': {'$exists': 1}}},
     {'$project': {
@@ -422,7 +422,7 @@ def get_refauthors_part_pipeline(topn:int, authorParams: AuthorParam):
   return pipeline
 
 
-def get_ref_auth4ngramm_tops_pipeline(
+def get_ref_auth4ngramm_tops(
   topn:Optional[int], authorParams: AuthorParam
 ):
   pipeline = [
@@ -455,7 +455,7 @@ def get_ref_auth4ngramm_tops_pipeline(
   return pipeline
 
 
-def get_ref_bund4ngramm_tops_pipeline(
+def get_ref_bund4ngramm_tops(
   topn:Optional[int], authorParams: AuthorParam
 ):
   pipeline = [
@@ -488,7 +488,7 @@ def get_ref_bund4ngramm_tops_pipeline(
   return pipeline
 
 
-def get_frags_cocitauthors_pipeline(
+def get_frags_cocitauthors(
   topn:Optional[int], authParams: AuthorParam
 ) -> List[dict]:
   pipeline = [
@@ -507,7 +507,7 @@ def get_frags_cocitauthors_pipeline(
   return pipeline
 
 
-def get_frags_cocitauthors_cocitauthors_pipeline(
+def get_frags_cocitauthors_cocitauthors(
   topn:Optional[int], authorParams: AuthorParam
 ):
   pipeline = [
@@ -551,7 +551,7 @@ def get_frags_cocitauthors_cocitauthors_pipeline(
   return pipeline
 
 
-def get_frags_cocitauthors_ngramms_pipeline(
+def get_frags_cocitauthors_ngramms(
   topn: Optional[int], authorParams: AuthorParam, ngrammParam: NgrammParam
 ):
   pipeline = [
@@ -609,7 +609,7 @@ def get_frags_cocitauthors_ngramms_pipeline(
   return pipeline
 
 
-def get_frags_cocitauthors_topics_pipeline(
+def get_frags_cocitauthors_topics(
   topn:Optional[int], authorParams: AuthorParam, probability:Optional[float]
 ):
   pipeline = [
@@ -627,7 +627,7 @@ def get_frags_cocitauthors_topics_pipeline(
     pipeline += [
       {"$match": {"topics.probability": {"$gte": probability}}, }]
 
-  pipeline = _add_topic_pipeline(authorParams)
+  pipeline = _add_topic2pipeline(authorParams)
 
   pipeline += [
     {"$group": {
@@ -664,7 +664,7 @@ def get_frags_cocitauthors_topics_pipeline(
   return pipeline
 
 
-def get_frags_ngramms_pipeline(
+def get_frags_ngramms(
   topn:Optional[int], authorParams: AuthorParam, ngrammParam: NgrammParam
 ):
   pipeline = [
@@ -701,7 +701,7 @@ def get_frags_ngramms_pipeline(
   return pipeline
 
 
-def get_frags_ngramms_cocitauthors_pipeline(
+def get_frags_ngramms_cocitauthors(
   topn: Optional[int], authorParams: AuthorParam, ngrammParam: NgrammParam
 ):
   pipeline = [
@@ -786,7 +786,7 @@ def get_frags_ngramms_ngramms_branch_root(
   return pipeline
 
 
-def get_frags_ngramms_ngramms_branch_pipeline(ngrammParam: NgrammParam):
+def get_frags_ngramms_ngramms_branch(ngrammParam: NgrammParam):
   pipeline = [
     {'$project': {
       'prefix': 0, 'suffix': 0, 'exact': 0, 'positive_negative': 0,
@@ -807,7 +807,7 @@ def get_frags_ngramms_ngramms_branch_pipeline(ngrammParam: NgrammParam):
   return pipeline
 
 
-def get_frags_ngramms_topics_pipeline(
+def get_frags_ngramms_topics(
   topn: Optional[int], authorParams: AuthorParam, ngrammParam: NgrammParam,
   probability: Optional[float]
 ):
@@ -853,7 +853,7 @@ def get_frags_ngramms_topics_pipeline(
       "frags": {'$push': {"fn": "$cont.frag_num", "cnt": "$count"}},
       'ngrm': {'$first': "$ngrm"},}},]
 
-  pipeline += _add_topic_pipeline(authorParams, localField='_id.topic')
+  pipeline += _add_topic2pipeline(authorParams, localField='_id.topic')
 
   pipeline += [
     {'$group': {
@@ -952,7 +952,7 @@ def get_frag_pos_neg_contexts(authorParams: AuthorParam):
   return pipeline
 
 
-def get_frags_topics_pipeline(
+def get_frags_topics(
   topn:Optional[int], authorParams: AuthorParam, probability:Optional[float]
 ):
   pipeline = [
@@ -967,7 +967,7 @@ def get_frags_topics_pipeline(
     pipeline += [
       {'$match': {'topics.probability': {'$gte': probability}}},]
 
-  pipeline += _add_topic_pipeline(authorParams)
+  pipeline += _add_topic2pipeline(authorParams)
   pipeline += [
     {'$group': {
       '_id': {'_id': '$topic.title', 'frag_num': '$frag_num'},
@@ -982,7 +982,7 @@ def get_frags_topics_pipeline(
   return pipeline
 
 
-def get_frags_topics_cocitauthors_pipeline(
+def get_frags_topics_cocitauthors(
   authorParams: AuthorParam, probability:Optional[float]
 ):
   pipeline = [
@@ -1000,7 +1000,7 @@ def get_frags_topics_cocitauthors_pipeline(
     pipeline += [
       {"$match": {"topics.probability": {"$gte": probability}}, }]
 
-  pipeline += _add_topic_pipeline(authorParams)
+  pipeline += _add_topic2pipeline(authorParams)
   pipeline += [
     {"$group": {
       "_id": {
@@ -1035,7 +1035,7 @@ def get_frags_topics_cocitauthors_pipeline(
   return pipeline
 
 
-def get_frags_topics_ngramms_pipeline(
+def get_frags_topics_ngramms(
   authorParams: AuthorParam, ngrammParam: NgrammParam,
   probability: Optional[float], topn_crpssgramm:Optional[int]
 ):
@@ -1061,7 +1061,7 @@ def get_frags_topics_ngramms_pipeline(
     pipeline += [
       {'$match': {'topics.probability': {'$gte': probability}}},
     ]
-  pipeline += _add_topic_pipeline(authorParams)
+  pipeline += _add_topic2pipeline(authorParams)
   pipeline += [
     {"$group": {
       "_id": {
@@ -1098,7 +1098,7 @@ def get_frags_topics_ngramms_pipeline(
   return pipeline
 
 
-def get_frags_topics_topics_pipeline(
+def get_frags_topics_topics(
   authorParams: AuthorParam, probability: Optional[float]
 ):
   pipeline = [
@@ -1114,7 +1114,7 @@ def get_frags_topics_topics_pipeline(
     pipeline += [
       {"$match": {
         "topics.probability": {"$gte": probability}}, }]
-  pipeline += _add_topic_pipeline(authorParams)
+  pipeline += _add_topic2pipeline(authorParams)
   pipeline += [
     {'$lookup': {
       'from': 'contexts', 'localField': '_id', 'foreignField': '_id',
@@ -1125,7 +1125,7 @@ def get_frags_topics_topics_pipeline(
     pipeline += [
       {"$match": {
         "cont.topics.probability": {"$gte": probability}}, }]
-  pipeline += _add_topic_pipeline(
+  pipeline += _add_topic2pipeline(
     authorParams, localField='cont.topics._id', as_field='cont_topic')
   pipeline += [
     {'$project': {
@@ -1155,7 +1155,7 @@ def get_frags_topics_topics_pipeline(
   return pipeline
 
 
-def get_pos_neg_cocitauthors_pipeline(
+def get_pos_neg_cocitauthors(
   topn:Optional[int], authorParams: AuthorParam
 ):
   pipeline = [
@@ -1193,7 +1193,7 @@ def get_pos_neg_cocitauthors_pipeline(
   return pipeline
 
 
-def get_pos_neg_contexts_pipeline(authorParams: AuthorParam):
+def get_pos_neg_contexts(authorParams: AuthorParam):
   pipeline = [
     {'$match': {'positive_negative': {'$exists': True}}},
     {'$project': {'pubid': True, 'positive_negative': True}},]
@@ -1215,7 +1215,7 @@ def get_pos_neg_contexts_pipeline(authorParams: AuthorParam):
   return pipeline
 
 
-def get_pos_neg_ngramms_pipeline(
+def get_pos_neg_ngramms(
   topn: Optional[int], authorParams: AuthorParam, ngrammParam: NgrammParam
 ):
   pipeline = [
@@ -1265,7 +1265,7 @@ def get_pos_neg_ngramms_pipeline(
   return pipeline
 
 
-def get_pos_neg_pubs_pipeline(authorParams: AuthorParam):
+def get_pos_neg_pubs(authorParams: AuthorParam):
   pipeline = [
     {'$match': {'positive_negative': {'$exists': 1}, }},]
   if filter_pipeline := filter_by_pubs_acc(authorParams):
@@ -1289,7 +1289,7 @@ def get_pos_neg_pubs_pipeline(authorParams: AuthorParam):
   return pipeline
 
 
-def get_pos_neg_topics_pipeline(
+def get_pos_neg_topics(
   authorParams: AuthorParam, probability:Optional[float]
 ):
   pipeline = [
@@ -1304,7 +1304,7 @@ def get_pos_neg_topics_pipeline(
   pipeline += [
     {'$unwind': '$topics'},
     {'$match': {'topics.probability': {'$gte': probability}}},]
-  pipeline += _add_topic_pipeline(authorParams)
+  pipeline += _add_topic2pipeline(authorParams)
   pipeline += [
     {'$group': {
       '_id': {
@@ -1326,7 +1326,7 @@ def get_pos_neg_topics_pipeline(
   return pipeline
 
 
-def get_publications_cocitauthors_pipeline(
+def get_publications_cocitauthors(
   authorParams: AuthorParam, topn_auth:Optional[int]
 ):
   pipeline = [
@@ -1374,7 +1374,7 @@ def get_publications_cocitauthors_pipeline(
   return pipeline
 
 
-def get_publications_ngramms_pipeline(
+def get_publications_ngramms(
   topn:Optional[int], authorParams: AuthorParam, ngrammParam: NgrammParam,
   topn_gramm:Optional[int]
 ):
@@ -1445,7 +1445,7 @@ def get_publications_ngramms_pipeline(
   return pipeline
 
 
-def get_publications_topics_topics_pipeline(
+def get_publications_topics_topics(
   authorParams: AuthorParam, probability:Optional[float]
 ):
   pipeline = [
@@ -1460,7 +1460,7 @@ def get_publications_topics_topics_pipeline(
     pipeline += [{
       "$match": {
         "topics.probability": {"$gte": probability}}, }]
-  pipeline += _add_topic_pipeline(authorParams)
+  pipeline += _add_topic2pipeline(authorParams)
   pipeline += [{
     '$lookup': {
       'from': 'contexts', 'localField': '_id', 'foreignField': '_id',
@@ -1470,7 +1470,7 @@ def get_publications_topics_topics_pipeline(
     pipeline += [{
       "$match": {
         "cont.topics.probability": {"$gte": probability}}, }]
-  pipeline += _add_topic_pipeline(
+  pipeline += _add_topic2pipeline(
     authorParams, localField='cont.topics._id', as_field='cont_topic')
   pipeline += [{
     '$project': {
