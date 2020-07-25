@@ -1,61 +1,9 @@
 #! /usr/bin/env python3
 # -*- codong: utf-8 -*-
-from typing import List, Optional
+from typing import Optional
 
 from models_dev.common import filter_by_pubs_acc
-from models_dev.models import AuthorParam, Authors, NgrammParam
-
-
-def get_ngramm_author_stat(
-  topn:Optional[int], author:Authors, np:NgrammParam
-) -> List[dict]:
-  assert author
-  assert not np.is_empty()
-  aname = author.value
-  pipeline = [
-    {'$match': {
-      '$or': [
-        {'uni_authors': aname,}, {'uni_cited': aname}, {'uni_citing': aname}]}},
-    {'$addFields': {
-      'atypes': {'$setUnion': [
-        {'$cond': {
-          'if': {'$in': [aname, {'$ifNull': ['$uni_authors', []]}]},
-          'then': ['author'], 'else': []}},
-        {'$cond': {
-          'if': {'$in': [aname, {'$ifNull': ['$uni_cited', []]}]},
-          'then': ['cited'], 'else': []}},
-        {'$cond': {
-          'if': {'$in': [aname, {'$ifNull': ['$uni_citing', []]}]},
-          'then': ['citing'], 'else': []}},
-        ]}}},
-    {'$lookup': {
-      'from': 'contexts', 'localField': '_id', 'foreignField': 'pubid',
-      'as': 'cont'}},
-    {'$unwind': '$cont'},
-    {'$unwind': '$cont.ngrams'},
-    {'$match': {'cont.ngrams.nka': np.nka, 'cont.ngrams.type': np.ltype.value}},
-    {'$group': {
-      '_id': '$cont.ngrams._id',
-      'atypes': {'$push': {
-        'atype': '$atypes', 'cnt_tot': '$cont.ngrams.cnt',
-        'contid': '$cont._id'}},
-      'cnt': {'$sum': 1}, 'cnt_tot': {'$sum': '$cont.ngrams.cnt'}}},
-    {'$sort': {'cnt': -1, '_id': 1}},
-  ]
-  if topn:
-    pipeline += [{'$limit': topn}]
-
-  len_drop = len(np.ltype.value) + 1
-  pipeline += [
-    {'$project': {
-      '_id': 0,
-      'ngrm': {
-        '$substrCP': [
-          '$_id', len_drop, {'$subtract': [{'$strLenCP': "$_id" }, len_drop]}]},
-      'cnt': '$cnt', 'cnt_tot': '$cnt_tot', 'atypes': '$atypes'
-      }},
-  ]
-  return pipeline
+from models_dev.models import AuthorParam
 
 
 def get_ref_auth4ngramm_tops(
