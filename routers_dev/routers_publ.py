@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends
 from pymongo import ASCENDING
 from pymongo.collection import Collection
 
-from routers_dev.common import DebugOption, Slot, depNgrammParam
+from routers_dev.common import DebugOption, Slot
 from models_dev.db_pipelines import (
   get_frags_ngramms_ngramms_branch, get_frags_ngramms_ngramms_branch_root,
   get_publications_cocitauthors, get_publications_ngramms,
@@ -25,7 +25,7 @@ router = APIRouter()
 async def _req_publ_ngramm_ngramm(
   topn:Optional[int]=10,
   authorParams:AuthorParam=Depends(),
-  ngrammParam:NgrammParam=Depends(depNgrammParam),
+  ngrammParam:NgrammParam=Depends(),
   topn_ngramm:Optional[int]=10,
   _debug_option:Optional[DebugOption]=None,
   slot:Slot=Depends(Slot.req2slot)
@@ -134,7 +134,7 @@ async def _req_publ_publications_cocitauthors(
 async def _req_publ_publications_ngramms(
   topn:Optional[int]=None,
   authorParams:AuthorParam=Depends(),
-  ngrammParam:NgrammParam=Depends(depNgrammParam),
+  ngrammParam:NgrammParam=Depends(),
   topn_gramm:Optional[int]=10,
   _debug_option:Optional[DebugOption]=None,
   slot:Slot=Depends(Slot.req2slot)

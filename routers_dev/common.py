@@ -47,23 +47,14 @@ class DebugOption(str, enum.Enum):
   raw_out = 'raw_out'
 
 
-def depNgrammParam(
-  nka:Optional[int]=Query(None, ge=0, le=6),
-  ltype:Optional[LType]=Query(
-    None, title='Тип фразы',
-    description='Тип фразы. Может быть одно из значений "lemmas", "nolemmas" или пустой')
-):
-  return NgrammParam(nka, ltype)
-
-
 def depNgrammParamReq(
-  nka:int=Query(..., ge=0, le=6),
+  nka:int=Query(..., ge=2, le=6),
   ltype:LType=Query(
     ...,
     title='Тип фразы',
     description='Тип фразы. Может быть одно из значений "lemmas", "nolemmas"')
 ):
-  return NgrammParam(nka, ltype)
+  return NgrammParam(nka=nka, ltype=ltype)
 
 
 class _OnlyOne(BaseModel):

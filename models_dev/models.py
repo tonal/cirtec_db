@@ -2,24 +2,27 @@
 from enum import Enum, auto
 from typing import Optional, Tuple
 
-from pydantic import BaseModel
+from pydantic import BaseModel, conint, Field
+
+import loads.common
 
 
 DEF_AUTHOR = 'Sergey-Sinelnikov-Murylev'
-ALL_AUTHORS = (
-  'Sergey-Sinelnikov-Murylev',
-  'Alexander-Knobel',
-  'Alexander-Radygin',
-  'Alexandra-Bozhechkova',
-  'Andrey-Shastitko',
-  'Christopher-Baum',
-  'Maria-Kazakova',
-  'Natalia-Shagaida',
-  'Pavel-Trunin',
-  'Sergey-Drobyshevsky',
-  'Vasily-Uzun',
-  'Vladimir-Mau',
-)
+ALL_AUTHORS = loads.common.AUTHORS
+# (
+#   'Sergey-Sinelnikov-Murylev',
+#   'Alexander-Knobel',
+#   'Alexander-Radygin',
+#   'Alexandra-Bozhechkova',
+#   'Andrey-Shastitko',
+#   'Christopher-Baum',
+#   'Maria-Kazakova',
+#   'Natalia-Shagaida',
+#   'Pavel-Trunin',
+#   'Sergey-Drobyshevsky',
+#   'Vasily-Uzun',
+#   'Vladimir-Mau',
+# )
 
 
 class AutoName(Enum):
@@ -64,8 +67,8 @@ class LType(str, AutoName):
 
 
 class NgrammParam(BaseModel):
-  nka:Optional[int]=None
-  ltype:Optional[LType]=None
+  nka:Optional[conint(ge=2, le=6)]=Field(None, title='Длина фразы')
+  ltype:Optional[LType]=Field(None, title='Тип фразы')
 
   class Config:
     allow_mutation = False

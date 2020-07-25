@@ -8,7 +8,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends
 from pymongo.collection import Collection
 
-from routers_dev.common import DebugOption, Slot, depNgrammParam
+from routers_dev.common import DebugOption, Slot
 from models_dev.db_pipelines import (
   get_frag_pos_neg_cocitauthors2, get_frag_pos_neg_contexts,
   get_frag_publications, get_frags_cocitauthors_cocitauthors,
@@ -84,7 +84,7 @@ async def _req_frags_cocitauthors_cocitauthors(
 async def _req_frags_cocitauthors_ngramms(
   topn:Optional[int]=None,
   authorParams:AuthorParam=Depends(),
-  ngrammParam:NgrammParam=Depends(depNgrammParam),
+  ngrammParam:NgrammParam=Depends(),
   topn_gramm:Optional[int]=10,
   _debug_option:Optional[DebugOption]=None,
   slot:Slot=Depends(Slot.req2slot)
@@ -172,7 +172,7 @@ async def _req_frags_cocitauthors_topics(
 async def _req_frags_ngramms(
   topn:Optional[int]=10,
   authorParams:AuthorParam=Depends(),
-  ngrammParam:NgrammParam=Depends(depNgrammParam),
+  ngrammParam:NgrammParam=Depends(),
   _debug_option:Optional[DebugOption]=None,
   slot:Slot=Depends(Slot.req2slot)
 ):
@@ -199,7 +199,7 @@ async def _req_frags_ngramms(
 async def _req_frags_ngramms_cocitauthors(
   topn: Optional[int]=10,
   authorParams:AuthorParam=Depends(),
-  ngrammParam:NgrammParam=Depends(depNgrammParam),
+  ngrammParam:NgrammParam=Depends(),
   topn_cocitauthors: Optional[int]=None,
   _debug_option:Optional[DebugOption]=None,
   slot:Slot=Depends(Slot.req2slot)
@@ -244,7 +244,7 @@ async def _req_frags_ngramms_cocitauthors(
 async def _req_frags_ngramm_ngramm(
   topn: Optional[int]=10,
   authorParams:AuthorParam=Depends(),
-  ngrammParam:NgrammParam=Depends(depNgrammParam),
+  ngrammParam:NgrammParam=Depends(),
   topn_ngramm: Optional[int]=10,
   _debug_option:Optional[DebugOption]=None,
   slot:Slot=Depends(Slot.req2slot)
@@ -310,7 +310,7 @@ async def _req_frags_ngramm_ngramm(
 async def _req_frags_ngramms_topics(
   topn: Optional[int]=10,
   authorParams:AuthorParam=Depends(),
-  ngrammParam:NgrammParam=Depends(depNgrammParam),
+  ngrammParam:NgrammParam=Depends(),
   probability: Optional[float]=.5,
   topn_topics:Optional[int]=10,
   _debug_option:Optional[DebugOption]=None,
@@ -551,7 +551,7 @@ async def _req_frags_topics_cocitauthors(
   summary='Кросс-распределение «топики» - «фразы»')
 async def _req_frags_topics_ngramms(
   authorParams:AuthorParam=Depends(),
-  ngrammParam:NgrammParam=Depends(depNgrammParam),
+  ngrammParam:NgrammParam=Depends(),
   probability: Optional[float]=.5,
   topn_crpssgramm:Optional[int]=10,
   _debug_option:Optional[DebugOption]=None,

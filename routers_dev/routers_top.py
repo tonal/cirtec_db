@@ -6,7 +6,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends
 from pymongo.collection import Collection
 
-from routers_dev.common import DebugOption, Slot, depNgrammParam
+from routers_dev.common import DebugOption, Slot
 from models_dev.db_pipelines import (
   get_refauthors, get_refbindles, get_top_cocitauthors,
   get_top_cocitauthors_publications, get_top_cocitrefs2, get_top_cocitrefs,
@@ -119,7 +119,7 @@ async def _req_top_cocitrefs2(
 async def _req_top_ngramms(
   topn:Optional[int]=10,
   authorParams:AuthorParam=Depends(),
-  ngrammParam:NgrammParam=Depends(depNgrammParam),
+  ngrammParam:NgrammParam=Depends(),
   _debug_option:Optional[DebugOption]=None,
   slot:Slot=Depends(Slot.req2slot)
 ):
@@ -159,7 +159,7 @@ async def _req_top_ngramms(
 async def _req_top_ngramm_pubs(
   topn:Optional[int]=10,
   authorParams:AuthorParam=Depends(),
-  ngrammParam:NgrammParam=Depends(depNgrammParam),
+  ngrammParam:NgrammParam=Depends(),
   _debug_option:Optional[DebugOption]=None,
   slot:Slot=Depends(Slot.req2slot)
 ):

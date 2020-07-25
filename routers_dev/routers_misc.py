@@ -1,18 +1,68 @@
 # -*- codong: utf-8 -*-
+from collections import Counter
 from itertools import chain, groupby, islice
 from operator import itemgetter
 from typing import Optional
 
 from fastapi import APIRouter, Depends
+from fastapi.params import Query
 from pymongo.collection import Collection
 
-from routers_dev.common import DebugOption, Slot
-from models_dev.db_pipelines import (
-  get_ref_auth4ngramm_tops, get_ref_bund4ngramm_tops, get_refauthors_part,
+from routers_dev.common import DebugOption, Slot, depNgrammParamReq
+from models_dev.db_pipelines import get_refauthors_part
+from models_dev.db_misc import (
+  get_ngramm_author_stat, get_ref_auth4ngramm_tops, get_ref_bund4ngramm_tops,
   get_top_detail_bund_refauthors)
-from models_dev.models import AuthorParam
+from models_dev.models import AuthorParam, Authors, NgrammParam
+
 
 router = APIRouter()
+
+
+@router.get('/ngramm_author_stat/', summary='Статистика фраз по автору')
+async def _ref_ngramm_author_stat(
+  topn:Optional[int]=None,
+  author:Authors=Query(...),
+  ngrammParam:NgrammParam=Depends(depNgrammParamReq),
+  _debug_option: Optional[DebugOption] = None,
+  slot: Slot = Depends(Slot.req2slot)
+):
+  pipeline = get_ngramm_author_stat(topn, author, ngrammParam)
+  if _debug_option == DebugOption.pipeline:
+    return pipeline
+
+  publications: Collection = slot.mdb.publications
+  curs = publications.aggregate(pipeline, allowDiskUse=True)
+
+  if _debug_option == DebugOption.raw_out:
+    return [cont async for cont in curs]
+
+  out = []
+
+  get_at = itemgetter('atype', 'cnt_tot')
+  async for cont in curs:
+    atypes = cont.pop('atypes')
+    cnt = Counter()
+    cnt_tot = Counter()
+    for atc in atypes:
+      ats, cnt_tots = get_at(atc)
+      for at in ats:
+        cnt[at] += 1
+        cnt_tot[at] += cnt_tots
+    cnt_all = cont.pop('cnt')
+    # assert cnt_all == sum(cnt.values()), f'{cnt_all} != {sum(cnt.values())}: {cont}, {atypes}'
+    cnt_all_tot = cont.pop('cnt_tot')
+    # assert cnt_all_tot == sum(cnt_tot.values())
+    cont['cnt'] = dict(
+      all=cnt_all, **cnt,
+      **{f'{k}_proc': round((v/cnt_all)*100, 3) for k, v in cnt.items()})
+    cont['cnt_tot'] = dict(
+      all=cnt_all_tot, **cnt_tot,
+      **{f'{k}_proc': round((v/cnt_all_tot)*100, 3) for k, v in cnt_tot.items()})
+
+    out.append(cont)
+
+  return out
 
 
 @router.get('/ref_auth4ngramm_tops/',) # summary='Топ N со-цитируемых референсов')

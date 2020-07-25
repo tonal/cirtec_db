@@ -4,7 +4,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends
 from pymongo.collection import Collection
 
-from routers_dev.common import DebugOption, Slot, depNgrammParam
+from routers_dev.common import DebugOption, Slot
 from models_dev.db_pipelines import (
   get_pos_neg_cocitauthors, get_pos_neg_contexts, get_pos_neg_ngramms,
   get_pos_neg_pubs, get_pos_neg_topics, get_refauthors, get_refbindles)
@@ -51,7 +51,7 @@ async def _req_pos_neg_contexts(
 async def _req_pos_neg_ngramms(
   topn:Optional[int]=10,
   authorParams:AuthorParam=Depends(),
-  ngrammParam:NgrammParam=Depends(depNgrammParam),
+  ngrammParam:NgrammParam=Depends(),
   _debug_option:Optional[DebugOption]=None,
   slot:Slot=Depends(Slot.req2slot)
 ):
