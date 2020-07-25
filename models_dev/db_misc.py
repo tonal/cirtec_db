@@ -11,38 +11,34 @@ def get_ngramm_author_stat(
 ) -> List[dict]:
   assert author
   assert not np.is_empty()
+  aname = author.value
   pipeline = [
     {'$match': {
       '$or': [
-        {'uni_authors': author.value,},
-        {'uni_cited': author.value},
-        {'uni_citing': author.value} ]}},
-    {'$unwind': {'path': '$uni_authors', 'preserveNullAndEmptyArrays': True}},
-    {'$unwind': {'path': '$uni_cited', 'preserveNullAndEmptyArrays': True}},
-    {'$unwind': {'path': '$uni_citing', 'preserveNullAndEmptyArrays': True}},
-    {'$match': {
-      '$or': [
-        {'uni_authors': author.value,},
-        {'uni_cited': author.value},
-        {'uni_citing': author.value} ]}},
+        {'uni_authors': aname,}, {'uni_cited': aname}, {'uni_citing': aname}]}},
+    {'$addFields': {
+      'atypes': {'$setUnion': [
+        {'$cond': {
+          'if': {'$in': [aname, {'$ifNull': ['$uni_authors', []]}]},
+          'then': ['author'], 'else': []}},
+        {'$cond': {
+          'if': {'$in': [aname, {'$ifNull': ['$uni_cited', []]}]},
+          'then': ['cited'], 'else': []}},
+        {'$cond': {
+          'if': {'$in': [aname, {'$ifNull': ['$uni_citing', []]}]},
+          'then': ['citing'], 'else': []}},
+        ]}}},
     {'$lookup': {
       'from': 'contexts', 'localField': '_id', 'foreignField': 'pubid',
       'as': 'cont'}},
     {'$unwind': '$cont'},
     {'$unwind': '$cont.ngrams'},
     {'$match': {'cont.ngrams.nka': np.nka, 'cont.ngrams.type': np.ltype.value}},
-    {'$addFields': {
-      'atypes': {'$setUnion': [
-        {'$cond': {
-          'if': {'$gt': ['$uni_authors', '']}, 'then': ['author'], 'else': []}},
-        {'$cond': {
-          'if': {'$gt': ['$uni_cited', '']}, 'then': ['cited'], 'else': []}},
-        {'$cond': {
-          'if': {'$gt': ['$uni_citing', '']}, 'then': ['citing'], 'else': []}},
-        ]}}},
     {'$group': {
       '_id': '$cont.ngrams._id',
-      'atypes': {'$push': {'atype': '$atypes', 'cnt_tot': '$cont.ngrams.cnt'}},
+      'atypes': {'$push': {
+        'atype': '$atypes', 'cnt_tot': '$cont.ngrams.cnt',
+        'contid': '$cont._id'}},
       'cnt': {'$sum': 1}, 'cnt_tot': {'$sum': '$cont.ngrams.cnt'}}},
     {'$sort': {'cnt': -1, '_id': 1}},
   ]
