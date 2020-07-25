@@ -8,7 +8,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic import BaseModel, root_validator
 from pymongo.database import Database
 
-from models_dev.models import AuthorParam, LType, NgrammParam
+from models_dev.models import AuthorParam, LType, NgrammParam, Authors
 
 
 @dataclass(eq=False, order=False)
@@ -84,9 +84,9 @@ class _OnlyOne(BaseModel):
 
 
 class AuthorParamOnlyOne(_OnlyOne):
-  author: Optional[str]=None
-  cited: Optional[str]=None
-  citing: Optional[str]=None
+  author: Optional[Authors]=None
+  cited: Optional[Authors]=None
+  citing: Optional[Authors]=None
 
 
 def depAuthorParamOnlyOne(
@@ -97,9 +97,9 @@ def depAuthorParamOnlyOne(
 
 
 class AuthorParamOnlyOne2(_OnlyOne):
-  author2:Optional[str]=None
-  cited2:Optional[str]=None
-  citing2:Optional[str]=None
+  author2:Optional[Authors]=None
+  cited2:Optional[Authors]=None
+  citing2:Optional[Authors]=None
 
 
 def depAuthorParamOnlyOne2(
