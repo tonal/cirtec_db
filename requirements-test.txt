@@ -11,7 +11,7 @@ attrs==19.3.0             # via -r requirements.in, aiohttp, pytest
 brotlipy==0.7.0           # via aiohttp
 cchardet==2.1.6           # via aiohttp
 certifi==2020.6.20        # via requests
-cffi==1.14.0              # via brotlipy, pycares
+cffi==1.14.1              # via brotlipy, pycares
 chardet==3.0.4            # via aiohttp, requests
 click==7.1.2              # via -r requirements.in, uvicorn
 cssselect==1.1.0          # via parsel
@@ -57,6 +57,7 @@ six==1.15.0               # via packaging, parsel, python-dateutil, w3lib
 sklearn==0.0              # via -r requirements.in
 starlette==0.13.6         # via fastapi
 threadpoolctl==2.1.0      # via scikit-learn
+typing-extensions==3.7.4.2  # via yarl
 ujson==3.0.0              # via -r requirements.in
 urllib3==1.25.10          # via requests
 uvicorn==0.11.6           # via -r requirements.in
@@ -65,5 +66,5 @@ w3lib==1.22.0             # via parsel
 wcwidth==0.2.5            # via pytest
 websockets==8.1           # via uvicorn
 xlrd==1.2.0               # via -r requirements.in
-yarl==1.4.2               # via aiohttp
+yarl==1.5.0               # via aiohttp
 zstandard==0.14.0         # via pymongo

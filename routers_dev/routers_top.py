@@ -182,21 +182,25 @@ async def _ref_ngramm_author_stat(
     atypes = cont.pop('atypes')
     cnt = Counter()
     cnt_tot = Counter()
+    cnt_unq = Counter()
     for atc in atypes:
       ats, cnt_tots = get_at(atc)
       for at in ats:
         cnt[at] += 1
         cnt_tot[at] += cnt_tots
+      first_at = ats[0]
+      cnt_unq[first_at] += 1
     cnt_all = cont.pop('cnt')
-    # assert cnt_all == sum(cnt.values()), f'{cnt_all} != {sum(cnt.values())}: {cont}, {atypes}'
     cnt_all_tot = cont.pop('cnt_tot')
-    # assert cnt_all_tot == sum(cnt_tot.values())
+    cnt_dbl_all = sum(cnt.values())
     cont['cnt'] = dict(
       all=cnt_all, **cnt,
-      **{f'{k}_proc': round((v/cnt_all)*100, 3) for k, v in cnt.items()})
-    cont['cnt_tot'] = dict(
-      all=cnt_all_tot, **cnt_tot,
-      **{f'{k}_proc': round((v/cnt_all_tot)*100, 3) for k, v in cnt_tot.items()})
+      **{f'{k}_unk': v for k, v in cnt_unq.items()},
+      **{f'{k}_proc': round((v/cnt_all)*100, 3) for k, v in cnt.items()},
+      **{f'{k}_dbl_proc': round((v/cnt_dbl_all)*100, 3) for k, v in cnt.items()})
+    # cont['cnt_tot'] = dict(
+    #   all=cnt_all_tot, **cnt_tot,
+    #   **{f'{k}_proc': round((v/cnt_all_tot)*100, 3) for k, v in cnt_tot.items()})
 
     out.append(cont)
 
