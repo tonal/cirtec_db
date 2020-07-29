@@ -31,7 +31,7 @@ motor==2.1.0              # via -r requirements.in
 multidict==4.7.6          # via aiohttp, yarl
 numpy==1.19.1             # via pandas, scikit-learn, scipy
 orjson==3.3.0             # via -r requirements.in
-pandas==1.0.5             # via -r requirements.in
+pandas==1.1.0             # via -r requirements.in
 parsel==1.6.0             # via -r requirements.in
 pycares==3.1.1            # via aiodns
 pycparser==2.20           # via cffi
@@ -54,7 +54,7 @@ threadpoolctl==2.1.0      # via scikit-learn
 typing-extensions==3.7.4.2  # via yarl
 ujson==3.0.0              # via -r requirements.in
 urllib3==1.25.10          # via requests
-uvicorn==0.11.6           # via -r requirements.in
+uvicorn==0.11.7           # via -r requirements.in
 uvloop==0.14.0            # via -r requirements.in, uvicorn
 w3lib==1.22.0             # via parsel
 websockets==8.1           # via uvicorn

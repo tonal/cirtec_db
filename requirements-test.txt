@@ -24,6 +24,7 @@ h11==0.9.0                # via uvicorn
 html-text==0.5.2          # via -r requirements.in
 httptools==0.1.1          # via uvicorn
 idna==2.10                # via requests, yarl
+iniconfig==1.0.0          # via pytest
 joblib==0.16.0            # via -r requirements.in, scikit-learn
 lxml==4.5.2               # via -r requirements.in, html-text, parsel
 more-itertools==8.4.0     # via -r requirements.in, pytest
@@ -32,7 +33,7 @@ multidict==4.7.6          # via aiohttp, yarl
 numpy==1.19.1             # via pandas, scikit-learn, scipy
 orjson==3.3.0             # via -r requirements.in
 packaging==20.4           # via pytest
-pandas==1.0.5             # via -r requirements.in
+pandas==1.1.0             # via -r requirements.in
 parsel==1.6.0             # via -r requirements.in
 pluggy==0.13.1            # via pytest
 py==1.9.0                 # via pytest
@@ -45,7 +46,7 @@ pymorphy2-dicts==2.4.393442.3710985  # via pymorphy2
 pymorphy2==0.8            # via -r requirements.in
 pyparsing==2.4.7          # via packaging
 pytest-aiohttp==0.3.0     # via -r requirements-test.in
-pytest==5.4.3             # via pytest-aiohttp
+pytest==6.0.0             # via pytest-aiohttp
 python-dateutil==2.8.1    # via pandas
 python-snappy==0.5.4      # via pymongo
 pytz==2020.1              # via pandas
@@ -57,13 +58,13 @@ six==1.15.0               # via packaging, parsel, python-dateutil, w3lib
 sklearn==0.0              # via -r requirements.in
 starlette==0.13.6         # via fastapi
 threadpoolctl==2.1.0      # via scikit-learn
+toml==0.10.1              # via pytest
 typing-extensions==3.7.4.2  # via yarl
 ujson==3.0.0              # via -r requirements.in
 urllib3==1.25.10          # via requests
-uvicorn==0.11.6           # via -r requirements.in
+uvicorn==0.11.7           # via -r requirements.in
 uvloop==0.14.0            # via -r requirements.in, uvicorn
 w3lib==1.22.0             # via parsel
-wcwidth==0.2.5            # via pytest
 websockets==8.1           # via uvicorn
 xlrd==1.2.0               # via -r requirements.in
 yarl==1.5.0               # via aiohttp

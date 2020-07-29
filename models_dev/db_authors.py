@@ -1,10 +1,19 @@
 #! /usr/bin/env python3
-from typing import Optional
+from enum import auto
+from typing import Dict
 
 from pydantic import validate_arguments
 
 from models_dev.common import get_ngramm_filter
-from models_dev.models import AType, NgrammParam, AuthorParam
+from models_dev.models import AType, AutoName, NgrammParam, AuthorParam
+
+
+class FieldsSet(str, AutoName):
+  bundle = auto()
+  ref_author = auto()
+  ngram = auto()
+  topic = auto()
+  topic_strong = auto()
 
 
 def get_publics(
@@ -86,10 +95,26 @@ def _atype2field(atype:AType) -> str:
   return field
 
 
-def get_cmp_authors(ap1:AuthorParam, ap2:AuthorParam) -> list:
+def get_cmp_authors(
+  ap1:AuthorParam, ap2:AuthorParam, ngrmpr:NgrammParam, probability:float
+) -> Dict[str, list]:
   assert ap1.only_one() and ap2.only_one()
   atype1, name1 = ap1.get_qual_auth()
   atype2, name2 = ap2.get_qual_auth()
+  pipelines = {}
+  for fld_set in FieldsSet:
+    # type: fld_set: FieldsSet
+    pipeline = get_cmp_authors_ref(
+      atype1, name1, atype2, name2, fld_set, ngrmpr, probability)
+    pipelines[fld_set] = pipeline
+
+  return pipelines
+
+
+def get_cmp_authors_ref(
+  atype1:AType, name1:str, atype2:AType, name2:str, field_col:FieldsSet,
+  ngrmpr:NgrammParam, probability:float
+) -> list:
 
   pipiline = []
 
@@ -99,11 +124,6 @@ def get_cmp_authors(ap1:AuthorParam, ap2:AuthorParam) -> list:
       {'$unwind': '$' + field},
       {'$match': {field: {'$in': [name1, name2]}}},
       {'$addFields': {'author': '$' + field, 'atype': atype1.value}},
-      # {'$unwind': '$refs'},
-      # {'$match': {'refs.bundle': {'$exists': 1}}},
-      # {'$group': {
-      #   '_id': {'author': '$author', 'atype': '$atype', 'bundle': '$refs.bundle'},
-      #   'cnt': {'$sum': 1}}},
     ]
   else:
     field1 = _atype2field(atype1)
@@ -123,24 +143,73 @@ def get_cmp_authors(ap1:AuthorParam, ap2:AuthorParam) -> list:
       {'$project': {'data': {'$setUnion': ['$atype1', '$atype2']}}},
       {'$unwind': '$data'},
       {'$project': {
-        'refs': '$data.refs', 'author': '$data.author', 'atype': '$data.atype'}},
-      # {'$unwind': '$data.refs'},
-      # {'$match': {'data.refs.bundle': {'$exists': 1}}},
-      # {'$group': {
-      #   '_id': {
-      #     'author': '$data.author', 'atype': '$data.atype',
-      #     'bundle': '$data.refs.bundle'},
-      #   'cnt': {'$sum': 1}}},
+        '_id': '$data._id', 'refs': '$data.refs', 'author': '$data.author',
+        'atype': '$data.atype'}},
     ]
+
+  if field_col in {FieldsSet.bundle, FieldsSet.ref_author}:
+    pipiline += [
+      {'$unwind': '$refs'}, ]
+
+    if field_col == FieldsSet.bundle:
+      pipiline += [
+        {'$match': {'refs.bundle': {'$exists': 1}}},
+        {'$addFields': {'label': '$refs.bundle'}}, ]
+    elif field_col == FieldsSet.ref_author:
+      pipiline += [
+        {'$unwind': '$refs.authors'},
+        # {'$match': {'refs.bundle': {'$exists': 1}}},
+        {'$addFields': {'label': '$refs.authors'}}, ]
+    else:
+      assert False
+  elif field_col == FieldsSet.ngram:
+    pipiline += [
+      {'$lookup': {
+        'from': 'contexts', 'localField': '_id', 'foreignField': 'pub_id',
+        'as': 'cont'}},
+      {'$unwind': '$cont'},
+      {'$unwind': '$cont.ngrams'},
+      {'$match': {
+        'cont.ngrams.nka': ngrmpr.nka, 'cont.ngrams.type': ngrmpr.ltype.value}},
+      {'$addFields': {'label': '$cont.ngrams._id'}},
+    ]
+  elif field_col == FieldsSet.topic:
+    pipiline += [
+      {'$lookup': {
+        'from': 'contexts', 'localField': '_id', 'foreignField': 'pub_id',
+        'as': 'cont'}},
+      {'$unwind': '$cont'},
+      {'$unwind': '$cont.topics'},
+      {'$match': {'cont.topics.probability': {'$gte': 0.5}, }},
+      {'$addFields': {'label': {'$split': ['$cont.topics.title', ', ']}}},
+      {'$unwind': '$label'},
+    ]
+  elif field_col == FieldsSet.topic_strong:
+    pipiline += [
+      {'$lookup': {
+        'from': 'contexts', 'localField': '_id', 'foreignField': 'pub_id',
+        'as': 'cont'}},
+      {'$unwind': '$cont'},
+      {'$unwind': '$cont.topics'},
+      {'$match': {'cont.topics.probability': {'$gte': 0.5}, }},
+      {'$lookup': {
+        'from': 'topics', 'localField': 'cont.topics._id', 'foreignField': '_id',
+        'as': 'topic'}},
+      {'$unwind': '$topic'},
+      {'$match': {
+        '$or': [
+          {f'topic.uni_{atype1}': name1}, {f'topic.uni_{atype2}': name2}]}},
+      {'$addFields': {'label': {'$split': ['$cont.topics.title', ', ']}}},
+      {'$unwind': '$label'},
+    ]
+
   pipiline += [
-    {'$unwind': '$refs'},
-    {'$match': {'refs.bundle': {'$exists': 1}}},
     {'$group': {
-      '_id': {'author': '$author', 'atype': '$atype', 'bundle': '$refs.bundle'},
+      '_id': {'author': '$author', 'atype': '$atype', 'label': '$label'},
       'cnt': {'$sum': 1}}},
     {'$project': {
       '_id': 0, 'atype': '$_id.atype', 'name': '$_id.author',
-      'bundle': '$_id.bundle', 'cnt': 1}},
+      'label': '$_id.label', 'cnt': 1}},
     # {'$sort': {'cnt': -1, '_id': 1,}}
   ]
 
