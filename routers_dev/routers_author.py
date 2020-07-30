@@ -13,7 +13,10 @@ from models_dev.models import AType, NgrammParam, AuthorParam
 from routers_dev.common import (
   DebugOption, Slot, depNgrammParamReq, depAuthorParamOnlyOne,
   depAuthorParamOnlyOne2)
+from utils import get_logger_dev as get_logger
 
+
+_logger = get_logger()
 
 router = APIRouter()
 
@@ -81,7 +84,7 @@ async def _req_compare2authors(
   vals = {}
   for key, pipeline in pipelines.items():
     curs = coll.aggregate(pipeline)
-    calc_vals = await calc_cmp_vals(atype1, atype2, name1, name2, curs)
+    calc_vals = await calc_cmp_vals(atype1, atype2, name1, name2, curs, key)
     vals[key] = calc_vals
 
   out = dict(
@@ -93,7 +96,7 @@ async def _req_compare2authors(
 
 
 async def calc_cmp_vals(
-  atype1:AType, atype2:AType, name1:str, name2:str, curs
+  atype1:AType, atype2:AType, name1:str, name2:str, curs, data_key
 ) -> Dict[str, float]:
 
   sets = [Counter(), Counter()]
@@ -107,8 +110,25 @@ async def calc_cmp_vals(
     label, cnt = get_val(doc)
     accum[key][label] += cnt
   keys_union = tuple(sorted(sets[0].keys() | sets[1].keys()))
+  if not keys_union:
+    _logger.warning(
+      'Нет данных %s для вычисления дистанцый между %s %s и %s %s',
+      data_key, atype1, name1, atype2, name2)
+    return dict(yaccard=0, jensen_shannon=1)
+
   cnts1 = sum(sets[0].values())
+  if not cnts1:
+    _logger.warning(
+      'Нет данных %s для вычисления дистанцый для %s %s',
+      data_key, atype1, name1)
+    return dict(yaccard=0, jensen_shannon=1)
   cnts2 = sum(sets[1].values())
+  if not cnts2:
+    _logger.warning(
+      'Нет данных %s для вычисления дистанцый для %s %s',
+      data_key, atype2, name2)
+    return dict(yaccard=0, jensen_shannon=1)
+
   # Йенсен-Шеннон расхождение
   eps = 10e-15
   uv1 = np.array(tuple(sets[0][k] / cnts1 for k in keys_union))

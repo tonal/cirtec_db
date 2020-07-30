@@ -13,10 +13,10 @@ from routers_dev import (
   routers_author, routers_db, routers_frags, routers_misc, routers_posneg,
   routers_publ, routers_top)
 from server_utils import _init_logging
-from utils import load_config
+from utils import get_logger_dev as get_logger, load_config_dev as load_config
 
 
-_logger = logging.getLogger('cirtec_dev_fastapi')
+_logger = get_logger()
 
 
 def main():
@@ -79,7 +79,7 @@ def main():
 
 def _load_conf() -> dict:
   # env.read_envfile()
-  conf = load_config()['dev']
+  conf = load_config()
 
   return conf
 
