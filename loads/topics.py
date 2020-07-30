@@ -15,7 +15,8 @@ from pymongo import ASCENDING, MongoClient, ReturnDocument
 from pymongo.database import Database
 
 from loads.common import AUTHORS, rename_new_field
-from utils import load_config
+from utils import load_config_dev as load_config
+# from utils import load_config_ord as load_config
 
 
 # TOPICS = 'topic_output.json'
@@ -25,7 +26,7 @@ TOPICS:str = 'http://onir2.ranepa.ru:8081/prl/data/%(author)s/topic_output.json'
 def main():
   start = datetime.now()
   conf = load_config()
-  conf_mongo = conf['dev']['mongodb']
+  conf_mongo = conf['mongodb']
   for_del: int = reduce(lambda x, y: x * 100 + y, start.timetuple()[:6])
 
   with MongoClient(conf_mongo['uri'], compressors='snappy') as client:

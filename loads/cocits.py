@@ -14,7 +14,8 @@ from pymongo.database import Database
 from pymongo.errors import DuplicateKeyError
 
 from loads.common import rename_new_field
-from utils import load_config
+from utils import load_config_dev as load_config
+# from utils import load_config_ord as load_config
 
 # COCITS_FILE:str = 'linked_papers_cocits_aunas.json'
 COCITS_AUTHORS = (
@@ -31,7 +32,7 @@ COCITS_REFS = (
 def main():
   start = datetime.now()
   conf = load_config()
-  conf_mongo = conf['dev']['mongodb']
+  conf_mongo = conf['mongodb']
   # conf_mongo = conf['mongodb']
   for_del: int = reduce(lambda x, y: x * 100 + y, start.timetuple()[:6])
 

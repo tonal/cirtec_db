@@ -17,7 +17,9 @@ from loads.pubs import update_pubs_conts, SOURCE_XML
 from loads.ngrams import update_ngramms, NGRAM_ROOT
 from loads.topics import update_topics, TOPICS
 from loads.common import AUTHORS
-from utils import load_config
+
+from utils import load_config_dev as load_config
+# from utils import load_config_ord as load_config
 
 
 def main():
@@ -26,7 +28,7 @@ def main():
   print(start, 'start')
   for_del:int = reduce(lambda x, y: x * 100 + y, start.timetuple()[:6])
 
-  conf = load_config()['dev']
+  conf = load_config()
   conf_mongo = conf['mongodb']
   with MongoClient(conf_mongo['uri'], compressors='snappy') as client:
     mdb:Database = client[conf_mongo['db']]

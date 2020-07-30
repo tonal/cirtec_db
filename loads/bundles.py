@@ -14,7 +14,8 @@ from pymongo.collection import Collection
 from pymongo.database import Database
 
 from loads.common import AUTHORS
-from utils import load_config
+from utils import load_config_dev as load_config
+# from utils import load_config_ord as load_config
 
 
 # BUNDLES:str = 'linked_papers_base.json'
@@ -30,7 +31,8 @@ def main():
   now = datetime.now
   start = now()
   conf = load_config()
-  conf_mongo = conf['dev']['mongodb']
+  # conf_mongo = conf['dev']['mongodb']
+  conf_mongo = conf['mongodb']
   bundles:Tuple[str, ...] = BUNDLES
   for_del: int = reduce(lambda x, y: x * 100 + y, start.timetuple()[:6])
 

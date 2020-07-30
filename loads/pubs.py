@@ -15,7 +15,9 @@ from parsel import Selector
 from pymongo import MongoClient
 
 from loads.common import AUTHORS, rename_new_field
-from utils import load_config, norm_spaces
+from utils import norm_spaces
+from utils import load_config_dev as load_config
+# from utils import load_config_ord as load_config
 
 
 SOURCE_XML = (
@@ -43,7 +45,7 @@ re_suffix = re.compile(r'Suffix:\s* (.+)', re.I | re.X | re.S)
 
 def main():
   start = datetime.now()
-  conf = load_config()['dev']
+  conf = load_config() #['dev']
   conf_mongo = conf['mongodb']
   linked_papers_xml = SOURCE_XML
   for_del:int = reduce(lambda x, y: x * 100 + y, start.timetuple()[:6])

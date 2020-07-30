@@ -15,7 +15,8 @@ from pymongo.collection import Collection
 from pymongo.database import Database
 
 from loads.common import AUTHORS, rename_new_field
-from utils import load_config
+from utils import load_config_dev as load_config
+# from utils import load_config_ord as load_config
 
 
 NGRAM_ROOT:str = 'http://onir2.ranepa.ru:8081/prl/data/%(author)s/'
@@ -28,7 +29,8 @@ NKAS = (2, 3, 4, 5, 6)
 def main():
   start = datetime.now()
   conf = load_config()
-  conf_mongo = conf['dev']['mongodb']
+  # conf_mongo = conf['dev']['mongodb']
+  conf_mongo = conf['mongodb']
   for_del: int = reduce(lambda x, y: x * 100 + y, start.timetuple()[:6])
 
   with MongoClient(conf_mongo['uri'], compressors='snappy') as client:

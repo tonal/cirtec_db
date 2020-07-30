@@ -17,13 +17,15 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.linear_model import LogisticRegression
 
 from util_text import Text2Seq
-from utils import load_config
+from utils import load_config_dev as load_config
+# from utils import load_config_ord as load_config
 
 
 def main():
   start = datetime.now()
   conf = load_config()
-  conf_mongo = conf['dev']['mongodb']
+  # conf_mongo = conf['dev']['mongodb']
+  conf_mongo = conf['mongodb']
   for_del: int = reduce(lambda x, y: x * 100 + y, start.timetuple()[:6])
 
   with MongoClient(conf_mongo['uri'], compressors='snappy') as client:
