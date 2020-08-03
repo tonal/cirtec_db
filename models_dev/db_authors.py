@@ -165,7 +165,7 @@ def get_cmp_authors_ref(
   elif field_col == FieldsSet.ngram:
     pipiline += [
       {'$lookup': {
-        'from': 'contexts', 'localField': '_id', 'foreignField': 'pub_id',
+        'from': 'contexts', 'localField': '_id', 'foreignField': 'pubid',
         'as': 'cont'}},
       {'$unwind': '$cont'},
       {'$unwind': '$cont.ngrams'},
@@ -176,7 +176,7 @@ def get_cmp_authors_ref(
   elif field_col == FieldsSet.topic:
     pipiline += [
       {'$lookup': {
-        'from': 'contexts', 'localField': '_id', 'foreignField': 'pub_id',
+        'from': 'contexts', 'localField': '_id', 'foreignField': 'pubid',
         'as': 'cont'}},
       {'$unwind': '$cont'},
       {'$unwind': '$cont.topics'},
@@ -187,7 +187,7 @@ def get_cmp_authors_ref(
   elif field_col == FieldsSet.topic_strong:
     pipiline += [
       {'$lookup': {
-        'from': 'contexts', 'localField': '_id', 'foreignField': 'pub_id',
+        'from': 'contexts', 'localField': '_id', 'foreignField': 'pubid',
         'as': 'cont'}},
       {'$unwind': '$cont'},
       {'$unwind': '$cont.topics'},
