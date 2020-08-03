@@ -130,9 +130,9 @@ async def calc_cmp_vals(
     return dict(yaccard=0, jensen_shannon=1)
 
   # Йенсен-Шеннон расхождение
-  eps = 10e-15
   uv1 = np.array(tuple(sets[0][k] / cnts1 for k in keys_union))
   uv2 = np.array(tuple(sets[1][k] / cnts2 for k in keys_union))
+  # eps = 10e-15
   # uvm = (uv1 + uv2) / 2 + eps
   # uv1 += eps
   # uv2 += eps
