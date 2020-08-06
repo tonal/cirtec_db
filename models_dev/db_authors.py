@@ -1,11 +1,20 @@
 #! /usr/bin/env python3
+from collections import Counter
 from enum import auto
+from itertools import combinations
+from operator import itemgetter
 from typing import Dict
 
+import numpy as np
 from pydantic import validate_arguments
+from scipy.spatial.distance import jensenshannon
 
 from models_dev.common import get_ngramm_filter
 from models_dev.models import AType, AutoName, NgrammParam, AuthorParam
+from utils import get_logger_dev as get_logger
+
+
+_logger = get_logger()
 
 
 class FieldsSet(str, AutoName):
@@ -180,7 +189,7 @@ def get_cmp_authors_ref(
         'as': 'cont'}},
       {'$unwind': '$cont'},
       {'$unwind': '$cont.topics'},
-      {'$match': {'cont.topics.probability': {'$gte': 0.5}, }},
+      {'$match': {'cont.topics.probability': {'$gte': probability}, }},
       {'$addFields': {'label': {'$split': ['$cont.topics.title', ', ']}}},
       {'$unwind': '$label'},
     ]
@@ -191,7 +200,7 @@ def get_cmp_authors_ref(
         'as': 'cont'}},
       {'$unwind': '$cont'},
       {'$unwind': '$cont.topics'},
-      {'$match': {'cont.topics.probability': {'$gte': 0.5}, }},
+      {'$match': {'cont.topics.probability': {'$gte': probability}, }},
       {'$lookup': {
         'from': 'topics', 'localField': 'cont.topics._id', 'foreignField': '_id',
         'as': 'topic'}},
@@ -214,3 +223,174 @@ def get_cmp_authors_ref(
   ]
 
   return pipiline
+
+
+async def calc_cmp_vals(
+  atype1: AType, name1: str, atype2: AType, name2: str, curs, data_key
+) -> Dict[str, float]:
+
+  set1, set2 = Counter(), Counter()
+  accum = {
+    (atype1.value, name1): set1,
+    (atype2.value, name2): set2, }
+  get_key = itemgetter('atype', 'name')
+  get_val = itemgetter('label', 'cnt')
+  async for doc in curs:
+    key = get_key(doc)
+    label, cnt = get_val(doc)
+    accum[key][label] += cnt
+
+  return calc_dists(atype1, name1, set1, atype2, name2, set2, data_key)
+
+
+def calc_dists(atype1, name1, cnts1, atype2, name2, cnts2, data_key):
+  keys_union = tuple(sorted(cnts1.keys() | cnts2.keys()))
+  if not keys_union:
+    _logger.warning(
+      'Нет данных %s для вычисления дистанцый между %s %s и %s %s', data_key,
+      atype1, name1, atype2, name2)
+    return dict(yaccard=0, jensen_shannon=1)
+
+  cnt1 = sum(cnts1.values())
+  if not cnts1:
+    _logger.warning('Нет данных %s для вычисления дистанцый для %s %s',
+      data_key, atype1, name1)
+    return dict(yaccard=0, jensen_shannon=1)
+
+  cnt2 = sum(cnts2.values())
+  if not cnts2:
+    _logger.warning('Нет данных %s для вычисления дистанцый для %s %s',
+      data_key, atype2, name2)
+    return dict(yaccard=0, jensen_shannon=1)
+
+  # Йенсен-Шеннон расхождение
+  uv1 = np.array(tuple(cnts1[k] / cnt1 for k in keys_union))
+  uv2 = np.array(tuple(cnts2[k] / cnt2 for k in keys_union))
+  # eps = 10e-15
+  # uvm = (uv1 + uv2) / 2 + eps
+  # uv1 += eps
+  # uv2 += eps
+  # KLD1 = np.sum(uv1 * np.log(uv1 / uvm))
+  # KLD2 = np.sum(uv2 * np.log(uv2 / uvm))
+  # JS = np.sqrt((KLD1 + KLD2) / 2)
+  JS = jensenshannon(uv1, uv2)
+  keys_intersect = cnts1.keys() & cnts2.keys()
+  yaccard = len(keys_intersect) / len(keys_union)
+  return dict(yaccard=yaccard, jensen_shannon=JS)
+
+
+def get_cmp_authors_all(
+  ngrmpr:NgrammParam, probability:float
+) -> Dict[str, list]:
+  pipelines = {}
+  for fld_set in FieldsSet:
+    # type: fld_set: FieldsSet
+    pipeline = get_cmp_authors_ref_all(fld_set, ngrmpr, probability)
+    pipelines[fld_set] = pipeline
+
+  return pipelines
+
+
+def get_cmp_authors_ref_all(
+  field_col:FieldsSet, ngrmpr:NgrammParam, probability:float
+) -> list:
+
+  pipiline = []
+
+  if field_col in {FieldsSet.bundle, FieldsSet.ref_author}:
+    pipiline += [
+      {'$unwind': '$refs'}, ]
+
+    if field_col == FieldsSet.bundle:
+      pipiline += [
+        {'$match': {'refs.bundle': {'$exists': 1}}},
+        {'$addFields': {'label': '$refs.bundle'}}, ]
+    elif field_col == FieldsSet.ref_author:
+      pipiline += [
+        {'$unwind': '$refs.authors'},
+        {'$addFields': {'label': '$refs.authors'}}, ]
+    else:
+      assert False
+  elif field_col == FieldsSet.ngram:
+    pipiline += [
+      {'$lookup': {
+        'from': 'contexts', 'localField': '_id', 'foreignField': 'pubid',
+        'as': 'cont'}},
+      {'$unwind': '$cont'},
+      {'$unwind': '$cont.ngrams'},
+      {'$match': {
+        'cont.ngrams.nka': ngrmpr.nka, 'cont.ngrams.type': ngrmpr.ltype.value}},
+      {'$addFields': {'label': '$cont.ngrams._id'}},
+    ]
+  elif field_col == FieldsSet.topic:
+    pipiline += [
+      {'$lookup': {
+        'from': 'contexts', 'localField': '_id', 'foreignField': 'pubid',
+        'as': 'cont'}},
+      {'$unwind': '$cont'},
+      {'$unwind': '$cont.topics'},
+      {'$match': {'cont.topics.probability': {'$gte': probability}, }},
+      {'$addFields': {'label': {'$split': ['$cont.topics.title', ', ']}}},
+      {'$unwind': '$label'},
+    ]
+  elif field_col == FieldsSet.topic_strong:
+    return []
+    # pipiline += [
+    #   {'$lookup': {
+    #     'from': 'contexts', 'localField': '_id', 'foreignField': 'pubid',
+    #     'as': 'cont'}},
+    #   {'$unwind': '$cont'},
+    #   {'$unwind': '$cont.topics'},
+    #   {'$match': {'cont.topics.probability': {'$gte': probability}, }},
+    #   {'$lookup': {
+    #     'from': 'topics', 'localField': 'cont.topics._id', 'foreignField': '_id',
+    #     'as': 'topic'}},
+    #   {'$unwind': '$topic'},
+    #   {'$match': {
+    #     '$or': [
+    #       {'topic.uni_author': name1}, {f'topic.uni_{atype2}': name2}]}},
+    #   {'$addFields': {'label': {'$split': ['$cont.topics.title', ', ']}}},
+    #   {'$unwind': '$label'},
+    # ]
+
+  pipiline += [
+    {'$group': {
+      '_id': {
+        'author': '$uni_authors', 'cited': '$uni_cited',
+        'citing': '$uni_citing', 'label': '$label'},
+      'cnt': {'$sum': 1}}},
+    {'$project': {
+      '_id': 0, 'author': '$_id.author', 'cited': '$_id.cited',
+      'citing': '$_id.citing', 'label': '$_id.label', 'cnt': '$cnt'}},
+  ]
+
+  return pipiline
+
+
+async def calc_cmp_vals_all(curs, data_key): # -> Dict[str, float]:
+
+  accum = {}
+  get_val = itemgetter('label', 'cnt')
+  async for doc in curs:
+    label, cnt = get_val(doc)
+    keys = {}
+    keys.update(author=doc.get('author', ()))
+    keys.update(cited=doc.get('cited', ()))
+    keys.update(citing=doc.get('citing', ()))
+    for atype, names in keys.items():
+      for name in names:
+        cnts = accum.setdefault((name, atype), Counter())
+        cnts[label] += cnt
+
+  out = []
+  for (name1, atype1), (name2, atype2) in combinations(accum.keys(), 2):
+    cnts1 = accum[(name1, atype1)]
+    cnts2 = accum[(name2, atype2)]
+    vals = calc_dists(atype1, name1, cnts1, atype2, name2, cnts2, data_key)
+    out.append(
+      dict(
+        author1=dict(atype=atype1, name=name1),
+        author2=dict(atype=atype2, name=name2),
+        vals=vals))
+
+  return out
