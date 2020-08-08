@@ -4,9 +4,9 @@ from pymongo.collection import Collection
 
 AUTHORS = (
   'Sergey-Sinelnikov-Murylev',
+  'Alexandra-Bozhechkova',
   'Alexander-Knobel',
   'Alexander-Radygin',
-  'Alexandra-Bozhechkova',
   'Andrey-Shastitko',
   'Christopher-Baum',
   'Maria-Kazakova',

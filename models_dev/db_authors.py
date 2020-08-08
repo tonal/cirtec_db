@@ -1,9 +1,9 @@
 #! /usr/bin/env python3
-from collections import Counter
+from collections import Counter, defaultdict
 from enum import auto
 from itertools import combinations
 from operator import itemgetter
-from typing import Dict
+from typing import Dict, List
 
 import numpy as np
 from pydantic import validate_arguments
@@ -322,7 +322,7 @@ def get_cmp_authors_ref_all(
         'cont.ngrams.nka': ngrmpr.nka, 'cont.ngrams.type': ngrmpr.ltype.value}},
       {'$addFields': {'label': '$cont.ngrams._id'}},
     ]
-  elif field_col == FieldsSet.topic:
+  elif field_col in {FieldsSet.topic, FieldsSet.topic_strong}:
     pipiline += [
       {'$lookup': {
         'from': 'contexts', 'localField': '_id', 'foreignField': 'pubid',
@@ -330,28 +330,26 @@ def get_cmp_authors_ref_all(
       {'$unwind': '$cont'},
       {'$unwind': '$cont.topics'},
       {'$match': {'cont.topics.probability': {'$gte': probability}, }},
+    ]
+    if field_col == FieldsSet.topic_strong:
+      pipiline += [
+        {'$lookup': {
+          'from': 'topics', 'localField': 'cont.topics._id',
+          'foreignField': '_id', 'as': 'topic'}},
+        {'$unwind': '$topic'},
+        {'$unwind': {'path': '$uni_authors', 'preserveNullAndEmptyArrays': True}},
+        {'$unwind': {'path': '$uni_cited', 'preserveNullAndEmptyArrays': True}},
+        {'$unwind': {'path': '$uni_citing', 'preserveNullAndEmptyArrays': True}},
+        {'$match': {
+          '$or': [
+            {'$expr': {'$eq': ['$topic.uni_author', {'$ifNull': ['$uni_authors', '']}]}},
+            {'$expr': {'$eq': ['$topic.uni_cited', {'$ifNull': ['$uni_cited','']}]}},
+            {'$expr': {'$eq': ['$topic.uni_citing', {'$ifNull': ['$uni_citing','']}]}}, ]}},
+      ]
+    pipiline += [
       {'$addFields': {'label': {'$split': ['$cont.topics.title', ', ']}}},
       {'$unwind': '$label'},
     ]
-  elif field_col == FieldsSet.topic_strong:
-    return []
-    # pipiline += [
-    #   {'$lookup': {
-    #     'from': 'contexts', 'localField': '_id', 'foreignField': 'pubid',
-    #     'as': 'cont'}},
-    #   {'$unwind': '$cont'},
-    #   {'$unwind': '$cont.topics'},
-    #   {'$match': {'cont.topics.probability': {'$gte': probability}, }},
-    #   {'$lookup': {
-    #     'from': 'topics', 'localField': 'cont.topics._id', 'foreignField': '_id',
-    #     'as': 'topic'}},
-    #   {'$unwind': '$topic'},
-    #   {'$match': {
-    #     '$or': [
-    #       {'topic.uni_author': name1}, {f'topic.uni_{atype2}': name2}]}},
-    #   {'$addFields': {'label': {'$split': ['$cont.topics.title', ', ']}}},
-    #   {'$unwind': '$label'},
-    # ]
 
   pipiline += [
     {'$group': {
@@ -367,9 +365,9 @@ def get_cmp_authors_ref_all(
   return pipiline
 
 
-async def calc_cmp_vals_all(curs, data_key): # -> Dict[str, float]:
+async def calc_cmp_vals_all(curs, data_key) -> List[Dict[str, float]]:
 
-  accum = {}
+  accum = defaultdict(Counter)
   get_val = itemgetter('label', 'cnt')
   async for doc in curs:
     label, cnt = get_val(doc)
@@ -378,15 +376,26 @@ async def calc_cmp_vals_all(curs, data_key): # -> Dict[str, float]:
     keys.update(cited=doc.get('cited', ()))
     keys.update(citing=doc.get('citing', ()))
     for atype, names in keys.items():
-      for name in names:
-        cnts = accum.setdefault((name, atype), Counter())
+      if isinstance(names, str):
+        cnts = accum[(names, atype)]
         cnts[label] += cnt
+      else:
+        for name in names:
+          cnts = accum[(name, atype)]
+          cnts[label] += cnt
 
   out = []
-  for (name1, atype1), (name2, atype2) in combinations(accum.keys(), 2):
+  _logger.debug('%s authors: %s', data_key, sorted(accum.keys()))
+  for i, ((name1, atype1), (name2, atype2)) in enumerate(
+    combinations(sorted(accum.keys()), 2),
+    1
+  ):
     cnts1 = accum[(name1, atype1)]
     cnts2 = accum[(name2, atype2)]
     vals = calc_dists(atype1, name1, cnts1, atype2, name2, cnts2, data_key)
+    _logger.debug(
+      '%s %d: %s %s -> %s %s: %s',
+      data_key, i, name1, atype1, name2, atype2, vals)
     out.append(
       dict(
         author1=dict(atype=atype1, name=name1),

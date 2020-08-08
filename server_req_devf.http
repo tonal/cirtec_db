@@ -180,3 +180,9 @@ GET http://localhost:8668/cirtec_dev/db/ngramm/?id=lemmas_производств
 GET http://localhost:8668/cirtec_dev/top/cocitauthors/publications/?author=Sergey-Sinelnikov-Murylev
 
 ###
+GET http://localhost:8668/cirtec_dev/authors/compare_all_authors/?probability=0.5&nka=2&ltype=lemmas
+
+###
+GET http://localhost:8668/cirtec_dev/authors/compare_all_authors/?probability=0.5&nka=2&ltype=lemmas&_debug_option=raw_out
+
+###
