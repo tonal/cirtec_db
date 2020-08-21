@@ -41,7 +41,7 @@ from server_dbquery import (
   get_top_ngramms_publications_pipeline, get_top_topics_pipeline,
   get_top_topics_publications_pipeline)
 from server_utils import _init_logging, cvt_oid, to_out_typed
-from utils import load_config
+from utils import load_config_ord as load_config
 
 
 _logger = logging.getLogger('cirtec_fastapi')

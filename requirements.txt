@@ -7,18 +7,18 @@
 aiodns==2.0.0             # via aiohttp
 aiohttp[speedups]==3.6.2  # via -r requirements.in
 async-timeout==3.0.1      # via aiohttp
-attrs==19.3.0             # via -r requirements.in, aiohttp
+attrs==20.1.0             # via -r requirements.in, aiohttp
 brotlipy==0.7.0           # via aiohttp
 cchardet==2.1.6           # via aiohttp
 certifi==2020.6.20        # via requests
-cffi==1.14.1              # via brotlipy, pycares
+cffi==1.14.2              # via brotlipy, pycares
 chardet==3.0.4            # via aiohttp, requests
 click==7.1.2              # via -r requirements.in, uvicorn
 cssselect==1.1.0          # via parsel
 dawg-python==0.7.2        # via pymorphy2
 dnspython==1.16.0         # via pymongo
 docopt==0.6.2             # via pymorphy2
-fastapi==0.60.1           # via -r requirements.in
+fastapi==0.61.0           # via -r requirements.in
 fastnumbers==3.0.0        # via -r requirements.in
 h11==0.9.0                # via uvicorn
 html-text==0.5.2          # via -r requirements.in
@@ -27,11 +27,11 @@ idna==2.10                # via requests, yarl
 joblib==0.16.0            # via -r requirements.in, scikit-learn
 lxml==4.5.2               # via -r requirements.in, html-text, parsel
 more-itertools==8.4.0     # via -r requirements.in
-motor==2.1.0              # via -r requirements.in
+motor==2.2.0              # via -r requirements.in
 multidict==4.7.6          # via aiohttp, yarl
 numpy==1.19.1             # via pandas, scikit-learn, scipy
-orjson==3.3.0             # via -r requirements.in
-pandas==1.1.0             # via -r requirements.in
+orjson==3.3.1             # via -r requirements.in
+pandas==1.1.1             # via -r requirements.in
 parsel==1.6.0             # via -r requirements.in
 pycares==3.1.1            # via aiodns
 pycparser==2.20           # via cffi
