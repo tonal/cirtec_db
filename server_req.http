@@ -217,3 +217,6 @@ GET http://localhost:7667/cirtec/top/cocitrefs/cocitrefs/
 GET http://localhost:7667/cirtec/frags/ref_authors/?author=Sergey-Sinelnikov-Murylev
 
 ###
+GET http://localhost:8668/cirtec_dev/authors/stat/?atype=cited&probability=0.5&nka=2&ltype=lemmas
+
+###

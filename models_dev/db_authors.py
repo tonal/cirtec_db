@@ -54,7 +54,7 @@ def get_publics(
           'as': 'cont'}},
         {'$unwind': '$cont'},
         {'$group': {
-          '_id': {'pub_author': '$uni_authors', 'cont': '$cont._id'}}},
+          '_id': {'pub_author': field, 'cont': '$cont._id'}}},
         {'$group': {'_id': '$_id.pub_author', 'cnt': {'$sum': 1}}}, ],
       'ngramms': [
         {'$lookup': {
@@ -77,15 +77,15 @@ def get_publics(
       #   {'$group': {'_id': '$_id.pub_author', 'cnt': {'$sum': 1}}}, ],
     }},
     {'$unwind': '$publications'},
-    {'$unwind': '$references'},
+    {'$unwind': {'path': '$references', 'preserveNullAndEmptyArrays': True}},
     {'$match': {'$expr': {'$eq': ['$publications._id', '$references._id']}}},
-    {'$unwind': '$ref_authors'},
+    {'$unwind': {'path': '$ref_authors', 'preserveNullAndEmptyArrays': True}},
     {'$match': {'$expr': {'$eq': ['$publications._id', '$ref_authors._id']}}},
-    {'$unwind': '$conts'},
+    {'$unwind': {'path': '$conts', 'preserveNullAndEmptyArrays': True}},
     {'$match': {'$expr': {'$eq': ['$publications._id', '$conts._id']}}},
-    {'$unwind': '$ngramms'},
+    {'$unwind': {'path': '$ngramms', 'preserveNullAndEmptyArrays': True}},
     {'$match': {'$expr': {'$eq': ['$publications._id', '$ngramms._id']}}},
-    # {'$unwind': '$topics'},
+    # {'$unwind': {'path': '$topics', 'preserveNullAndEmptyArrays': True}},
     # {'$match': {'$expr': {'$eq': ['$publications._id', '$topics._id']}}},
     {'$project': {
       'author': '$publications._id', 'cnt_pubs': '$publications.cnt',
