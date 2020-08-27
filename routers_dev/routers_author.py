@@ -6,8 +6,8 @@ from fastapi import APIRouter, Depends
 from pymongo.collection import Collection
 
 from models_dev.db_authors import (
-  FieldsSet, calc_cmp_vals, calc_cmp_vals_all, get_cmp_authors_all, get_publics,
-  get_cmp_authors)
+  collect_cmp_vals, FieldsSet, calc_cmp_vals, calc_cmp_vals_all,
+  get_cmp_authors_all, get_publics, get_cmp_authors)
 from models_dev.models import AType, NgrammParam, AuthorParam
 from routers_dev.common import (
   DebugOption, Slot, depNgrammParamReq, depAuthorParamOnlyOne,
@@ -44,6 +44,68 @@ async def _req_stat(
   return out
 
 
+@router.get('/common2authors/',
+  summary='Общие слова 2х авторов', tags=['authors'])
+async def _req_common2authors(
+  authorParams1:AuthorParam=Depends(depAuthorParamOnlyOne),
+  authorParams2:AuthorParam=Depends(depAuthorParamOnlyOne2),
+  ngrmpr:NgrammParam=Depends(depNgrammParamReq),
+  probability:Optional[float]=.5,
+  _debug_option: Optional[DebugOption]=None,
+  slot: Slot = Depends(Slot.req2slot)
+):
+  pipelines = get_cmp_authors(
+    authorParams1, authorParams2, ngrmpr, probability)
+  if _debug_option == DebugOption.pipeline:
+    return pipelines
+
+  atype1, name1 = authorParams1.get_qual_auth()
+  atype2, name2 = authorParams2.get_qual_auth()
+
+  def_vals = dict(common=1, union=1)
+
+  if authorParams1 == authorParams2:
+    out = dict(
+      author1=dict(atype=atype1, name=name1),
+      author2=dict(atype=atype2, name=name2),
+      **{k: def_vals for k in FieldsSet}
+    )
+    return out
+
+  coll:Collection = slot.mdb.publications
+
+  if _debug_option == DebugOption.raw_out:
+    out = {}
+    for key, pipeline in pipelines.items():
+      curs = coll.aggregate(pipeline)
+      out_lst = [doc async for doc in curs]
+      out[key] = out_lst
+    return out
+
+  vals = {}
+  for key, pipeline in pipelines.items():
+    curs = coll.aggregate(pipeline)
+    cnts1, cnts2 = await collect_cmp_vals(atype1, name1, atype2, name2, curs)
+    keys_union = cnts1.keys() | cnts2.keys()
+    keys_intersect = cnts1.keys() & cnts2.keys()
+    if key == FieldsSet.ngram:
+      len_pref = len(ngrmpr.ltype.value) + 1
+      common_words = [s[len_pref:] for s in sorted(keys_intersect)]
+    else:
+      common_words = sorted(keys_intersect)
+    vals[key] = dict(
+      common=len(keys_intersect), union=len(keys_union),
+      common_words=common_words
+      )
+
+  out = dict(
+    author1=dict(atype=atype1, name=name1),
+    author2=dict(atype=atype2, name=name2),
+    **vals
+  )
+  return out
+
+
 @router.get('/compare2authors/',
   summary='Сравнение 2х авторов', tags=['authors'])
 async def _req_compare2authors(
@@ -62,7 +124,7 @@ async def _req_compare2authors(
   atype1, name1 = authorParams1.get_qual_auth()
   atype2, name2 = authorParams2.get_qual_auth()
 
-  def_vals = dict(yaccard=1, jensen_shannon=0)
+  def_vals = dict(common=1, union=1, yaccard=1, jensen_shannon=0)
 
   if authorParams1 == authorParams2:
     out = dict(

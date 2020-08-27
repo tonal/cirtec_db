@@ -229,6 +229,12 @@ async def calc_cmp_vals(
   atype1: AType, name1: str, atype2: AType, name2: str, curs, data_key
 ) -> Dict[str, float]:
 
+  set1, set2 = await collect_cmp_vals(atype1, name1, atype2, name2, curs)
+
+  return calc_dists(atype1, name1, set1, atype2, name2, set2, data_key)
+
+
+async def collect_cmp_vals(atype1, name1, atype2, name2, curs):
   set1, set2 = Counter(), Counter()
   accum = {
     (atype1.value, name1): set1,
@@ -239,8 +245,7 @@ async def calc_cmp_vals(
     key = get_key(doc)
     label, cnt = get_val(doc)
     accum[key][label] += cnt
-
-  return calc_dists(atype1, name1, set1, atype2, name2, set2, data_key)
+  return set1, set2
 
 
 def calc_dists(atype1, name1, cnts1, atype2, name2, cnts2, data_key):
@@ -249,19 +254,19 @@ def calc_dists(atype1, name1, cnts1, atype2, name2, cnts2, data_key):
     _logger.warning(
       'Нет данных %s для вычисления дистанцый между %s %s и %s %s', data_key,
       atype1, name1, atype2, name2)
-    return dict(yaccard=0, jensen_shannon=1)
+    return dict(common=0, union=0, yaccard=0, jensen_shannon=1)
 
   cnt1 = sum(cnts1.values())
   if not cnts1:
     _logger.warning('Нет данных %s для вычисления дистанцый для %s %s',
       data_key, atype1, name1)
-    return dict(yaccard=0, jensen_shannon=1)
+    return dict(common=0, union=0, yaccard=0, jensen_shannon=1)
 
   cnt2 = sum(cnts2.values())
   if not cnts2:
     _logger.warning('Нет данных %s для вычисления дистанцый для %s %s',
       data_key, atype2, name2)
-    return dict(yaccard=0, jensen_shannon=1)
+    return dict(common=0, union=0, yaccard=0, jensen_shannon=1)
 
   # Йенсен-Шеннон расхождение
   uv1 = np.array(tuple(cnts1[k] / cnt1 for k in keys_union))
@@ -276,7 +281,9 @@ def calc_dists(atype1, name1, cnts1, atype2, name2, cnts2, data_key):
   JS = jensenshannon(uv1, uv2)
   keys_intersect = cnts1.keys() & cnts2.keys()
   yaccard = len(keys_intersect) / len(keys_union)
-  return dict(yaccard=yaccard, jensen_shannon=JS)
+  return dict(
+    common=len(keys_intersect), union=len(keys_union), yaccard=yaccard,
+    jensen_shannon=JS)
 
 
 def get_cmp_authors_all(
