@@ -88,11 +88,11 @@ async def _req_common2authors(
     cnts1, cnts2 = await collect_cmp_vals(atype1, name1, atype2, name2, curs)
     keys_union = cnts1.keys() | cnts2.keys()
     keys_intersect = cnts1.keys() & cnts2.keys()
+    words = sorted((w, cnts1[w], cnts2[w]) for w in keys_intersect)
     if key == FieldsSet.ngram:
       len_pref = len(ngrmpr.ltype.value) + 1
-      common_words = [s[len_pref:] for s in sorted(keys_intersect)]
-    else:
-      common_words = sorted(keys_intersect)
+      words = ((w[len_pref:], c1, c2) for w, c1, c2 in words)
+    common_words = [dict(word=w, author1=c1, author2=c2) for w, c1, c2 in words]
     vals[key] = dict(
       common=len(keys_intersect), union=len(keys_union),
       common_words=common_words
