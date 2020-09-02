@@ -125,8 +125,8 @@ async def _req_common2authors_bundle(
 async def _req_common2authors_field(
   field:FieldsSet, authorParams1:AuthorParam, authorParams2:AuthorParam,
   word:Optional[str],
-  ngrmpr:Optional[NgrammParam]=None, probability:Optional[float]=None,
-  *, slot:Slot, _debug_option:Optional[DebugOption]=None,
+  *, ngrmpr:Optional[NgrammParam]=None, probability:Optional[float]=None,
+  slot:Slot, _debug_option:Optional[DebugOption]=None,
 ):
 
   pipeline = get_cmp_authors_cont(
@@ -150,11 +150,12 @@ async def _req_common2authors_field(
   keys_union = set1.keys() | set2.keys()
   keys_intersect = set1.keys() & set2.keys()
   words = sorted((w, set1[w], set2[w]) for w in keys_intersect)
+  len_pref = len(ngrmpr.ltype.value) + 1 if field == FieldsSet.ngram else 0
   common_words = [
     dict(
-      word=w,
-      author1=dict(cnt=c1, conts=conts1.get(w, None)),
-      author2=dict(cnt=c2, conts=conts2.get(w, None)))
+      word=w[len_pref:],
+      author1=dict(cnt=c1, conts=sorted(conts1.get(w, ()))),
+      author2=dict(cnt=c2, conts=sorted(conts2.get(w, ()))))
     for w, c1, c2 in words]
 
   out = dict(
@@ -166,8 +167,24 @@ async def _req_common2authors_field(
   return out
 
 
+@router.get('/common2authors/ngram',
+  summary='Общие ngram 2х авторов', tags=['authors'])
+async def _req_common2authors_ngram(
+  authorParams1:AuthorParam=Depends(depAuthorParamOnlyOne),
+  authorParams2:AuthorParam=Depends(depAuthorParamOnlyOne2),
+  word:str=Query(None, min_length=2),
+  ngrmpr:NgrammParam=Depends(depNgrammParamReq),
+  _debug_option: Optional[DebugOption]=None,
+  slot: Slot = Depends(Slot.req2slot)
+):
+  out = await _req_common2authors_field(
+    FieldsSet.ngram, authorParams1, authorParams2, word, ngrmpr=ngrmpr,
+    slot=slot, _debug_option=_debug_option)
+  return out
+
+
 @router.get('/common2authors/ref_author',
-  summary='Общие bundle 2х авторов', tags=['authors'])
+  summary='Общие ref_author 2х авторов', tags=['authors'])
 async def _req_common2authors_ref_author(
   authorParams1:AuthorParam=Depends(depAuthorParamOnlyOne),
   authorParams2:AuthorParam=Depends(depAuthorParamOnlyOne2),

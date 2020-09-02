@@ -282,7 +282,6 @@ def get_cmp_authors_ref_cont(
     elif field_col == FieldsSet.ref_author:
       pipiline += [
         {'$unwind': '$refs.authors'},
-        # {'$match': {'refs.bundle': {'$exists': 1}}},
         {'$addFields': {'label': '$refs.authors'}}, ]
     else:
       assert False
@@ -301,6 +300,7 @@ def get_cmp_authors_ref_cont(
     ]
 
   elif field_col == FieldsSet.ngram:
+    ltype = ngrmpr.ltype.value
     pipiline += [
       {'$lookup': {
         'from': 'contexts', 'localField': '_id', 'foreignField': 'pubid',
@@ -308,9 +308,13 @@ def get_cmp_authors_ref_cont(
       {'$unwind': '$cont'},
       {'$unwind': '$cont.ngrams'},
       {'$match': {
-        'cont.ngrams.nka': ngrmpr.nka, 'cont.ngrams.type': ngrmpr.ltype.value}},
+        'cont.ngrams.nka': ngrmpr.nka, 'cont.ngrams.type': ltype}},
       {'$addFields': {'label': '$cont.ngrams._id'}},
     ]
+    if word:
+      pipiline += [
+        {'$match': {'label': f'{ltype}_{word}'}}, ]
+
   elif field_col == FieldsSet.topic:
     pipiline += [
       {'$lookup': {
