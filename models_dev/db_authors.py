@@ -3,7 +3,7 @@ from collections import Counter, defaultdict
 from enum import auto
 from itertools import combinations
 from operator import itemgetter
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import numpy as np
 from pydantic import validate_arguments
@@ -225,6 +225,135 @@ def get_cmp_authors_ref(
   return pipiline
 
 
+def get_cmp_authors_cont(
+  ap1:AuthorParam, ap2:AuthorParam, word:str, field_col:FieldsSet,
+  ngrmpr:Optional[NgrammParam], probability:Optional[float]
+) -> list:
+  assert ap1.only_one() and ap2.only_one()
+  atype1, name1 = ap1.get_qual_auth()
+  atype2, name2 = ap2.get_qual_auth()
+  return get_cmp_authors_ref_cont(
+    atype1, name1, atype2, name2, word, field_col, ngrmpr, probability)
+
+
+def get_cmp_authors_ref_cont(
+  atype1:AType, name1:str, atype2:AType, name2:str, word:str,
+  field_col:FieldsSet, ngrmpr:Optional[NgrammParam], probability:Optional[float]
+) -> list:
+
+  pipiline = []
+
+  if atype1 == atype2:
+    field = _atype2field(atype1)
+    pipiline += [
+      {'$unwind': '$' + field},
+      {'$match': {field: {'$in': [name1, name2]}}},
+      {'$addFields': {'author': '$' + field, 'atype': atype1.value}},
+    ]
+  else:
+    field1 = _atype2field(atype1)
+    field2 = _atype2field(atype2)
+    pipiline += [
+      {'$match': {'$or': [{field1: name1}, {field2: name2}]}},
+      {'$facet': {
+        'atype1': [
+          {'$unwind': '$' + field1},
+          {'$match': {field1: name1}},
+          {'$addFields': {'author': '$' + field1, 'atype': atype1.value}}, ],
+        'atype2': [
+          {'$unwind': '$' + field2},
+          {'$match': {field2: name2}},
+          {'$addFields': {'author': '$' + field2, 'atype': atype2.value}}, ]
+        }},
+      {'$project': {'data': {'$setUnion': ['$atype1', '$atype2']}}},
+      {'$unwind': '$data'},
+      {'$project': {
+        '_id': '$data._id', 'refs': '$data.refs', 'author': '$data.author',
+        'atype': '$data.atype'}},
+    ]
+
+  if field_col in {FieldsSet.bundle, FieldsSet.ref_author}:
+    pipiline += [
+      {'$unwind': '$refs'}, ]
+    if field_col == FieldsSet.bundle:
+      pipiline += [
+        {'$match': {'refs.bundle': {'$exists': 1}}},
+        {'$addFields': {'label': '$refs.bundle'}}, ]
+    elif field_col == FieldsSet.ref_author:
+      pipiline += [
+        {'$unwind': '$refs.authors'},
+        # {'$match': {'refs.bundle': {'$exists': 1}}},
+        {'$addFields': {'label': '$refs.authors'}}, ]
+    else:
+      assert False
+
+    if word:
+      pipiline += [
+        {'$match': {'label': word}}, ]
+
+    pipiline += [
+      {'$lookup': {
+        'from': 'contexts', 'localField': '_id', 'foreignField': 'pubid',
+        'as': 'cont'}},
+      {'$unwind': '$cont'},
+      {'$unwind': '$cont.refs'},
+      {'$match': {'$expr': {'$eq': ['$refs.num', '$cont.refs.num']}}},
+    ]
+
+  elif field_col == FieldsSet.ngram:
+    pipiline += [
+      {'$lookup': {
+        'from': 'contexts', 'localField': '_id', 'foreignField': 'pubid',
+        'as': 'cont'}},
+      {'$unwind': '$cont'},
+      {'$unwind': '$cont.ngrams'},
+      {'$match': {
+        'cont.ngrams.nka': ngrmpr.nka, 'cont.ngrams.type': ngrmpr.ltype.value}},
+      {'$addFields': {'label': '$cont.ngrams._id'}},
+    ]
+  elif field_col == FieldsSet.topic:
+    pipiline += [
+      {'$lookup': {
+        'from': 'contexts', 'localField': '_id', 'foreignField': 'pubid',
+        'as': 'cont'}},
+      {'$unwind': '$cont'},
+      {'$unwind': '$cont.topics'},
+      {'$match': {'cont.topics.probability': {'$gte': probability}, }},
+      {'$addFields': {'label': {'$split': ['$cont.topics.title', ', ']}}},
+      {'$unwind': '$label'},
+    ]
+  elif field_col == FieldsSet.topic_strong:
+    pipiline += [
+      {'$lookup': {
+        'from': 'contexts', 'localField': '_id', 'foreignField': 'pubid',
+        'as': 'cont'}},
+      {'$unwind': '$cont'},
+      {'$unwind': '$cont.topics'},
+      {'$match': {'cont.topics.probability': {'$gte': probability}, }},
+      {'$lookup': {
+        'from': 'topics', 'localField': 'cont.topics._id', 'foreignField': '_id',
+        'as': 'topic'}},
+      {'$unwind': '$topic'},
+      {'$match': {
+        '$or': [
+          {f'topic.uni_{atype1}': name1}, {f'topic.uni_{atype2}': name2}]}},
+      {'$addFields': {'label': {'$split': ['$cont.topics.title', ', ']}}},
+      {'$unwind': '$label'},
+    ]
+
+  pipiline += [
+    {'$group': {
+      '_id': {'author': '$author', 'atype': '$atype', 'label': '$label'},
+      'cnt': {'$sum': 1}, 'conts': {'$addToSet': '$cont._id'}}},
+    {'$project': {
+      '_id': 0, 'atype': '$_id.atype', 'name': '$_id.author',
+      'label': '$_id.label', 'cnt': 1, 'conts': 1}},
+    # {'$sort': {'cnt': -1, '_id': 1,}}
+  ]
+
+  return pipiline
+
+
 async def calc_cmp_vals(
   atype1: AType, name1: str, atype2: AType, name2: str, curs, data_key
 ) -> Dict[str, float]:
@@ -246,6 +375,27 @@ async def collect_cmp_vals(atype1, name1, atype2, name2, curs):
     label, cnt = get_val(doc)
     accum[key][label] += cnt
   return set1, set2
+
+
+async def collect_cmp_vals_conts(atype1, name1, atype2, name2, curs):
+  set1, set2 = Counter(), Counter()
+  accum = {
+    (atype1.value, name1): set1,
+    (atype2.value, name2): set2, }
+  conts1, conts2 = {}, {}
+  conts = {
+    (atype1.value, name1): conts1,
+    (atype2.value, name2): conts2, }
+  get_key = itemgetter('atype', 'name')
+  get_val = itemgetter('label', 'cnt')
+  get_conts = itemgetter('conts')
+  async for doc in curs:
+    key = get_key(doc)
+    label, cnt = get_val(doc)
+    accum[key][label] += cnt
+    cs = get_conts(doc)
+    conts[key][label] = cs
+  return (set1, conts1), (set2, conts2)
 
 
 def calc_dists(atype1, name1, cnts1, atype2, name2, cnts2, data_key):

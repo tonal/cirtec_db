@@ -2,12 +2,13 @@
 from operator import itemgetter
 from typing import Optional
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from pymongo.collection import Collection
 
 from models_dev.db_authors import (
-  collect_cmp_vals, FieldsSet, calc_cmp_vals, calc_cmp_vals_all,
-  get_cmp_authors_all, get_publics, get_cmp_authors)
+  collect_cmp_vals, collect_cmp_vals_conts, FieldsSet, calc_cmp_vals,
+  calc_cmp_vals_all, get_cmp_authors_all, get_cmp_authors_cont, get_publics,
+  get_cmp_authors)
 from models_dev.models import AType, NgrammParam, AuthorParam
 from routers_dev.common import (
   DebugOption, Slot, depNgrammParamReq, depAuthorParamOnlyOne,
@@ -103,6 +104,53 @@ async def _req_common2authors(
     author2=dict(atype=atype2, name=name2),
     **vals
   )
+  return out
+
+
+@router.get('/common2authors/bundle',
+  summary='Общие слова 2х авторов', tags=['authors'])
+async def _req_common2authors_bundle(
+  authorParams1:AuthorParam=Depends(depAuthorParamOnlyOne),
+  authorParams2:AuthorParam=Depends(depAuthorParamOnlyOne2),
+  word:str=Query(None, min_length=2),
+  _debug_option: Optional[DebugOption]=None,
+  slot: Slot = Depends(Slot.req2slot)
+):
+
+  pipeline = get_cmp_authors_cont(
+    authorParams1, authorParams2, word, FieldsSet.bundle, None, None)
+
+  if _debug_option == DebugOption.pipeline:
+    return pipeline
+
+  coll:Collection = slot.mdb.publications
+
+  curs = coll.aggregate(pipeline, allowDiskUse=True)
+  if _debug_option == DebugOption.raw_out:
+    out = [doc async for doc in curs]
+    return out
+
+  atype1, name1 = authorParams1.get_qual_auth()
+  atype2, name2 = authorParams2.get_qual_auth()
+
+  (set1, conts1), (set2, conts2) = await collect_cmp_vals_conts(
+    atype1, name1, atype2, name2, curs)
+  keys_union = set1.keys() | set2.keys()
+  keys_intersect = set1.keys() & set2.keys()
+  words = sorted((w, set1[w], set2[w]) for w in keys_intersect)
+  common_words = [
+    dict(
+      word=w,
+      author1=dict(cnt=c1, conts=conts1.get(w, None)),
+      author2=dict(cnt=c2, conts=conts2.get(w, None)))
+    for w, c1, c2 in words]
+
+  out = dict(
+    author1=dict(atype=atype1, name=name1),
+    author2=dict(atype=atype2, name=name2),
+    common=len(keys_intersect), union=len(keys_union),
+    common_words=common_words
+    )
   return out
 
 
