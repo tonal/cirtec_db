@@ -326,6 +326,10 @@ def get_cmp_authors_ref_cont(
       {'$addFields': {'label': {'$split': ['$cont.topics.title', ', ']}}},
       {'$unwind': '$label'},
     ]
+    if word:
+      pipiline += [
+        {'$match': {'label': word}}, ]
+
   elif field_col == FieldsSet.topic_strong:
     pipiline += [
       {'$lookup': {
@@ -344,14 +348,17 @@ def get_cmp_authors_ref_cont(
       {'$addFields': {'label': {'$split': ['$cont.topics.title', ', ']}}},
       {'$unwind': '$label'},
     ]
+    if word:
+      pipiline += [
+        {'$match': {'label': word}}, ]
 
   pipiline += [
     {'$group': {
       '_id': {'author': '$author', 'atype': '$atype', 'label': '$label'},
-      'cnt': {'$sum': 1}, 'conts': {'$addToSet': '$cont._id'}}},
+      'conts': {'$addToSet': '$cont._id'}}},
     {'$project': {
       '_id': 0, 'atype': '$_id.atype', 'name': '$_id.author',
-      'label': '$_id.label', 'cnt': 1, 'conts': 1}},
+      'label': '$_id.label', 'conts': 1}},
     # {'$sort': {'cnt': -1, '_id': 1,}}
   ]
 
@@ -391,13 +398,12 @@ async def collect_cmp_vals_conts(atype1, name1, atype2, name2, curs):
     (atype1.value, name1): conts1,
     (atype2.value, name2): conts2, }
   get_key = itemgetter('atype', 'name')
-  get_val = itemgetter('label', 'cnt')
-  get_conts = itemgetter('conts')
+  get_val = itemgetter('label', 'conts')
   async for doc in curs:
     key = get_key(doc)
-    label, cnt = get_val(doc)
+    label, cs = get_val(doc)
+    cnt = len(cs)
     accum[key][label] += cnt
-    cs = get_conts(doc)
     conts[key][label] = cs
   return (set1, conts1), (set2, conts2)
 

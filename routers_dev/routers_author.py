@@ -198,6 +198,38 @@ async def _req_common2authors_ref_author(
   return out
 
 
+@router.get('/common2authors/topic',
+  summary='Общие topic 2х авторов', tags=['authors'])
+async def _req_common2authors_topic(
+  authorParams1:AuthorParam=Depends(depAuthorParamOnlyOne),
+  authorParams2:AuthorParam=Depends(depAuthorParamOnlyOne2),
+  word:str=Query(None, min_length=2),
+  probability:Optional[float]=.5,
+  _debug_option: Optional[DebugOption]=None,
+  slot: Slot = Depends(Slot.req2slot)
+):
+  out = await _req_common2authors_field(
+    FieldsSet.topic, authorParams1, authorParams2, word,
+    probability=probability, slot=slot, _debug_option=_debug_option)
+  return out
+
+
+@router.get('/common2authors/topic_strong',
+  summary='Общие topic_strong 2х авторов', tags=['authors'])
+async def _req_common2authors_topic_strong(
+  authorParams1:AuthorParam=Depends(depAuthorParamOnlyOne),
+  authorParams2:AuthorParam=Depends(depAuthorParamOnlyOne2),
+  word:str=Query(None, min_length=2),
+  probability:Optional[float]=.5,
+  _debug_option: Optional[DebugOption]=None,
+  slot: Slot = Depends(Slot.req2slot)
+):
+  out = await _req_common2authors_field(
+    FieldsSet.topic_strong, authorParams1, authorParams2, word,
+    probability=probability, slot=slot, _debug_option=_debug_option)
+  return out
+
+
 @router.get('/compare2authors/',
   summary='Сравнение 2х авторов', tags=['authors'])
 async def _req_compare2authors(
