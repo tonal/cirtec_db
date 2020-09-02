@@ -108,7 +108,7 @@ async def _req_common2authors(
 
 
 @router.get('/common2authors/bundle',
-  summary='Общие слова 2х авторов', tags=['authors'])
+  summary='Общие bundle 2х авторов', tags=['authors'])
 async def _req_common2authors_bundle(
   authorParams1:AuthorParam=Depends(depAuthorParamOnlyOne),
   authorParams2:AuthorParam=Depends(depAuthorParamOnlyOne2),
@@ -116,9 +116,21 @@ async def _req_common2authors_bundle(
   _debug_option: Optional[DebugOption]=None,
   slot: Slot = Depends(Slot.req2slot)
 ):
+  out = await _req_common2authors_field(
+    FieldsSet.bundle, authorParams1, authorParams2, word,
+    slot=slot, _debug_option=_debug_option)
+  return out
+
+
+async def _req_common2authors_field(
+  field:FieldsSet, authorParams1:AuthorParam, authorParams2:AuthorParam,
+  word:Optional[str],
+  ngrmpr:Optional[NgrammParam]=None, probability:Optional[float]=None,
+  *, slot:Slot, _debug_option:Optional[DebugOption]=None,
+):
 
   pipeline = get_cmp_authors_cont(
-    authorParams1, authorParams2, word, FieldsSet.bundle, None, None)
+    authorParams1, authorParams2, word, field, ngrmpr, probability)
 
   if _debug_option == DebugOption.pipeline:
     return pipeline
@@ -151,6 +163,21 @@ async def _req_common2authors_bundle(
     common=len(keys_intersect), union=len(keys_union),
     common_words=common_words
     )
+  return out
+
+
+@router.get('/common2authors/ref_author',
+  summary='Общие bundle 2х авторов', tags=['authors'])
+async def _req_common2authors_ref_author(
+  authorParams1:AuthorParam=Depends(depAuthorParamOnlyOne),
+  authorParams2:AuthorParam=Depends(depAuthorParamOnlyOne2),
+  word:str=Query(None, min_length=2),
+  _debug_option: Optional[DebugOption]=None,
+  slot: Slot = Depends(Slot.req2slot)
+):
+  out = await _req_common2authors_field(
+    FieldsSet.ref_author, authorParams1, authorParams2, word,
+    slot=slot, _debug_option=_debug_option)
   return out
 
 
