@@ -7,7 +7,7 @@
 aiodns==2.0.0             # via aiohttp
 aiohttp[speedups]==3.6.2  # via -r requirements.in
 async-timeout==3.0.1      # via aiohttp
-attrs==20.1.0             # via -r requirements.in, aiohttp
+attrs==20.2.0             # via -r requirements.in, aiohttp
 brotlipy==0.7.0           # via aiohttp
 cchardet==2.1.6           # via aiohttp
 certifi==2020.6.20        # via requests

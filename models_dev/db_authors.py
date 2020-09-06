@@ -167,7 +167,6 @@ def get_cmp_authors_ref(
     elif field_col == FieldsSet.ref_author:
       pipiline += [
         {'$unwind': '$refs.authors'},
-        # {'$match': {'refs.bundle': {'$exists': 1}}},
         {'$addFields': {'label': '$refs.authors'}}, ]
     else:
       assert False
@@ -182,7 +181,7 @@ def get_cmp_authors_ref(
         'cont.ngrams.nka': ngrmpr.nka, 'cont.ngrams.type': ngrmpr.ltype.value}},
       {'$addFields': {'label': '$cont.ngrams._id'}},
     ]
-  elif field_col == FieldsSet.topic:
+  elif field_col in {FieldsSet.topic, FieldsSet.topic_strong}:
     pipiline += [
       {'$lookup': {
         'from': 'contexts', 'localField': '_id', 'foreignField': 'pubid',
@@ -190,26 +189,28 @@ def get_cmp_authors_ref(
       {'$unwind': '$cont'},
       {'$unwind': '$cont.topics'},
       {'$match': {'cont.topics.probability': {'$gte': probability}, }},
-      {'$addFields': {'label': {'$split': ['$cont.topics.title', ', ']}}},
-      {'$unwind': '$label'},
     ]
-  elif field_col == FieldsSet.topic_strong:
+    if field_col == FieldsSet.topic_strong:
+      pipiline += [
+        {'$lookup': {
+          'from': 'topics', 'localField': 'cont.topics._id',
+          'foreignField': '_id', 'as': 'topic'}},
+        {'$unwind': '$topic'},
+        {'$match': {
+            '$or': [{f'topic.uni_{atype1}': name1},
+              {f'topic.uni_{atype2}': name2}]}},
+      ]
+
     pipiline += [
-      {'$lookup': {
-        'from': 'contexts', 'localField': '_id', 'foreignField': 'pubid',
-        'as': 'cont'}},
-      {'$unwind': '$cont'},
-      {'$unwind': '$cont.topics'},
-      {'$match': {'cont.topics.probability': {'$gte': probability}, }},
-      {'$lookup': {
-        'from': 'topics', 'localField': 'cont.topics._id', 'foreignField': '_id',
-        'as': 'topic'}},
-      {'$unwind': '$topic'},
-      {'$match': {
-        '$or': [
-          {f'topic.uni_{atype1}': name1}, {f'topic.uni_{atype2}': name2}]}},
       {'$addFields': {'label': {'$split': ['$cont.topics.title', ', ']}}},
       {'$unwind': '$label'},
+      {'$group': {
+        '_id': {
+          'author': "$author", 'atype': "$atype", 'label': "$label",
+          'cont': "$cont._id"}, }},
+      {'$project': {
+        '_id': 0, 'author': "$_id.author", 'atype': "$_id.atype",
+        'label': "$_id.label", 'cont': '$_id.cont'}},
     ]
 
   pipiline += [
