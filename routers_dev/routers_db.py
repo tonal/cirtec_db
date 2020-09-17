@@ -1,4 +1,6 @@
 # -*- codong: utf-8 -*-
+from typing import List
+
 from bson import ObjectId
 from fastapi import APIRouter, Depends
 from fastapi.encoders import jsonable_encoder
@@ -19,6 +21,16 @@ async def _db_bundle(id:str, slot:Slot=Depends(Slot.req2slot)):
   doc:dict = await coll.find_one(dict(_id=id))
   # _logger.info('end func(%s)->%s', id, doc)
   return doc
+
+
+@router.post('/bundle/', tags=['db'],
+  summary='Данные по указанным бандлам (bundles) из mongodb')
+async def _db_bundle_lst(ids:List[str], slot:Slot=Depends(Slot.req2slot)):
+  # _logger.info('start func(%s)', id)
+  coll:Collection = slot.mdb.bundles
+  curs = coll.find({'_id': {'$in': ids}}).sort('_id')
+  # _logger.info('end func(%s)->%s', id, doc)
+  return [obj async for obj in curs]
 
 
 @router.get('/context/', tags=['db'],
