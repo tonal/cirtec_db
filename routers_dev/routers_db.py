@@ -1,4 +1,5 @@
 # -*- codong: utf-8 -*-
+from functools import partial
 from typing import List
 
 from bson import ObjectId
@@ -11,6 +12,9 @@ from server_utils import oid2dict
 
 
 router = APIRouter()
+
+_jsonable_encoder = partial(
+  jsonable_encoder, custom_encoder={ObjectId: oid2dict})
 
 
 @router.get('/bundle/', tags=['db'],
@@ -29,8 +33,8 @@ async def _db_bundle_lst(ids:List[str], slot:Slot=Depends(Slot.req2slot)):
   # _logger.info('start func(%s)', id)
   coll:Collection = slot.mdb.bundles
   curs = coll.find({'_id': {'$in': ids}}).sort('_id')
-  # _logger.info('end func(%s)->%s', id, doc)
-  return [obj async for obj in curs]
+  out= [_jsonable_encoder(obj) async for obj in curs]
+  return out
 
 
 @router.get('/context/', tags=['db'],
@@ -38,8 +42,17 @@ async def _db_bundle_lst(ids:List[str], slot:Slot=Depends(Slot.req2slot)):
 async def _db_context(id: str, slot:Slot=Depends(Slot.req2slot)):
   coll:Collection = slot.mdb.contexts
   doc:dict = await coll.find_one(dict(_id=id))
-  doc = jsonable_encoder(doc, custom_encoder={ObjectId: oid2dict})
+  doc = _jsonable_encoder(doc)
   return doc
+
+
+@router.post('/context/', tags=['db'],
+  summary='Данные по указанным контекстам (contexts) из mongodb')
+async def _db_context_lst(ids:List[str], slot:Slot=Depends(Slot.req2slot)):
+  coll:Collection = slot.mdb.contexts
+  curs = coll.find({'_id': {'$in': ids}}).sort('_id')
+  out= [_jsonable_encoder(obj) async for obj in curs]
+  return out
 
 
 @router.get('/ngramm/', tags=['db'],
@@ -50,12 +63,30 @@ async def _db_ngramm(id: str, slot:Slot=Depends(Slot.req2slot)):
   return doc
 
 
+@router.post('/ngramm/', tags=['db'],
+  summary='Данные по указанным нграммам (n_gramms) из mongodb')
+async def _db_ngramm_lst(ids:List[str], slot:Slot=Depends(Slot.req2slot)):
+  coll:Collection = slot.mdb.n_gramms
+  curs = coll.find({'_id': {'$in': ids}}).sort('_id')
+  out= [_jsonable_encoder(obj) async for obj in curs]
+  return out
+
+
 @router.get('/publication/', tags=['db'],
   summary='Данные по указанному публикации (publications) из mongodb')
 async def _db_publication(id: str, slot:Slot=Depends(Slot.req2slot)):
   coll:Collection = slot.mdb.publications
   doc:dict = await coll.find_one(dict(_id=id))
   return doc
+
+
+@router.post('/publication/', tags=['db'],
+  summary='Данные по указанным публикациям (publications) из mongodb')
+async def _db_publication_lst(ids:List[str], slot:Slot=Depends(Slot.req2slot)):
+  coll:Collection = slot.mdb.publications
+  curs = coll.find({'_id': {'$in': ids}}).sort('_id')
+  out= [_jsonable_encoder(obj) async for obj in curs]
+  return out
 
 
 @router.get('/db/topic/', tags=['db'],
@@ -66,3 +97,14 @@ async def _db_topic(id: str, slot:Slot=Depends(Slot.req2slot)):
   if doc:
     doc = jsonable_encoder(doc, custom_encoder={ObjectId: oid2dict})
   return doc
+
+
+
+@router.post('/db/topic/', tags=['db'],
+  summary='Данные по указанным топикам (topics) из mongodb')
+async def _db_topic_lst(ids:List[str], slot:Slot=Depends(Slot.req2slot)):
+  coll: Collection = slot.mdb.topics
+  # doc: dict = await coll.find_one(dict(_id=ObjectId(id)))
+  curs = coll.find({'_id': {'$in': list(map(ObjectId, ids))}}).sort('_id')
+  out= [_jsonable_encoder(obj) async for obj in curs]
+  return out
