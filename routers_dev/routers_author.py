@@ -288,11 +288,11 @@ async def _req_compare2authors(
 async def _req_compare_authors_all(
   ngrmpr: NgrammParam = Depends(depNgrammParamReq),
   probability: Optional[float] = .5,
-  #  limit:int=None,
+   limit:int=None,
   _debug_option: Optional[DebugOption] = None,
   slot: Slot = Depends(Slot.req2slot)
 ):
-  pipelines = get_cmp_authors_all(ngrmpr, probability, None) # limit)
+  pipelines = get_cmp_authors_all(ngrmpr, probability, limit) # None) #
   if _debug_option == DebugOption.pipeline:
     return pipelines
 

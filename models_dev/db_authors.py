@@ -389,7 +389,9 @@ async def calc_cmp_vals(
   return calc_dists(atype1, name1, set1, atype2, name2, set2, data_key)
 
 
-async def collect_cmp_vals(atype1, name1, atype2, name2, curs):
+async def collect_cmp_vals(
+  atype1: AType, name1: str, atype2: AType, name2: str, curs
+):
   set1, set2 = Counter(), Counter()
   accum = {
     (atype1.value, name1): set1,
@@ -403,7 +405,9 @@ async def collect_cmp_vals(atype1, name1, atype2, name2, curs):
   return set1, set2
 
 
-async def collect_cmp_vals_conts(atype1, name1, atype2, name2, curs):
+async def collect_cmp_vals_conts(
+  atype1: AType, name1: str, atype2: AType, name2: str, curs
+):
   set1, set2 = Counter(), Counter()
   accum = {
     (atype1.value, name1): set1,
@@ -423,7 +427,10 @@ async def collect_cmp_vals_conts(atype1, name1, atype2, name2, curs):
   return (set1, conts1), (set2, conts2)
 
 
-def calc_dists(atype1, name1, cnts1, atype2, name2, cnts2, data_key):
+def calc_dists(
+  atype1: AType, name1: str, cnts1, atype2: AType, name2: str, cnts2,
+  data_key:str
+):
   keys_union = tuple(sorted(cnts1.keys() | cnts2.keys()))
   if not keys_union:
     _logger.warning(
@@ -519,30 +526,63 @@ def get_cmp_authors_ref_all(
           'from': 'topics', 'localField': 'cont.topics._id',
           'foreignField': '_id', 'as': 'topic'}},
         {'$unwind': '$topic'},
-        {'$unwind': {'path': '$uni_authors', 'preserveNullAndEmptyArrays': True}},
-        {'$unwind': {'path': '$uni_cited', 'preserveNullAndEmptyArrays': True}},
-        {'$unwind': {'path': '$uni_citing', 'preserveNullAndEmptyArrays': True}},
+        {'$unwind': {
+          'path': '$uni_authors', 'preserveNullAndEmptyArrays': True}},
+        {'$unwind': {
+          'path': '$uni_cited', 'preserveNullAndEmptyArrays': True}},
+        {'$unwind': {
+          'path': '$uni_citing', 'preserveNullAndEmptyArrays': True}},
         {'$match': {
           '$or': [
-            {'$expr': {'$eq': ['$topic.uni_author', {'$ifNull': ['$uni_authors', '']}]}},
-            {'$expr': {'$eq': ['$topic.uni_cited', {'$ifNull': ['$uni_cited','']}]}},
-            {'$expr': {'$eq': ['$topic.uni_citing', {'$ifNull': ['$uni_citing','']}]}}, ]}},
+            {'$expr': {
+              '$eq': ['$topic.uni_author', {'$ifNull': ['$uni_authors', '']}]}},
+            {'$expr': {
+              '$eq': ['$topic.uni_cited', {'$ifNull': ['$uni_cited','']}]}},
+            {'$expr': {
+              '$eq': ['$topic.uni_citing', {'$ifNull': ['$uni_citing','']}]}}, ]}},
       ]
+
     pipiline += [
       {'$set': {'label': {'$split': ['$cont.topics.title', ', ']}}},
       {'$unwind': '$label'},
     ]
 
   pipiline += [
+    {'$unwind': {'path': '$uni_authors', 'preserveNullAndEmptyArrays': True}},
+    {'$unwind': {'path': '$uni_cited', 'preserveNullAndEmptyArrays': True}},
+    {'$unwind': {'path': '$uni_citing', 'preserveNullAndEmptyArrays': True}},
+    {'$set': {'apairs': {
+      '$filter': {
+        'input': [
+          {'atype': 'author', 'author': '$uni_authors'},
+          {'atype': 'cited', 'author': '$uni_cited'},
+          {'atype': 'citing', 'author': '$uni_citing'}],
+        'cond': '$$this.author'
+      }, }}},
+    {'$unwind': '$apairs'},
     {'$group': {
       '_id': {
-        'author': '$uni_authors', 'cited': '$uni_cited',
-        'citing': '$uni_citing', 'label': '$label'},
-      'cnt': {'$count': {}}}},
+        'author': '$apairs.author', 'atype': '$apairs.atype', 'label': '$label'},
+      'cnt': {'$count': {}},}},
     {'$project': {
-      '_id': 0, 'author': '$_id.author', 'cited': '$_id.cited',
-      'citing': '$_id.citing', 'label': '$_id.label', 'cnt': '$cnt'}},
+      '_id': 0, 'atype': '$_id.atype', 'name': '$_id.author',
+      'label': '$_id.label', 'cnt': 1,}},
+    {'$sort': {'atype': 1, 'name': 1, 'cnt': -1, 'label': 1,}},
   ]
+
+  if limit:
+    pipiline += [
+      {'$set': {
+        'sort_fld_': {
+          'atype': '$atype', 'author': '$name',
+          'cnt': {'$subtract': [0, '$cnt']}, 'label': '$label'}}},
+      {'$setWindowFields': {
+        'partitionBy': {'atype': '$atype', 'author': '$name'},
+        'sortBy': {'sort_fld_': 1, },
+        'output': {'num_': {'$documentNumber': {}}}, }},
+      {'$match': {'num_': {'$lte': limit}}},
+      {'$unset': ['num_', 'sort_fld_']},
+    ]
 
   return pipiline
 
@@ -551,20 +591,12 @@ async def calc_cmp_vals_all(curs, data_key) -> list[dict[str, float]]:
 
   accum = defaultdict(Counter)
   get_val = itemgetter('label', 'cnt')
+  get_key = itemgetter('name', 'atype')
   async for doc in curs:
     label, cnt = get_val(doc)
-    keys = {}
-    keys.update(author=doc.get('author', ()))
-    keys.update(cited=doc.get('cited', ()))
-    keys.update(citing=doc.get('citing', ()))
-    for atype, names in keys.items():
-      if isinstance(names, str):
-        cnts = accum[(names, atype)]
-        cnts[label] += cnt
-      else:
-        for name in names:
-          cnts = accum[(name, atype)]
-          cnts[label] += cnt
+    name, atype = get_key(doc)
+    cnts = accum[(name, atype)]
+    cnts[label] += cnt
 
   out = []
   _logger.debug('%s authors: %s', data_key, sorted(accum.keys()))
