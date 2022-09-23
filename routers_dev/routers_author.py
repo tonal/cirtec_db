@@ -237,11 +237,12 @@ async def _req_compare2authors(
   authorParams2:AuthorParam=Depends(depAuthorParamOnlyOne2),
   ngrmpr:NgrammParam=Depends(depNgrammParamReq),
   probability:Optional[float]=.5,
+  limit:int=None,
   _debug_option: Optional[DebugOption]=None,
   slot: Slot = Depends(Slot.req2slot)
 ):
   pipelines = get_cmp_authors(
-    authorParams1, authorParams2, ngrmpr, probability)
+    authorParams1, authorParams2, ngrmpr, probability, limit)
   if _debug_option == DebugOption.pipeline:
     return pipelines
 
@@ -287,10 +288,11 @@ async def _req_compare2authors(
 async def _req_compare_authors_all(
   ngrmpr: NgrammParam = Depends(depNgrammParamReq),
   probability: Optional[float] = .5,
+  #  limit:int=None,
   _debug_option: Optional[DebugOption] = None,
   slot: Slot = Depends(Slot.req2slot)
 ):
-  pipelines = get_cmp_authors_all(ngrmpr, probability)
+  pipelines = get_cmp_authors_all(ngrmpr, probability, None) # limit)
   if _debug_option == DebugOption.pipeline:
     return pipelines
 

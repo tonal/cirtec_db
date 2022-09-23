@@ -3,7 +3,7 @@ from collections import Counter, defaultdict
 from enum import auto
 from itertools import combinations
 from operator import itemgetter
-from typing import Dict, List, Optional
+from typing import TYPE_CHECKING
 
 import numpy as np
 from pydantic import validate_arguments
@@ -32,22 +32,22 @@ def get_publics(
   assert probability > 0
   field = '$' + _atype2field(atype)
   pipeline = [
-    # {'$group': {'_id': field, 'cnt': {'$sum': 1}}},
+    # {'$group': {'_id': field, 'cnt': {'$count': {}}}},
     {'$unwind': field}, # '$uni_authors'},
     {'$facet': {
       'publications': [
-        {'$group': {'_id': field, 'cnt': {'$sum': 1}}}, ],
+        {'$group': {'_id': field, 'cnt': {'$count': {}}}}, ],
       'references': [
         {'$unwind': '$refs'},
         {'$match': {'refs.bundle': {'$exists': 1}}},
-        {'$group': {'_id': field, 'cnt': {'$sum': 1}}}, ],
+        {'$group': {'_id': field, 'cnt': {'$count': {}}}}, ],
       'ref_authors': [
         {'$unwind': '$refs'},
         {'$match': {'refs.bundle': {'$exists': 1}}},
         {'$unwind': '$refs.authors'},
         {'$group': {
           '_id': {'pub_author': field, 'ref_author': '$refs.authors'}}},
-        {'$group': {'_id': '$_id.pub_author', 'cnt': {'$sum': 1}}}, ],
+        {'$group': {'_id': '$_id.pub_author', 'cnt': {'$count': {}}}}, ],
       'conts': [
         {'$lookup': {
           'from': 'contexts', 'localField': '_id', 'foreignField': 'pubid',
@@ -55,7 +55,7 @@ def get_publics(
         {'$unwind': '$cont'},
         {'$group': {
           '_id': {'pub_author': field, 'cont': '$cont._id'}}},
-        {'$group': {'_id': '$_id.pub_author', 'cnt': {'$sum': 1}}}, ],
+        {'$group': {'_id': '$_id.pub_author', 'cnt': {'$count': {}}}}, ],
       'ngramms': [
         {'$lookup': {
           'from': 'contexts', 'localField': '_id', 'foreignField': 'pubid',
@@ -64,7 +64,7 @@ def get_publics(
         {'$unwind': '$cont.ngrams'},
         get_ngramm_filter(ngpr, 'cont.ngrams'),
         {'$group': {'_id': {'pub_author': field, 'ngrm': '$cont.ngrams._id'}}},
-        {'$group': {'_id': '$_id.pub_author', 'cnt': {'$sum': 1}}}, ],
+        {'$group': {'_id': '$_id.pub_author', 'cnt': {'$count': {}}}}, ],
       # 'topics': [
       #   {'$lookup': {
       #     'from': 'contexts', 'localField': '_id', 'foreignField': 'pubid',
@@ -74,7 +74,7 @@ def get_publics(
       #   {'$match': {'cont.topics.probability': {'$gte': probability}}},
       #   {'$group': {
       #     '_id': {'pub_author': field, 'topic': '$cont.topics._id'}}},
-      #   {'$group': {'_id': '$_id.pub_author', 'cnt': {'$sum': 1}}}, ],
+      #   {'$group': {'_id': '$_id.pub_author', 'cnt': {'$count': {}}}}, ],
     }},
     {'$unwind': '$publications'},
     {'$unwind': {'path': '$references', 'preserveNullAndEmptyArrays': True}},
@@ -105,8 +105,9 @@ def _atype2field(atype:AType) -> str:
 
 
 def get_cmp_authors(
-  ap1:AuthorParam, ap2:AuthorParam, ngrmpr:NgrammParam, probability:float
-) -> Dict[str, list]:
+  ap1:AuthorParam, ap2:AuthorParam, ngrmpr:NgrammParam, probability:float,
+  limit:int|None
+) -> dict[str, list]:
   assert ap1.only_one() and ap2.only_one()
   atype1, name1 = ap1.get_qual_auth()
   atype2, name2 = ap2.get_qual_auth()
@@ -114,7 +115,7 @@ def get_cmp_authors(
   for fld_set in FieldsSet:
     # type: fld_set: FieldsSet
     pipeline = get_cmp_authors_ref(
-      atype1, name1, atype2, name2, fld_set, ngrmpr, probability)
+      atype1, name1, atype2, name2, fld_set, ngrmpr, probability, limit)
     pipelines[fld_set] = pipeline
 
   return pipelines
@@ -122,7 +123,7 @@ def get_cmp_authors(
 
 def get_cmp_authors_ref(
   atype1:AType, name1:str, atype2:AType, name2:str, field_col:FieldsSet,
-  ngrmpr:NgrammParam, probability:float
+  ngrmpr:NgrammParam, probability:float, limit:int|None
 ) -> list:
 
   pipiline = []
@@ -132,7 +133,7 @@ def get_cmp_authors_ref(
     pipiline += [
       {'$unwind': '$' + field},
       {'$match': {field: {'$in': [name1, name2]}}},
-      {'$addFields': {'author': '$' + field, 'atype': atype1.value}},
+      {'$set': {'author': '$' + field, 'atype': atype1.value}},
     ]
   else:
     field1 = _atype2field(atype1)
@@ -143,11 +144,11 @@ def get_cmp_authors_ref(
         'atype1': [
           {'$unwind': '$' + field1},
           {'$match': {field1: name1}},
-          {'$addFields': {'author': '$' + field1, 'atype': atype1.value}}, ],
+          {'$set': {'author': '$' + field1, 'atype': atype1.value}}, ],
         'atype2': [
           {'$unwind': '$' + field2},
           {'$match': {field2: name2}},
-          {'$addFields': {'author': '$' + field2, 'atype': atype2.value}}, ]
+          {'$set': {'author': '$' + field2, 'atype': atype2.value}}, ]
         }},
       {'$project': {'data': {'$setUnion': ['$atype1', '$atype2']}}},
       {'$unwind': '$data'},
@@ -163,11 +164,11 @@ def get_cmp_authors_ref(
     if field_col == FieldsSet.bundle:
       pipiline += [
         {'$match': {'refs.bundle': {'$exists': 1}}},
-        {'$addFields': {'label': '$refs.bundle'}}, ]
+        {'$set': {'label': '$refs.bundle'}}, ]
     elif field_col == FieldsSet.ref_author:
       pipiline += [
         {'$unwind': '$refs.authors'},
-        {'$addFields': {'label': '$refs.authors'}}, ]
+        {'$set': {'label': '$refs.authors'}}, ]
     else:
       assert False
   elif field_col == FieldsSet.ngram:
@@ -179,7 +180,7 @@ def get_cmp_authors_ref(
       {'$unwind': '$cont.ngrams'},
       {'$match': {
         'cont.ngrams.nka': ngrmpr.nka, 'cont.ngrams.type': ngrmpr.ltype.value}},
-      {'$addFields': {'label': '$cont.ngrams._id'}},
+      {'$set': {'label': '$cont.ngrams._id'}},
     ]
   elif field_col in {FieldsSet.topic, FieldsSet.topic_strong}:
     pipiline += [
@@ -202,7 +203,7 @@ def get_cmp_authors_ref(
       ]
 
     pipiline += [
-      {'$addFields': {'label': {'$split': ['$cont.topics.title', ', ']}}},
+      {'$set': {'label': {'$split': ['$cont.topics.title', ', ']}}},
       {'$unwind': '$label'},
       {'$group': {
         '_id': {
@@ -216,19 +217,32 @@ def get_cmp_authors_ref(
   pipiline += [
     {'$group': {
       '_id': {'author': '$author', 'atype': '$atype', 'label': '$label'},
-      'cnt': {'$sum': 1}}},
+      'cnt': {'$count': {}}}},
     {'$project': {
       '_id': 0, 'atype': '$_id.atype', 'name': '$_id.author',
       'label': '$_id.label', 'cnt': 1}},
-    # {'$sort': {'cnt': -1, '_id': 1,}}
   ]
+  if limit:
+    pipiline += [
+      {'$sort': {'atype': 1, 'name': 1, 'cnt': -1, 'label': 1, }},
+      {'$set': {
+        'sort_fld_': {'atype': '$atype', 'author': '$name',
+        'cnt': {'$subtract': [0, '$cnt']},
+        'label': '$label'}}},
+      {'$setWindowFields': {
+        'partitionBy': {'atype': '$atype', 'author': '$name'},
+        'sortBy': {'sort_fld_': 1, },
+        'output': {'num_': {'$documentNumber': {}}}, }},
+      {'$match': {'num_': {'$lte': limit}}},
+      {'$unset': ['num_', 'sort_fld_']},
+    ]
 
   return pipiline
 
 
 def get_cmp_authors_cont(
   ap1:AuthorParam, ap2:AuthorParam, word:str, field_col:FieldsSet,
-  ngrmpr:Optional[NgrammParam], probability:Optional[float]
+  ngrmpr:NgrammParam|None, probability:float|None
 ) -> list:
   assert ap1.only_one() and ap2.only_one()
   atype1, name1 = ap1.get_qual_auth()
@@ -239,7 +253,7 @@ def get_cmp_authors_cont(
 
 def get_cmp_authors_ref_cont(
   atype1:AType, name1:str, atype2:AType, name2:str, word:str,
-  field_col:FieldsSet, ngrmpr:Optional[NgrammParam], probability:Optional[float]
+  field_col:FieldsSet, ngrmpr:NgrammParam|None, probability:float|None
 ) -> list:
 
   pipiline = []
@@ -249,7 +263,7 @@ def get_cmp_authors_ref_cont(
     pipiline += [
       {'$unwind': '$' + field},
       {'$match': {field: {'$in': [name1, name2]}}},
-      {'$addFields': {'author': '$' + field, 'atype': atype1.value}},
+      {'$set': {'author': '$' + field, 'atype': atype1.value}},
     ]
   else:
     field1 = _atype2field(atype1)
@@ -260,11 +274,11 @@ def get_cmp_authors_ref_cont(
         'atype1': [
           {'$unwind': '$' + field1},
           {'$match': {field1: name1}},
-          {'$addFields': {'author': '$' + field1, 'atype': atype1.value}}, ],
+          {'$set': {'author': '$' + field1, 'atype': atype1.value}}, ],
         'atype2': [
           {'$unwind': '$' + field2},
           {'$match': {field2: name2}},
-          {'$addFields': {'author': '$' + field2, 'atype': atype2.value}}, ]
+          {'$set': {'author': '$' + field2, 'atype': atype2.value}}, ]
         }},
       {'$project': {'data': {'$setUnion': ['$atype1', '$atype2']}}},
       {'$unwind': '$data'},
@@ -279,11 +293,11 @@ def get_cmp_authors_ref_cont(
     if field_col == FieldsSet.bundle:
       pipiline += [
         {'$match': {'refs.bundle': {'$exists': 1}}},
-        {'$addFields': {'label': '$refs.bundle'}}, ]
+        {'$set': {'label': '$refs.bundle'}}, ]
     elif field_col == FieldsSet.ref_author:
       pipiline += [
         {'$unwind': '$refs.authors'},
-        {'$addFields': {'label': '$refs.authors'}}, ]
+        {'$set': {'label': '$refs.authors'}}, ]
     else:
       assert False
 
@@ -310,7 +324,7 @@ def get_cmp_authors_ref_cont(
       {'$unwind': '$cont.ngrams'},
       {'$match': {
         'cont.ngrams.nka': ngrmpr.nka, 'cont.ngrams.type': ltype}},
-      {'$addFields': {'label': '$cont.ngrams._id'}},
+      {'$set': {'label': '$cont.ngrams._id'}},
     ]
     if word:
       pipiline += [
@@ -324,7 +338,7 @@ def get_cmp_authors_ref_cont(
       {'$unwind': '$cont'},
       {'$unwind': '$cont.topics'},
       {'$match': {'cont.topics.probability': {'$gte': probability}, }},
-      {'$addFields': {'label': {'$split': ['$cont.topics.title', ', ']}}},
+      {'$set': {'label': {'$split': ['$cont.topics.title', ', ']}}},
       {'$unwind': '$label'},
     ]
     if word:
@@ -346,7 +360,7 @@ def get_cmp_authors_ref_cont(
       {'$match': {
         '$or': [
           {f'topic.uni_{atype1}': name1}, {f'topic.uni_{atype2}': name2}]}},
-      {'$addFields': {'label': {'$split': ['$cont.topics.title', ', ']}}},
+      {'$set': {'label': {'$split': ['$cont.topics.title', ', ']}}},
       {'$unwind': '$label'},
     ]
     if word:
@@ -368,7 +382,7 @@ def get_cmp_authors_ref_cont(
 
 async def calc_cmp_vals(
   atype1: AType, name1: str, atype2: AType, name2: str, curs, data_key
-) -> Dict[str, float]:
+) -> dict[str, float]:
 
   set1, set2 = await collect_cmp_vals(atype1, name1, atype2, name2, curs)
 
@@ -448,19 +462,19 @@ def calc_dists(atype1, name1, cnts1, atype2, name2, cnts2, data_key):
 
 
 def get_cmp_authors_all(
-  ngrmpr:NgrammParam, probability:float
-) -> Dict[str, list]:
+  ngrmpr:NgrammParam, probability:float, limit:int|None
+) -> dict[str, list]:
   pipelines = {}
   for fld_set in FieldsSet:
     # type: fld_set: FieldsSet
-    pipeline = get_cmp_authors_ref_all(fld_set, ngrmpr, probability)
+    pipeline = get_cmp_authors_ref_all(fld_set, ngrmpr, probability, limit)
     pipelines[fld_set] = pipeline
 
   return pipelines
 
 
 def get_cmp_authors_ref_all(
-  field_col:FieldsSet, ngrmpr:NgrammParam, probability:float
+  field_col:FieldsSet, ngrmpr:NgrammParam, probability:float, limit:int|None
 ) -> list:
 
   pipiline = []
@@ -472,11 +486,11 @@ def get_cmp_authors_ref_all(
     if field_col == FieldsSet.bundle:
       pipiline += [
         {'$match': {'refs.bundle': {'$exists': 1}}},
-        {'$addFields': {'label': '$refs.bundle'}}, ]
+        {'$set': {'label': '$refs.bundle'}}, ]
     elif field_col == FieldsSet.ref_author:
       pipiline += [
         {'$unwind': '$refs.authors'},
-        {'$addFields': {'label': '$refs.authors'}}, ]
+        {'$set': {'label': '$refs.authors'}}, ]
     else:
       assert False
   elif field_col == FieldsSet.ngram:
@@ -488,7 +502,7 @@ def get_cmp_authors_ref_all(
       {'$unwind': '$cont.ngrams'},
       {'$match': {
         'cont.ngrams.nka': ngrmpr.nka, 'cont.ngrams.type': ngrmpr.ltype.value}},
-      {'$addFields': {'label': '$cont.ngrams._id'}},
+      {'$set': {'label': '$cont.ngrams._id'}},
     ]
   elif field_col in {FieldsSet.topic, FieldsSet.topic_strong}:
     pipiline += [
@@ -515,7 +529,7 @@ def get_cmp_authors_ref_all(
             {'$expr': {'$eq': ['$topic.uni_citing', {'$ifNull': ['$uni_citing','']}]}}, ]}},
       ]
     pipiline += [
-      {'$addFields': {'label': {'$split': ['$cont.topics.title', ', ']}}},
+      {'$set': {'label': {'$split': ['$cont.topics.title', ', ']}}},
       {'$unwind': '$label'},
     ]
 
@@ -524,7 +538,7 @@ def get_cmp_authors_ref_all(
       '_id': {
         'author': '$uni_authors', 'cited': '$uni_cited',
         'citing': '$uni_citing', 'label': '$label'},
-      'cnt': {'$sum': 1}}},
+      'cnt': {'$count': {}}}},
     {'$project': {
       '_id': 0, 'author': '$_id.author', 'cited': '$_id.cited',
       'citing': '$_id.citing', 'label': '$_id.label', 'cnt': '$cnt'}},
@@ -533,7 +547,7 @@ def get_cmp_authors_ref_all(
   return pipiline
 
 
-async def calc_cmp_vals_all(curs, data_key) -> List[Dict[str, float]]:
+async def calc_cmp_vals_all(curs, data_key) -> list[dict[str, float]]:
 
   accum = defaultdict(Counter)
   get_val = itemgetter('label', 'cnt')
