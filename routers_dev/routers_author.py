@@ -70,8 +70,7 @@ async def _req_common2authors(
     out = dict(
       author1=dict(atype=atype1, name=name1),
       author2=dict(atype=atype2, name=name2),
-      **{k: def_vals for k in FieldsSet}
-    )
+      **{k: def_vals for k in FieldsSet})
     return out
 
   coll:Collection = slot.mdb.publications
@@ -97,14 +96,12 @@ async def _req_common2authors(
     common_words = [dict(word=w, author1=c1, author2=c2) for w, c1, c2 in words]
     vals[key] = dict(
       common=len(keys_intersect), union=len(keys_union),
-      common_words=common_words
-      )
+      common_words=common_words)
 
   out = dict(
     author1=dict(atype=atype1, name=name1),
     author2=dict(atype=atype2, name=name2),
-    **vals
-  )
+    **vals)
   return out
 
 
